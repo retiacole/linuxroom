@@ -2,7 +2,7 @@
   <img src="docs/images/linuxroom-banner.png" width="960" alt="遺跡で炎の魔法を使うLinuxroomのキャラクターを描いたピクセルアート">
 </p>
 
-# Linuxroom v0.4.1
+# Linuxroom v0.4.2
 
 [English README](README.en.md) · 日本語
 
@@ -166,3 +166,7 @@ docs/            GitHub Pages配信物（ビルド後にコミット）
 テストでは119課題の解答、説明中の例を実行した後の解答、途中保存からの復元、49コマンドの網羅、旧版データの移行を確認します。`diff`の「差分あり（終了状態1）」は課題で明示した場合のみ正当な結果として扱い、実行エラーとは区別します。ブラウザテストでは画面操作・段階移動・入出力の途中表示・JSONの保存と読込・モバイル表示・通信不要を確認します。
 
 MIT License。`LICENSE`と、元のLogroom contributorsの著作権表示を保持してください。
+
+<p align="center">
+  <img src="assets/linuxroom-journey.png" width="100%" alt="草原の道を仲間と歩くRoomシリーズのキャラクターたち">
+</p>

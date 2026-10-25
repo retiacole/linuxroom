@@ -1,5 +1,10 @@
 # 更新履歴
 
+## v0.4.2 — 2026-10-26
+
+- 集合イラストを学習用HTMLから取り除き、日本語・英語READMEの末尾へ移動しました。学習画面・進捗保存の挙動は維持しています。
+- Moved the party illustration from the learning HTML to the end of the Japanese and English READMEs. Learning screens and saved progress keep their existing behavior.
+
 ## v0.4.1 — 2026-10-26
 
 - ホームの教材紹介の末尾に、仲間と歩く集合イラストを追加しました。画面幅に合わせて表示し、画像も単一HTMLに同梱するためオフラインで利用できます。

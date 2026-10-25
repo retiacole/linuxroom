@@ -128,8 +128,8 @@
     $('map-overall').textContent = t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了');
     $('welcome-progress').textContent = s.completed ? t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了。今日も一歩ずつ。') : '';
     $('course-summary').textContent = levels.length + t(' 段階 · 全 ') + s.total + t(' レッスン');
-    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.4.1');
-    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.4.1');
+    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.4.2');
+    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.4.2');
     $('start-learning').replaceChildren(document.createTextNode(ui.started ? t('続きから学ぶ ') : t('最初のレッスンをはじめる ')), node('span', '', '→'));
     renderLevelCards();
   }

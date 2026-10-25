@@ -2,7 +2,7 @@
   <img src="docs/images/linuxroom-banner.png" width="960" alt="Pixel art of the Linuxroom character casting fire magic in ancient ruins">
 </p>
 
-# Linuxroom v0.4.1
+# Linuxroom v0.4.2
 
 English · [日本語](README.md)
 
@@ -84,3 +84,7 @@ The tests cover shell behavior, every lesson's validation, all 119 rendered less
 ## Credits and license
 
 This app and curriculum were created using OpenAI Codex (AI). Its virtual shell extends the MIT-licensed implementation from [Logroom](https://github.com/retiacole/logroom). See [LICENSE](LICENSE) for the license.
+
+<p align="center">
+  <img src="assets/linuxroom-journey.png" width="100%" alt="The Room series characters walking together through the countryside">
+</p>
