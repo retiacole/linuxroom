@@ -1,16 +1,25 @@
+<p align="center">
+  <img src="docs/images/linuxroom-banner.png" width="960" alt="遺跡で炎の魔法を使うLinuxroomのキャラクターを描いたピクセルアート">
+</p>
+
 # Linuxroom v0.4
 
 [English README](README.en.md) · 日本語
 
-[ブラウザで学習する](https://retiacole.github.io/linuxroom/) · [オフライン版をダウンロード](https://github.com/retiacole/linuxroom/releases/latest/download/linuxroom.html)
+<img src="docs/images/linuxroom-character.png" align="right" width="120" alt="杖と本を持つLinuxroomのキャラクター">
 
-ひとつずつ、つないでいこう。
+**ひとつずつ、つないでいこう。**<br>
+*Build your Linux command skills, one step at a time.*
+
+[ブラウザで学習する](https://retiacole.github.io/linuxroom/) · [オフライン版をダウンロード](https://github.com/retiacole/linuxroom/releases/latest/download/linuxroom.html)
 
 Linuxコマンドに初めて触れる人が、ファイルの移動・閲覧から、検索・列の抽出・集計・保存までを段階的に練習する教材です。前のコマンドに処理を一つずつ足し、パイプの途中結果を見ながら組み立てます。
 
 初級・応用・発展の3段階、初級36・応用47・発展36、合計119課題を収録しています。初版の36課題のIDと学習順序を保ち、検索条件の組み立て、複数ファイルの照合、JSONの集計へと進みます。
 
 このアプリと教材はOpenAI Codex（AI）を使って作成しました。仮想シェルは [Logroom](https://github.com/retiacole/logroom) のMITライセンスの実装を利用・拡張しています。
+
+<br clear="right">
 
 ## はじめ方
 

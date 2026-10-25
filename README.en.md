@@ -1,10 +1,21 @@
+<p align="center">
+  <img src="docs/images/linuxroom-banner.png" width="960" alt="Pixel art of the Linuxroom character casting fire magic in ancient ruins">
+</p>
+
 # Linuxroom v0.4
 
 English · [日本語](README.md)
 
+<img src="docs/images/linuxroom-character.png" align="right" width="120" alt="The Linuxroom character holding a staff and a book">
+
+**Build your Linux command skills, one step at a time.**<br>
+*ひとつずつ、つないでいこう。*
+
 [Start in your browser](https://retiacole.github.io/linuxroom/) · [Download the offline HTML](https://github.com/retiacole/linuxroom/releases/latest/download/linuxroom.html)
 
 Learn Linux commands one small step at a time. Linuxroom is a self-contained browser lab for navigating files, searching records, extracting fields, building pipelines and saving results. Inspect the actual input and output at each pipeline stage.
+
+<br clear="right">
 
 ## Getting started
 
