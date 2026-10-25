@@ -1,4 +1,6 @@
-# Linuxroom v0.3
+# Linuxroom v0.4
+
+[English README](README.en.md) · 日本語
 
 [ブラウザで学習する](https://retiacole.github.io/linuxroom/) · [オフライン版をダウンロード](https://github.com/retiacole/linuxroom/releases/latest/download/linuxroom.html)
 
@@ -13,6 +15,10 @@ Linuxコマンドに初めて触れる人が、ファイルの移動・閲覧か
 ## はじめ方
 
 [公開版](https://retiacole.github.io/linuxroom/)をブラウザで開くか、オフライン版の `linuxroom.html` を保存して開きます。JavaScriptが使えるブラウザがあれば、インストール、Linux環境、アカウントは不要です。教材・スタイル・プログラムをHTML一つに同梱し、読み込み後の演習中はインターネットに接続しません。
+
+ヘッダーの **Language** メニューで **日本語 / English** を選べます。119課題の説明・課題・ヒント・解答例の案内、学習マップ、コマンド帳、採点結果、保存画面を英語で利用できます。選択はこのブラウザに保存され、進捗ファイルにも含まれます。作業ファイル、現在地、入力途中のコマンド、履歴、修了・ヒント記録を保ったまま切り替わります。
+
+コマンドや教材のファイル本文は両言語で共通です。たとえば追記課題の `確認開始`・`確認完了` は正解に使うサンプル文字列なので、英語でも同じ文字を入力します。英語の説明に意味と入力方法を記載しています。v0.1〜v0.3の進捗は引き続き利用できます。
 
 1. 「学習を始める」から最初の課題へ進みます。
 2. 短い説明と今回のミッションを読み、ターミナルにコマンドを入力します。
@@ -132,6 +138,11 @@ src/data.js       初級編36課題・練習用ファイル・判定条件
 src/data-levels.js 段階の定義・初級への段階タグ追加
 src/data-applied.js 応用編47課題
 src/data-advanced.js 発展編36課題
+src/data-en.js     全119課題の英語説明・課題文
+src/concepts-en.js 用語と定義の英訳
+src/examples-en.js 見本ごとの説明の英訳
+src/hints-en.js    段階的ヒントの英訳
+src/i18n.js        UI・コマンド帳の英訳と安全な言語切替
 src/shell.js      Logroom由来の仮想シェルと実行記録
 src/engine.js     チュートリアル採点・セッション・進捗
 src/app.js        学習画面とターミナル

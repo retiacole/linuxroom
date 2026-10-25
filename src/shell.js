@@ -1,6 +1,7 @@
 /* Browser-only virtual text shell for LogLab. No host processes or network access. */
 (function (root) {
   'use strict';
+  const t = value => root.LinuxroomI18n ? root.LinuxroomI18n.t(value) : value;
   const MAX_INPUT = 8192, MAX_OUTPUT = 524288, MAX_FILE = 2097152;
   const COMMANDS = ['help','pwd','cd','ls','cat','tac','less','more','grep','rg','sort','uniq','cut','tr','column','nl','diff','jq','base64','tee','head','tail','wc','sed','awk','find','echo','printf','paste','comm','join','xargs','rev','strings','basename','dirname','realpath','file','stat','du','date','clear','history','mkdir','touch','cp','mv','rm','rmdir'];
   const USAGE = {
@@ -185,7 +186,7 @@
     write(path,text,append=false,cmd='redirection') { const p=this.resolve(path);if(p==='/dev/null')return; if(this.isDir(p)) fail(cmd+': '+path+': Is a directory',1); if(!this.isDir(dirname(p))) fail(cmd+': '+path+': No such file or directory',1); const value=(append&&this.isFile(p)?this.files[p]:'')+text; if(value.length>MAX_FILE) fail(cmd+': '+path+': virtual file exceeds the 2 MiB text limit',1); this.files[p]=value;this.getMetadata(p).mtime=this.clock(); this.addParents(p); }
     getHelp(command) {
       if(command) {
-        if(command==='man')return 'man COMMAND — この教材では help COMMAND をページ表示します。実機では man でマニュアルを読みます。\n';
+        if(command==='man')return t('man COMMAND — この教材では help COMMAND をページ表示します。実機では man でマニュアルを読みます。\n');
         if(!COMMANDS.includes(command)) fail('help: unknown command '+command,1);
         let extra='';
         if(command==='grep') extra='\nDefault grep uses basic regex: + ? | ( ) are literal unless escaped; -E enables extended regex.\n-F matches literal text. -r/-R recurse (virtual filesystem has no symlinks); -m limits selected lines per file.\n-L lists files without matching lines. Exit status still follows line matches: 0 match, 1 no match, 2 error.\nLong aliases: --recursive, --ignore-case, --invert-match, --line-number, --count, --regexp,\n--fixed-strings, --extended-regexp, --word-regexp, --line-regexp, --only-matching, --quiet,\n--files-with-matches, --files-without-match, --max-count, --after-context, --before-context, --context.\n--include/--exclude filter basenames; --exclude-dir filters directory names with * and ? globs.\nPCRE (-P), binary options, and color flags are unsupported.';
@@ -225,12 +226,12 @@
         if(command==='rev') extra='\nReverse Unicode characters within each line; preserve line endings.';
         return USAGE[command]+extra+'\n';
       }
-      return 'Linuxroom 学習用の仮想ターミナル — Linux コマンドの一部を再現\n'+
+      return t('Linuxroom 学習用の仮想ターミナル — Linux コマンドの一部を再現\n')+
         'Commands: '+COMMANDS.join(', ')+'\n'+
         'Syntax: quotes, escapes, |, <, >, >>, 2>, 2>>, 2>&1, ;, &&, ||, unquoted ~ / * / ? and $? status.\n'+
         'Use help COMMAND for exact options. Files and redirects stay in virtual memory.\n'+
         'No host OS, server execution, package installation, general shell variables, scripts, or network.\n'+
-        'less/more open the viewer; q closes. help は教材専用ヘルプ。実機では man COMMAND。man は教材ヘルプの別名です。\n';
+        t('less/more open the viewer; q closes. help は教材専用ヘルプ。実機では man COMMAND。man は教材ヘルプの別名です。\n');
     }
     complete(input) {
       const m=input.match(/(?:^|[\s|;])([^\s|;]*)$/); if(!m) return [];
@@ -321,12 +322,12 @@
       return {stdout,stderr,code,trace,connectors,flow,...(clear?{clear:true}:{}),...(pager?{pager:true}:{})};
     }
     execute(cmd,args,stdin,context={}) {
-      if(['vi','view','sl'].includes(cmd)) fail(cmd+': Linuxroom では利用できません。ファイルを読むには cat または less を使ってください。',127);
+      if(['vi','view','sl'].includes(cmd)) fail(cmd+t(': Linuxroom では利用できません。ファイルを読むには cat または less を使ってください。'),127);
       if(!COMMANDS.includes(cmd)&&cmd!=='man') fail(cmd+': command not found. Type help for the supported training commands.',127);
       const result=(stdout='',code=0,extra={})=>({stdout,stderr:'',code,...extra});
       if(args.includes('--help')&&(args.indexOf('--')<0||args.indexOf('--help')<args.indexOf('--'))) return result(this.getHelp(cmd));
       switch(cmd) {
-        case 'man': if(args.length!==1)fail('man: one command name is required',2);return result('Linuxroom 学習用ヘルプ — 実機の man マニュアルではありません。実機では man COMMAND で詳細を調べます。\n\n'+this.getHelp(args[0]),0,{pager:true});
+        case 'man': if(args.length!==1)fail('man: one command name is required',2);return result(t('Linuxroom 学習用ヘルプ — 実機の man マニュアルではありません。実機では man COMMAND で詳細を調べます。\n\n')+this.getHelp(args[0]),0,{pager:true});
         case 'help': if(args.length>1) usageError(cmd,'too many arguments'); return result(this.getHelp(args[0]));
         case 'pwd': if(args.length) usageError(cmd,'no options are supported'); return result(this.cwd+'\n');
         case 'clear': if(args.length) usageError(cmd,'no arguments are supported'); return result('',0,{clear:true});

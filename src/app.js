@@ -1,5 +1,7 @@
 (function () {
   'use strict';
+  const i18n = globalThis.LinuxroomI18n;
+  const t = value => i18n.t(value);
   const DATA = globalThis.LINUXROOM_DATA;
   const Engine = globalThis.LinuxroomEngine;
   const KEY = 'linuxroom.progress.v1';
@@ -7,7 +9,7 @@
   const $ = id => document.getElementById(id);
   const lessons = DATA.lessons;
   const byId = new Map(lessons.map(lesson => [lesson.id, lesson]));
-  const levels = Array.isArray(DATA.levels) && DATA.levels.length ? DATA.levels : [{ id: 'beginner', title: '初級編', subtitle: '一つずつ、コマンドを覚える', description: 'ファイルを読むところから、パイプをつないで集計するところまで。' }];
+  const levels = Array.isArray(DATA.levels) && DATA.levels.length ? DATA.levels : [{ id: 'beginner', title: t('初級編'), subtitle: t('一つずつ、コマンドを覚える'), description: t('ファイルを読むところから、パイプをつないで集計するところまで。') }];
   const levelById = new Map(levels.map(level => [level.id, level]));
   const levelLessons = id => lessons.filter(lesson => (lesson.level || 'beginner') === id);
   const levelOf = lesson => lesson && levelById.has(lesson.level) ? lesson.level : levels[0].id;
@@ -16,7 +18,7 @@
   const modeLabels = { guide: 'まねて、試す', practice: '少し変えて、使う', challenge: '自分で、組み立てる' };
   const sessions = new Map();
   let progress = Engine.createProgress();
-  let ui = { started: false, drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
+  let ui = { started: false, locale: 'ja', drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
   let activeLevel = levels[0].id;
   let currentSession = null;
   let currentLesson = null;
@@ -44,9 +46,10 @@
 
   function validId(id) { return id === 'sandbox' || byId.has(id); }
   function safeUI(raw) {
-    const clean = { started: false, drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
+    const clean = { started: false, locale: 'ja', drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return clean;
     clean.started = raw.started === true;
+    clean.locale = i18n.languages.includes(raw.locale) ? raw.locale : 'ja';
     levels.forEach(level => {
       const id = raw.currentByLevel && raw.currentByLevel[level.id];
       if (byId.has(id) && levelOf(byId.get(id)) === level.id) clean.currentByLevel[level.id] = id;
@@ -67,7 +70,7 @@
 
   function storageFailure() {
     $('storage-warning').hidden = false;
-    $('storage-warning').textContent = 'ブラウザへの自動保存ができません。「進捗を保存」からファイルをダウンロードすると、あとで続きから学習できます。';
+    $('storage-warning').textContent = t('ブラウザへの自動保存ができません。「進捗を保存」からファイルをダウンロードすると、あとで続きから学習できます。');
   }
 
   function load() {
@@ -103,7 +106,7 @@
     try {
       localStorage.setItem(KEY, JSON.stringify(progress));
       localStorage.setItem(UI_KEY, JSON.stringify(ui));
-      $('save-status').textContent = 'このブラウザに自動保存しました。';
+      $('save-status').textContent = t('このブラウザに自動保存しました。');
     } catch (_) { storageFailure(); }
   }
 
@@ -117,17 +120,17 @@
 
   function stats() {
     const s = Engine.stats(progress);
-    $('progress-label').textContent = s.completed + ' / ' + s.total + ' レッスン修了';
+    $('progress-label').textContent = s.completed + ' / ' + s.total + t(' レッスン修了');
     $('progress-fill').style.width = s.percent + '%';
     const selected = levelById.get(activeLevel);
     const current = levelStats(activeLevel);
-    $('map-progress').textContent = selected.title + '　' + current.completed + ' / ' + current.total + ' レッスン修了 · ' + current.percent + '%';
-    $('map-overall').textContent = '全体 ' + s.completed + ' / ' + s.total + ' レッスン修了';
-    $('welcome-progress').textContent = s.completed ? '全体 ' + s.completed + ' / ' + s.total + ' レッスン修了。今日も一歩ずつ。' : '';
-    $('course-summary').textContent = levels.length + ' 段階 · 全 ' + s.total + ' レッスン';
-    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.3');
-    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.3');
-    $('start-learning').replaceChildren(document.createTextNode(ui.started ? '続きから学ぶ ' : '最初のレッスンをはじめる '), node('span', '', '→'));
+    $('map-progress').textContent = selected.title + '　' + current.completed + ' / ' + current.total + t(' レッスン修了 · ') + current.percent + '%';
+    $('map-overall').textContent = t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了');
+    $('welcome-progress').textContent = s.completed ? t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了。今日も一歩ずつ。') : '';
+    $('course-summary').textContent = levels.length + t(' 段階 · 全 ') + s.total + t(' レッスン');
+    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.4');
+    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.4');
+    $('start-learning').replaceChildren(document.createTextNode(ui.started ? t('続きから学ぶ ') : t('最初のレッスンをはじめる ')), node('span', '', '→'));
     renderLevelCards();
   }
 
@@ -148,17 +151,17 @@
       const s = levelStats(level.id);
       const card = node('section', 'level-card' + (levelOf(currentLesson || byId.get(progress.currentId)) === level.id ? ' level-current' : ''));
       const heading = node('div', 'level-card-heading');
-      heading.append(node('span', 'level-step', 'STEP ' + String(index + 1).padStart(2, '0')), node('span', 'level-count', s.total + ' レッスン'));
-      card.append(heading, node('h3', '', level.title), node('p', 'level-subtitle', level.subtitle || ''), node('p', 'level-description', level.description || '小さな操作をつなぎながら、できることを増やします。'));
+      heading.append(node('span', 'level-step', 'STEP ' + String(index + 1).padStart(2, '0')), node('span', 'level-count', s.total + t(' レッスン')));
+      card.append(heading, node('h3', '', level.title), node('p', 'level-subtitle', level.subtitle || ''), node('p', 'level-description', level.description || t('小さな操作をつなぎながら、できることを増やします。')));
       const progressLabel = node('div', 'level-progress-label');
-      progressLabel.append(node('span', '', s.completed + ' / ' + s.total + ' 修了'), node('span', '', s.percent + '%'));
+      progressLabel.append(node('span', '', s.completed + ' / ' + s.total + t(' 修了')), node('span', '', s.percent + '%'));
       const track = node('div', 'progress-track');
       const fill = node('span');
       fill.style.width = s.percent + '%';
       track.append(fill);
-      const button = node('button', 'button secondary full-width', level.title + (ui.started && ui.currentByLevel[level.id] ? 'の続きへ →' : 'をはじめる →'));
+      const button = node('button', 'button secondary full-width', level.title + (ui.started && ui.currentByLevel[level.id] ? t('の続きへ →') : t('をはじめる →')));
       button.dataset.level = level.id;
-      button.setAttribute('aria-label', level.title + 'を選んで学習する');
+      button.setAttribute('aria-label', level.title + t('を選んで学習する'));
       button.addEventListener('click', () => resumeLevel(level.id));
       card.append(progressLabel, track, button);
       return card;
@@ -229,14 +232,14 @@
     const selected = levelLessons(activeLevel);
     const index = selected.findIndex(lesson => lesson.id === id);
     const chapter = currentLesson ? DATA.chapters.find(ch => ch.id === currentLesson.chapter) : null;
-    $('lesson-position').textContent = currentLesson ? levelById.get(activeLevel).title + '　' + String(index + 1).padStart(2, '0') + ' / ' + selected.length + '　' + (chapter ? chapter.title : '') : 'FREE PRACTICE / 自由練習';
-    $('lesson-title').textContent = currentLesson ? currentLesson.title : '自由に、コマンドを試そう';
-    $('lesson-mode').textContent = currentLesson ? modeLabels[currentLesson.mode] || '一歩ずつ練習' : '自分のペースで';
-    $('lesson-minutes').textContent = currentLesson ? '約 ' + currentLesson.minutes + ' 分' : '時間制限なし';
-    $('lesson-goal').textContent = currentLesson ? currentLesson.goal : '習ったコマンドを、何度でも。';
-    $('lesson-explanation').replaceChildren(...(currentLesson ? currentLesson.explanation : ['ファイルを開いたり、探したり、パイプでつないだり。自由に操作してみましょう。', 'パイプでつないだら、「コマンドが、結果になるまで」で各段を選んでみよう。その段が受け取った入力と、次へ渡した出力を見比べられます。', '下の「この課題で使えるファイル」でファイル名を確認できます。迷ったら help やコマンド帳を使ってください。']).map(text => node('p', '', text)));
+    $('lesson-position').textContent = currentLesson ? levelById.get(activeLevel).title + '　' + String(index + 1).padStart(2, '0') + ' / ' + selected.length + '　' + (chapter ? chapter.title : '') : t('FREE PRACTICE / 自由練習');
+    $('lesson-title').textContent = currentLesson ? currentLesson.title : t('自由に、コマンドを試そう');
+    $('lesson-mode').textContent = currentLesson ? t(modeLabels[currentLesson.mode]) || t('一歩ずつ練習') : t('自分のペースで');
+    $('lesson-minutes').textContent = currentLesson ? t('約 ') + currentLesson.minutes + t(' 分') : t('時間制限なし');
+    $('lesson-goal').textContent = currentLesson ? currentLesson.goal : t('習ったコマンドを、何度でも。');
+    $('lesson-explanation').replaceChildren(...(currentLesson ? currentLesson.explanation : [t('ファイルを開いたり、探したり、パイプでつないだり。自由に操作してみましょう。'), t('パイプでつないだら、「コマンドが、結果になるまで」で各段を選んでみよう。その段が受け取った入力と、次へ渡した出力を見比べられます。'), t('下の「この課題で使えるファイル」でファイル名を確認できます。迷ったら help やコマンド帳を使ってください。')]).map(text => node('p', '', text)));
     const concepts = node('dl');
-    (currentLesson ? currentLesson.concepts : [{ term: 'help', text: 'この教材で使えるコマンドを表示します。' }]).forEach(concept => {
+    (currentLesson ? currentLesson.concepts : [{ term: 'help', text: t('この教材で使えるコマンドを表示します。') }]).forEach(concept => {
       const row = node('div', 'concept-item');
       row.append(node('dt', '', concept.term), node('dd', '', concept.text));
       concepts.append(row);
@@ -246,11 +249,11 @@
     $('example-details').open = !!(currentLesson && currentLesson.mode === 'guide');
     $('example-command').textContent = currentLesson && currentLesson.example ? currentLesson.example.command : '';
     $('example-note').textContent = currentLesson && currentLesson.example ? currentLesson.example.note : '';
-    $('lesson-task').textContent = currentLesson ? currentLesson.task : 'まずは pwd と ls で、現在地とファイルを見てみよう。';
+    $('lesson-task').textContent = currentLesson ? currentLesson.task : t('まずは pwd と ls で、現在地とファイルを見てみよう。');
     $('new-part-box').hidden = !(currentLesson && currentLesson.newPart);
     $('new-part').textContent = currentLesson && currentLesson.newPart || '';
     $('starter-fill').hidden = !(currentLesson && currentLesson.starter);
-    $('starter-fill').textContent = currentLesson && currentLesson.newPart ? '前の段階を入力' : '書きはじめを入力';
+    $('starter-fill').textContent = currentLesson && currentLesson.newPart ? t('前の段階を入力') : t('書きはじめを入力');
     $('starter-fill').title = currentLesson && currentLesson.starter || '';
     $('hint-button').disabled = !currentLesson;
     $('solution-button').disabled = !currentLesson;
@@ -258,7 +261,7 @@
     $('solution-box').hidden = true;
     $('lesson-feedback').hidden = true;
     $('success-box').hidden = true;
-    $('jump-mission').textContent = '課題に戻る ↑';
+    $('jump-mission').textContent = t('課題に戻る ↑');
     $('run-feedback').textContent = '';
     $('run-feedback').className = 'run-feedback';
     $('command-input').value = ui.drafts[id] || '';
@@ -307,7 +310,7 @@
 
   function renderSolution() {
     const box = $('solution-box');
-    box.replaceChildren(node('h3', '', '解答例'), node('p', '', '見ながら入力しても大丈夫。実行した結果を確かめて、自分の操作にしていきましょう。'));
+    box.replaceChildren(node('h3', '', t('解答例')), node('p', '', t('見ながら入力しても大丈夫。実行した結果を確かめて、自分の操作にしていきましょう。')));
     (currentLesson.solution || []).forEach(command => box.append(node('code', '', command)));
     box.hidden = false;
   }
@@ -326,18 +329,18 @@
     if (!currentLesson) return;
     $('lesson-feedback').hidden = true;
     $('success-box').hidden = false;
-    $('jump-mission').textContent = '修了・次の課題へ ↑';
+    $('jump-mission').textContent = t('修了・次の課題へ ↑');
     $('success-text').textContent = currentLesson.success;
     $('bridge-text').textContent = currentLesson.bridge || '';
     const next = nextLesson(currentLesson);
     const last = !next;
     $('next-lesson').hidden = last;
-    $('next-lesson').textContent = next && levelOf(next) !== levelOf(currentLesson) ? levelById.get(levelOf(next)).title + 'へ進む →' : '次のレッスンへ →';
+    $('next-lesson').textContent = next && levelOf(next) !== levelOf(currentLesson) ? levelById.get(levelOf(next)).title + t('へ進む →') : t('次のレッスンへ →');
     $('graduation-link').hidden = !last;
     $('logroom-link').hidden = !last;
-    if (last) $('bridge-text').textContent = (currentLesson.bridge || '次は SOCroom-easy でログの読み方を学び、Logroom でコマンドを使ったログ分析へ進みましょう。') + ' 各 GitHub ページから教材を入手できます。';
-    else if (levelOf(next) !== levelOf(currentLesson)) $('bridge-text').textContent = levelById.get(levelOf(currentLesson)).title + 'の最後の実習ができました。次は' + levelById.get(levelOf(next)).title + 'です。今までのコマンドに新しい操作を足していきましょう。';
-    if (newlyCompleted) toast('✓ ' + currentLesson.title + ' を修了しました');
+    if (last) $('bridge-text').textContent = (currentLesson.bridge || t('次は SOCroom-easy でログの読み方を学び、Logroom でコマンドを使ったログ分析へ進みましょう。')) + t(' 各 GitHub ページから教材を入手できます。');
+    else if (levelOf(next) !== levelOf(currentLesson)) $('bridge-text').textContent = levelById.get(levelOf(currentLesson)).title + t('の最後の実習ができました。次は') + levelById.get(levelOf(next)).title + t('です。今までのコマンドに新しい操作を足していきましょう。');
+    if (newlyCompleted) toast('✓ ' + currentLesson.title + t(' を修了しました'));
   }
 
   function checkAnswer(manual) {
@@ -351,7 +354,7 @@
       checkpoint();
     } else if (manual) {
       const feedback = $('lesson-feedback');
-      feedback.replaceChildren(node('p', '', result.message || 'あと少し。課題の条件をもう一度確かめてみよう。'));
+      feedback.replaceChildren(node('p', '', result.message || t('あと少し。課題の条件をもう一度確かめてみよう。')));
       const remaining = (result.details || []).filter(detail => !detail.passed);
       if (remaining.length) {
         const list = node('ul');
@@ -359,7 +362,7 @@
         feedback.append(list);
       }
       feedback.hidden = false;
-      toast('課題の条件と、左側のヒントを確認してみよう');
+      toast(t('課題の条件と、左側のヒントを確認してみよう'));
     }
   }
 
@@ -371,7 +374,7 @@
     const output = $('terminal-output');
     output.replaceChildren();
     const entries = ui.transcripts[currentSession.lessonId] || [];
-    if (!entries.length) output.append(node('div', 'terminal-welcome', 'Linuxroom · virtual terminal\n\nanalyst@linuxroom:~$ はプロンプトの例です。\nユーザー名@ホスト名:現在地 のあとに、入力を待つ $ が付きます。\nプロンプトは入力せず、コマンドだけを打って Enter。'));
+    if (!entries.length) output.append(node('div', 'terminal-welcome', t('Linuxroom · virtual terminal\n\nanalyst@linuxroom:~$ はプロンプトの例です。\nユーザー名@ホスト名:現在地 のあとに、入力を待つ $ が付きます。\nプロンプトは入力せず、コマンドだけを打って Enter。')));
     entries.forEach(entry => output.append(transcriptNode(entry)));
     output.scrollTop = output.scrollHeight;
   }
@@ -380,12 +383,12 @@
     const row = node('div', 'terminal-entry');
     const command = node('div', 'terminal-command');
     const prompt = node('span', 'history-prompt', entry.cwd ? promptFor(entry.cwd) : '$');
-    prompt.title = entry.cwd ? '実行前の現在地: ' + entry.cwd : '旧版の履歴には実行前の現在地が保存されていません。';
+    prompt.title = entry.cwd ? t('実行前の現在地: ') + entry.cwd : t('旧版の履歴には実行前の現在地が保存されていません。');
     command.append(prompt, node('span', '', entry.input));
     row.append(command);
     if (entry.stdout) row.append(node('pre', '', entry.stdout));
     if (entry.stderr) row.append(node('pre', 'error', entry.stderr));
-    if (!entry.stdout && !entry.stderr && entry.note) row.append(node('div', 'terminal-empty-output', entry.note));
+    if (!entry.stdout && !entry.stderr && entry.note) row.append(node('div', 'terminal-empty-output', t(entry.note)));
     return row;
   }
 
@@ -405,14 +408,14 @@
   }
 
   function updateShellView() {
-    $('terminal-cwd').textContent = '現在地: ' + currentSession.shell.cwd;
+    $('terminal-cwd').textContent = t('現在地: ') + currentSession.shell.cwd;
     $('terminal-prompt').textContent = promptFor(currentSession.shell.cwd);
-    $('terminal-prompt').title = 'analyst はユーザー名、linuxroom はホスト名。: の後ろは現在地、~ はホームフォルダ。$ は一般ユーザーの入力待ちです。プロンプトは入力しません。';
+    $('terminal-prompt').title = t('analyst はユーザー名、linuxroom はホスト名。: の後ろは現在地、~ はホームフォルダ。$ は一般ユーザーの入力待ちです。プロンプトは入力しません。');
     const files = Object.keys(currentSession.shell.files || {}).sort();
     $('file-count').textContent = files.length + ' files';
     $('file-list').replaceChildren(...files.slice(0, 100).map(path => {
       const button = node('button', 'file-button', path);
-      button.title = '入力欄に ' + path + ' を追加';
+      button.title = t('入力欄に ') + path + t(' を追加');
       button.addEventListener('click', () => {
         const value = $('command-input').value;
         fillInput(value + (value && !/\s$/.test(value) ? ' ' : '') + quoteArg(path));
@@ -431,7 +434,7 @@
     let result;
     try { result = Engine.run(currentSession, input); }
     catch (_) {
-      result = { stdout: '', stderr: 'この操作を実行できませんでした。コマンドを短くして、もう一度試してください。', code: 2, trace: [] };
+      result = { stdout: '', stderr: t('この操作を実行できませんでした。コマンドを短くして、もう一度試してください。'), code: 2, trace: [] };
     }
     $('command-input').value = '';
     ui.drafts[currentSession.lessonId] = '';
@@ -439,10 +442,10 @@
     historyDraft = '';
     const noOutput = !result.stdout && !result.stderr;
     const lastStage = Array.isArray(result.trace) && result.trace[result.trace.length - 1];
-    const fallback = result.code === 1 && lastStage && lastStage.command === 'diff' ? '差分が見つかりました。diff の終了状態 1 は、二つの内容が異なることを表します。' : result.code === 1 && noOutput && lastStage && ['grep', 'rg'].includes(lastStage.command) ? '一致する行がありませんでした。検索語や大文字・小文字を確認してみよう。' : noOutput && result.code !== 0 ? '終了状態 ' + result.code + ' です。画面に何も表示されなくても、コマンドが成功したとは限りません。' : noOutput && result.code === 0 ? '実行しました。画面に何も表示しないコマンドもあります。' : '';
+    const fallback = result.code === 1 && lastStage && lastStage.command === 'diff' ? t('差分が見つかりました。diff の終了状態 1 は、二つの内容が異なることを表します。') : result.code === 1 && noOutput && lastStage && ['grep', 'rg'].includes(lastStage.command) ? t('一致する行がありませんでした。検索語や大文字・小文字を確認してみよう。') : noOutput && result.code !== 0 ? t('終了状態 ') + result.code + t(' です。画面に何も表示されなくても、コマンドが成功したとは限りません。') : noOutput && result.code === 0 ? t('実行しました。画面に何も表示しないコマンドもあります。') : '';
     const feedback = result.feedback || fallback;
     if (result.clear) clearTerminal();
-    else appendTranscript(input, result, result.pager ? '閲覧画面を開きました。q で閉じます。' : fallback, cwdBefore);
+    else appendTranscript(input, result, result.pager ? t('閲覧画面を開きました。q で閉じます。') : fallback, cwdBefore);
     $('run-feedback').textContent = feedback;
     $('run-feedback').className = 'run-feedback' + (result.stderr && !result.expectedStatus ? ' error' : '');
     if (Array.isArray(result.trace) && result.trace.length) {
@@ -475,17 +478,17 @@
   function renderTrace() {
     $('trace-empty').hidden = latestTrace.length > 0;
     $('trace-detail').hidden = !latestTrace.length;
-    $('trace-summary').textContent = latestTrace.length ? latestTrace.length + ' 個の処理 · 実行結果' : '';
+    $('trace-summary').textContent = latestTrace.length ? latestTrace.length + t(' 個の処理 · 実行結果') : '';
     const stages = $('trace-stages');
     stages.replaceChildren();
     latestTrace.forEach((stage, i) => {
       if (i) {
         const piped = stage.pipeline === latestTrace[i - 1].pipeline && Number(stage.index) > 0;
-        stages.append(node('span', piped ? 'stage-arrow' : 'stage-chain', piped ? '|' : '次の実行 →'));
+        stages.append(node('span', piped ? 'stage-arrow' : 'stage-chain', piped ? '|' : t('次の実行 →')));
       }
       const button = node('button', 'stage-button');
       button.setAttribute('aria-pressed', String(i === traceIndex));
-      button.setAttribute('aria-label', '処理 ' + (i + 1) + ': ' + stageCommand(stage) + ' の入力と出力を見る');
+      button.setAttribute('aria-label', t('処理 ') + (i + 1) + ': ' + stageCommand(stage) + t(' の入力と出力を見る'));
       button.title = stageCommand(stage);
       button.append(node('strong', '', 'STEP ' + (i + 1)), document.createTextNode(stage.command));
       button.addEventListener('click', () => { traceIndex = i; renderTrace(); });
@@ -494,16 +497,16 @@
     const stage = latestTrace[traceIndex];
     if (!stage) return;
     $('trace-detail-title').textContent = stageCommand(stage);
-    $('trace-line-count').textContent = '出力 ' + lineCount(stage.stdout) + ' 行';
-    $('trace-input-count').textContent = lineCount(stage.stdin) + ' 行';
-    $('trace-input').textContent = stage.stdin || '（標準入力は空です。ファイル名を引数で渡す処理は、そのファイルを直接読みます）';
+    $('trace-line-count').textContent = t('出力 ') + lineCount(stage.stdout) + t(' 行');
+    $('trace-input-count').textContent = lineCount(stage.stdin) + t(' 行');
+    $('trace-input').textContent = stage.stdin || t('（標準入力は空です。ファイル名を引数で渡す処理は、そのファイルを直接読みます）');
     $('trace-input-details').open = Boolean(stage.stdin);
-    $('trace-output').textContent = stage.stdout || (stage.stderr ? stage.stderr : '（表示する出力はありません）');
-    let note = stage.stderr ? 'この処理でエラーが発生しました。エラー文と入力を確認してみよう。' : stage.code === 1 && stage.command === 'diff' ? '終了状態 1 は「差分あり」を表します。diff では、違いが見つかると 1 を返します。' : stage.code === 1 && ['grep', 'rg'].includes(stage.command) ? '終了状態 1 は「一致する行なし」を表します。検索語や大文字・小文字を確認してみよう。' : stage.code ? '終了状態 ' + stage.code + ' です。このコマンドの説明と結果を確認しましょう。' : '';
-    if (stage.redirections && stage.redirections.length) note += (note ? ' ' : '') + 'この欄は保存・リダイレクト前の実際の出力です。' + stage.redirections.map(redir => (redir.fd === 2 ? '2' : '') + redir.op + ' ' + redir.target).join(' / ');
-    if (Number(stage.index) > 0 && latestTrace[traceIndex - 1] && stage.pipeline === latestTrace[traceIndex - 1].pipeline) note += (note ? ' ' : '') + '前の処理から ' + lineCount(stage.stdin) + ' 行を受け取りました。';
-    else if (!stage.stdin) note += (note ? ' ' : '') + '最初の処理です。必要な入力は、ファイルや引数から受け取ります。';
-    if (stage.cwdAfter && stage.cwdBefore !== stage.cwdAfter) note += (note ? ' ' : '') + '現在地: ' + stage.cwdBefore + ' → ' + stage.cwdAfter;
+    $('trace-output').textContent = stage.stdout || (stage.stderr ? stage.stderr : t('（表示する出力はありません）'));
+    let note = stage.stderr ? t('この処理でエラーが発生しました。エラー文と入力を確認してみよう。') : stage.code === 1 && stage.command === 'diff' ? t('終了状態 1 は「差分あり」を表します。diff では、違いが見つかると 1 を返します。') : stage.code === 1 && ['grep', 'rg'].includes(stage.command) ? t('終了状態 1 は「一致する行なし」を表します。検索語や大文字・小文字を確認してみよう。') : stage.code ? t('終了状態 ') + stage.code + t(' です。このコマンドの説明と結果を確認しましょう。') : '';
+    if (stage.redirections && stage.redirections.length) note += (note ? ' ' : '') + t('この欄は保存・リダイレクト前の実際の出力です。') + stage.redirections.map(redir => (redir.fd === 2 ? '2' : '') + redir.op + ' ' + redir.target).join(' / ');
+    if (Number(stage.index) > 0 && latestTrace[traceIndex - 1] && stage.pipeline === latestTrace[traceIndex - 1].pipeline) note += (note ? ' ' : '') + t('前の処理から ') + lineCount(stage.stdin) + t(' 行を受け取りました。');
+    else if (!stage.stdin) note += (note ? ' ' : '') + t('最初の処理です。必要な入力は、ファイルや引数から受け取ります。');
+    if (stage.cwdAfter && stage.cwdBefore !== stage.cwdAfter) note += (note ? ' ' : '') + t('現在地: ') + stage.cwdBefore + ' → ' + stage.cwdAfter;
     $('trace-note').textContent = note;
   }
 
@@ -521,7 +524,7 @@
     let matches = [];
     try { matches = currentSession.shell.complete(before); } catch (_) { /* Completion is optional for incomplete quotes. */ }
     matches = Array.isArray(matches) ? matches.filter(item => typeof item === 'string') : [];
-    if (!matches.length) { $('run-feedback').textContent = '補完の候補がありません。ファイル名や現在地を確認してみよう。'; return; }
+    if (!matches.length) { $('run-feedback').textContent = t('補完の候補がありません。ファイル名や現在地を確認してみよう。'); return; }
     let prefix = matches[0];
     for (const match of matches) while (prefix && !match.startsWith(prefix)) prefix = prefix.slice(0, -1);
     const token = before.match(/[^\s|;]*$/);
@@ -532,7 +535,7 @@
       input.setSelectionRange(completed.length, completed.length);
       laterSave();
     }
-    $('run-feedback').textContent = matches.length === 1 ? '補完しました。' : '候補: ' + matches.slice(0, 12).join('  ') + (matches.length > 12 ? ' …' : '');
+    $('run-feedback').textContent = matches.length === 1 ? t('補完しました。') : t('候補: ') + matches.slice(0, 12).join('  ') + (matches.length > 12 ? ' …' : '');
   }
 
   function inputKeys(event) {
@@ -541,7 +544,7 @@
     if (event.ctrlKey && event.key.toLowerCase() === 'c') {
       event.preventDefault();
       input.value = '';
-      $('run-feedback').textContent = '入力中のコマンドを取り消しました。';
+      $('run-feedback').textContent = t('入力中のコマンドを取り消しました。');
       laterSave();
     } else if (event.ctrlKey && event.key.toLowerCase() === 'l') {
       event.preventDefault(); clearTerminal();
@@ -572,8 +575,8 @@
     if (!currentSession || !currentSession.pagerOpen) return;
     Engine.closePager(currentSession);
     closeDialog($('pager-dialog'));
-    appendTranscript('q', { stdout: '', stderr: '', code: 0 }, '閲覧を終え、ターミナルに戻りました。');
-    $('run-feedback').textContent = '閲覧画面を閉じました。次のコマンドを入力できます。';
+    appendTranscript('q', { stdout: '', stderr: '', code: 0 }, t('閲覧を終え、ターミナルに戻りました。'));
+    $('run-feedback').textContent = t('閲覧画面を閉じました。次のコマンドを入力できます。');
     checkpoint();
     checkAnswer(false);
     $('command-input').focus();
@@ -610,7 +613,7 @@
         const completed = progress.completed[lesson.id];
         const button = node('button', 'lesson-link' + (completed ? ' done' : '') + (progress.currentId === lesson.id ? ' current' : ''));
         button.dataset.lesson = lesson.id;
-        button.append(node('span', 'lesson-check', completed ? '✓' : String(selected.indexOf(lesson) + 1).padStart(2, '0')), node('span', 'lesson-link-title', lesson.title), node('span', 'muted', completed && completed.assisted ? 'ヒントあり' : lesson.minutes + ' 分'));
+        button.append(node('span', 'lesson-check', completed ? '✓' : String(selected.indexOf(lesson) + 1).padStart(2, '0')), node('span', 'lesson-link-title', lesson.title), node('span', 'muted', completed && completed.assisted ? t('ヒントあり') : lesson.minutes + t(' 分')));
         button.addEventListener('click', () => renderLesson(lesson.id));
         rows.append(button);
       });
@@ -663,7 +666,7 @@
       const text = item.text || item.definition || item.description || item.meaning;
       if (term && text) items.push({ term, text, example: item.example || '' });
     });
-    return items;
+    return items.map(item => ({...item, term: t(item.term), text: t(item.text)}));
   }
 
   function renderReferences() {
@@ -675,7 +678,7 @@
       if (item.example) section.append(node('code', '', typeof item.example === 'string' ? item.example : item.example.command || ''));
       return section;
     }));
-    if (!matches.length) $('reference-list').append(node('p', 'muted', '該当する項目がありません。短い言葉で探してみよう。'));
+    if (!matches.length) $('reference-list').append(node('p', 'muted', t('該当する項目がありません。短い言葉で探してみよう。')));
     const related = search ? lessons.filter(lesson => {
       if (taughtCommands.has(search)) return lessonCommands(lesson).includes(search);
       const corpus = [lesson.title, lesson.goal, ...(lesson.explanation || []), ...(lesson.concepts || []).map(item => item.term + ' ' + item.text), ...(lesson.solution || [])].join(' ').toLowerCase();
@@ -683,14 +686,14 @@
     }) : [];
     $('reference-lessons').replaceChildren();
     if (related.length) {
-      $('reference-lessons').append(node('h3', '', 'この言葉を練習するレッスン'));
+      $('reference-lessons').append(node('h3', '', t('この言葉を練習するレッスン')));
       related.slice(0, 12).forEach(lesson => {
         const label = levelById.get(levelOf(lesson)).title + ' · ' + lesson.title;
         const button = node('button', 'reference-lesson-button', label + ' →');
         button.addEventListener('click', () => renderLesson(lesson.id, { focus: true }));
         $('reference-lessons').append(button);
       });
-      if (related.length > 12) $('reference-lessons').append(node('p', 'muted', 'ほか ' + (related.length - 12) + ' 件。言葉を追加すると、さらに絞り込めます。'));
+      if (related.length > 12) $('reference-lessons').append(node('p', 'muted', t('ほか ') + (related.length - 12) + t(' 件。言葉を追加すると、さらに絞り込めます。')));
     }
   }
 
@@ -698,7 +701,7 @@
 
   function retryLesson() {
     if (!currentSession) return;
-    if (!window.confirm('この課題の操作・ファイル・入力を最初からやり直します。修了記録とヒントの記録は残ります。よろしいですか？')) return;
+    if (!window.confirm(t('この課題の操作・ファイル・入力を最初からやり直します。修了記録とヒントの記録は残ります。よろしいですか？'))) return;
     const id = currentSession.lessonId;
     currentSession = null;
     sessions.delete(id);
@@ -707,7 +710,7 @@
     delete ui.transcripts[id];
     renderLesson(id, { skipCheckpoint: true, noScroll: true, focus: true });
     $('success-box').hidden = true;
-    toast('課題のファイルと現在地を初期状態に戻しました');
+    toast(t('課題のファイルと現在地を初期状態に戻しました'));
   }
 
   function exportProgress() {
@@ -722,7 +725,7 @@
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    $('save-status').textContent = '進捗ファイルをダウンロードしました。個人情報を含むコマンドを入力した場合、その入力も保存されます。';
+    $('save-status').textContent = t('進捗ファイルをダウンロードしました。個人情報を含むコマンドを入力した場合、その入力も保存されます。');
   }
 
   function importWasPreserved(raw, restored) {
@@ -767,33 +770,66 @@
     if (!file || importBusy) return;
     importBusy = true;
     try {
-      if (file.size > 12 * 1024 * 1024) throw new Error('ファイルが大きすぎます。Linuxroom で保存した進捗ファイルを選んでください。');
+      if (file.size > 12 * 1024 * 1024) throw new Error(t('ファイルが大きすぎます。Linuxroom で保存した進捗ファイルを選んでください。'));
       const text = typeof file.text === 'function' ? await file.text() : await new Promise((resolve, reject) => {
         const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsText(file);
       });
       const parsed = JSON.parse(text);
       const wrapped = parsed && parsed.format === 'linuxroom-export' && parsed.version === 1;
       const raw = wrapped ? parsed.progress : parsed;
-      if (!raw || typeof raw !== 'object' || raw.version !== 1 || !raw.completed || typeof raw.completed !== 'object' || Array.isArray(raw.completed) || !raw.sessions || typeof raw.sessions !== 'object' || Array.isArray(raw.sessions) || !validId(raw.currentId)) throw new Error('Linuxroom の進捗ファイルとして読み込めませんでした。');
-      if (JSON.stringify(raw).length > 8 * 1024 * 1024) throw new Error('進捗データが保存上限の 8 MiB を超えています。現在の進捗は変更していません。');
+      if (!raw || typeof raw !== 'object' || raw.version !== 1 || !raw.completed || typeof raw.completed !== 'object' || Array.isArray(raw.completed) || !raw.sessions || typeof raw.sessions !== 'object' || Array.isArray(raw.sessions) || !validId(raw.currentId)) throw new Error(t('Linuxroom の進捗ファイルとして読み込めませんでした。'));
+      if (JSON.stringify(raw).length > 8 * 1024 * 1024) throw new Error(t('進捗データが保存上限の 8 MiB を超えています。現在の進捗は変更していません。'));
       const nextProgress = Engine.hydrate(raw);
-      if (!importWasPreserved(raw, nextProgress)) throw new Error('未対応の課題や壊れた作業データが含まれるため、読み込みを中止しました。現在の進捗は変更していません。');
+      if (!importWasPreserved(raw, nextProgress)) throw new Error(t('未対応の課題や壊れた作業データが含まれるため、読み込みを中止しました。現在の進捗は変更していません。'));
       const nextUI = safeUI(wrapped ? parsed.ui : { started: true });
-      if (!window.confirm('このブラウザの進捗と課題の作業状態を、選んだファイルの内容に置き換えます。よろしいですか？')) return;
+      if (!window.confirm(t('このブラウザの進捗と課題の作業状態を、選んだファイルの内容に置き換えます。よろしいですか？'))) return;
       currentSession = null;
       sessions.clear();
       progress = nextProgress;
       ui = nextUI;
+      i18n.setLocale(ui.locale);
+      i18n.applyStatic(document);
       ui.started = true;
       reconcileUIProgress();
       renderLesson(progress.currentId, { skipCheckpoint: true });
-      toast('進捗を読み込みました。続きから学べます。');
+      toast(t('進捗を読み込みました。続きから学べます。'));
     } catch (error) {
-      $('save-status').textContent = error instanceof SyntaxError ? 'JSON の形式を読み取れませんでした。Linuxroom で保存したファイルを選んでください。' : error.message || 'ファイルを読み込めませんでした。';
+      $('save-status').textContent = error instanceof SyntaxError ? t('JSON の形式を読み取れませんでした。Linuxroom で保存したファイルを選んでください。') : error.message || t('ファイルを読み込めませんでした。');
     } finally { event.target.value = ''; importBusy = false; }
   }
 
   function bind() {
+    $('language-select').addEventListener('change', event => {
+      const value = event.target.value;
+      if (!i18n.languages.includes(value) || value === ui.locale) return;
+      checkpoint();
+      const wasHome = !$('welcome').hidden;
+      const openDialogs = [...document.querySelectorAll('dialog[open]')].map(dialog => dialog.id);
+      const selectedLevel = activeLevel;
+      const selectedTrace = traceIndex;
+      const exampleOpen = $('example-details').open;
+      const filesPanel = document.querySelector('.files-panel');
+      const filesOpen = filesPanel.open;
+      const scroll = {x: window.scrollX, y: window.scrollY};
+      ui.locale = i18n.setLocale(value);
+      i18n.applyStatic(document);
+      if (currentSession && !wasHome) {
+        renderLesson(currentSession.lessonId, {skipCheckpoint: true, noScroll: true});
+        traceIndex = Math.min(selectedTrace, Math.max(0, latestTrace.length - 1));
+        renderTrace();
+        $('example-details').open = exampleOpen;
+        filesPanel.open = filesOpen;
+      } else stats();
+      activeLevel = selectedLevel;
+      if (openDialogs.includes('map-dialog')) renderMapContents();
+      if (openDialogs.includes('reference-dialog')) renderReferences();
+      openDialogs.forEach(id => { if (!$(id).open) openDialog(id); });
+      if (!$('storage-warning').hidden) storageFailure();
+      $('toast').hidden = true;
+      checkpoint();
+      window.scrollTo(scroll.x, scroll.y);
+      $('language-select').focus({preventScroll: true});
+    });
     $('home-button').addEventListener('click', home);
     $('start-learning').addEventListener('click', () => renderLesson(ui.started && validId(progress.currentId) ? progress.currentId : lessons[0].id, { focus: true }));
     ['map-button', 'welcome-map-button'].forEach(id => $(id).addEventListener('click', renderMap));
@@ -838,7 +874,11 @@
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') checkpoint(); });
   }
 
+  i18n.captureStatic(document);
   load();
+  ui.locale = i18n.setLocale(ui.locale);
+  i18n.applyStatic(document);
+  if (!$('storage-warning').hidden) storageFailure();
   bind();
   stats();
   if (ui.started) renderLesson(progress.currentId, { skipCheckpoint: true, noScroll: true });

@@ -1,6 +1,7 @@
 /* Linuxroom lesson engine. All commands operate on LogLabShell's virtual files. */
 (function (root) {
   'use strict';
+  const t = value => root.LinuxroomI18n ? root.LinuxroomI18n.t(value) : value;
   const VERSION = 1, MAX_SAVE = 8 * 1024 * 1024, MAX_TEXT = 524288;
   const META = new Set(['help', 'man', 'history', 'clear']);
   const data = () => root.LINUXROOM_DATA;
@@ -36,13 +37,13 @@
     const error = result.stderr || result.trace.find(stage => stage.stderr)?.stderr;
     let feedback = '';
     if (error) {
-      if (/no such file|no such directory/i.test(error)) feedback = '指定した場所が見つかりません。pwd で現在地、ls でファイル名を確認できます。';
-      else if (/is a directory/i.test(error)) feedback = '指定した名前はディレクトリです。ls で中のファイルを確認しましょう。';
-      else if (/quote/.test(error)) feedback = '引用符が閉じていない可能性があります。開始と終わりの引用符を確認しましょう。';
-      else if (/unsupported|command not found|利用できません/.test(error)) feedback = 'この学習用ターミナルが扱うコマンドには範囲があります。help で対応内容を確認できます。';
-      else feedback = 'エラーの行を確認して、コマンド・引数・オプションを見直しましょう。';
-    } else if (noMatch) feedback = '検索条件に一致する行はありませんでした。grep の終了コード 1 は「一致なし」です。文字・大文字小文字・対象ファイルを確認しましょう。';
-    else if (!result.stdout && result.code === 0 && result.trace.length) feedback = 'コマンドは終了しました。cd や保存など、成功しても文字を表示しない操作があります。';
+      if (/no such file|no such directory/i.test(error)) feedback = t('指定した場所が見つかりません。pwd で現在地、ls でファイル名を確認できます。');
+      else if (/is a directory/i.test(error)) feedback = t('指定した名前はディレクトリです。ls で中のファイルを確認しましょう。');
+      else if (/quote/.test(error)) feedback = t('引用符が閉じていない可能性があります。開始と終わりの引用符を確認しましょう。');
+      else if (/unsupported|command not found|利用できません/.test(error)) feedback = t('この学習用ターミナルが扱うコマンドには範囲があります。help で対応内容を確認できます。');
+      else feedback = t('エラーの行を確認して、コマンド・引数・オプションを見直しましょう。');
+    } else if (noMatch) feedback = t('検索条件に一致する行はありませんでした。grep の終了コード 1 は「一致なし」です。文字・大文字小文字・対象ファイルを確認しましょう。');
+    else if (!result.stdout && result.code === 0 && result.trace.length) feedback = t('コマンドは終了しました。cd や保存など、成功しても文字を表示しない操作があります。');
     return Object.assign(result, {feedback, noMatch});
   }
 
@@ -55,7 +56,7 @@
     input = String(input);
     if (session.pagerOpen) {
       if (input.trim() === 'q') { closePager(session); return decorate({stdout: '', stderr: '', code: 0, trace: [], pagerClosed: true}); }
-      return decorate({stdout: '', stderr: 'less: 表示中です。q で閉じてからコマンドを入力してください。\n', code: 2, trace: []});
+      return decorate({stdout: '', stderr: t('less: 表示中です。q で閉じてからコマンドを入力してください。\n'), code: 2, trace: []});
     }
     const result = decorate(session.shell.run(input));
     if (input.trim()) remember(session, {type: 'command', input: input.slice(0, 8192)});
@@ -96,14 +97,14 @@
     const tidy = value => mode === 'exact' ? String(value) : String(value).trim();
     const lines = value => tidy(value).split('\n').map(line => mode === 'lines' ? line.trim().replace(/\s+/g, ' ') : line);
     const shown = value => value.length > 70 ? value.slice(0, 67) + '…' : value;
-    if (mode === 'contains') return '必要な文字列「' + shown(String(expected).trim()) + '」が見つかりません。';
+    if (mode === 'contains') return t('必要な文字列「') + shown(String(expected).trim()) + t('」が見つかりません。');
     const got = lines(actual), wanted = lines(expected);
     const remaining = got.slice();
     const missing = [];
     for (const line of wanted) { const at = remaining.indexOf(line); if (at >= 0) remaining.splice(at, 1); else missing.push(line); }
-    if (!missing.length && !remaining.length) return '行の順序が異なります。並べ方を確認しましょう。';
-    if (mode === 'exact' && String(actual).trimEnd() === String(expected).trimEnd()) return '末尾の改行または空白が異なります。';
-    return [missing.length ? '足りない行:「' + shown(missing[0]) + '」' : '', remaining.length ? '余分な行:「' + shown(remaining[0]) + '」' : ''].filter(Boolean).join(' / ');
+    if (!missing.length && !remaining.length) return t('行の順序が異なります。並べ方を確認しましょう。');
+    if (mode === 'exact' && String(actual).trimEnd() === String(expected).trimEnd()) return t('末尾の改行または空白が異なります。');
+    return [missing.length ? t('足りない行:「') + shown(missing[0]) + '」' : '', remaining.length ? t('余分な行:「') + shown(remaining[0]) + '」' : ''].filter(Boolean).join(' / ');
   }
 
   // These are parsed argument tokens from real executions, never a regex on input.
@@ -127,40 +128,40 @@
 
   function check(session) {
     const lesson = lessonFor(session.lessonId);
-    if (!lesson) return {passed: false, message: '自由練習には採点がありません。コマンドの結果を自由に確かめてください。', details: []};
+    if (!lesson) return {passed: false, message: t('自由練習には採点がありません。コマンドの結果を自由に確かめてください。'), details: []};
     const result = session.lastResult;
-    if (!result) return {passed: false, message: 'まずミッションに合うコマンドを実行してみましょう。', details: []};
-    if (!isSuccess(result, lesson)) return {passed: false, message: result.noMatch ? '一致する行がありません。検索条件と対象ファイルを確認しましょう。' : '直前の操作にエラーがあります。パイプの途中も確認して、もう一度実行しましょう。', details: []};
+    if (!result) return {passed: false, message: t('まずミッションに合うコマンドを実行してみましょう。'), details: []};
+    if (!isSuccess(result, lesson)) return {passed: false, message: result.noMatch ? t('一致する行がありません。検索条件と対象ファイルを確認しましょう。') : t('直前の操作にエラーがあります。パイプの途中も確認して、もう一度実行しましょう。'), details: []};
     const details = (lesson.validation?.all || []).map(condition => {
       let passed = false, message = '';
       const stages = condition.scope === 'any' ? session.evidence : result.trace;
       switch (condition.type) {
-        case 'output': passed = matches(result.stdout, condition.value, condition.match); message = passed ? '表示された結果がミッションの条件に合っている' : outputDifference(result.stdout, condition.value, condition.match); break;
-        case 'cwd': passed = session.shell.cwd === condition.value; message = '指定されたディレクトリへ移動している'; break;
-        case 'directory': passed = session.shell.isDir(session.shell.resolve(condition.path)); message = '指定されたディレクトリを用意している'; break;
-        case 'absent': {const path = session.shell.resolve(condition.path); passed = !session.shell.isFile(path) && !session.shell.isDir(path); message = '指定された作業用ファイル・ディレクトリを削除している'; break;}
-        case 'file': { const path = session.shell.resolve(condition.path); passed = session.shell.isFile(path) && matches(session.shell.files[path], condition.value, condition.match); message = '保存したファイルの内容が条件に合っている'; break; }
-        case 'used': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && (!condition.args || condition.args.every(arg => stage.args.includes(arg))) && (!condition.flags || [...condition.flags].every(flag => flagsFor(stage).has(flag)))); message = condition.command + ' を使って今回の操作を実行している'; break;
-        case 'status': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && stage.code === condition.code && (!condition.stderrRedirected || stage.stderrRedirected === true)); message = condition.command + ' の終了コード ' + condition.code + ' を確認している'; break;
-        case 'redirect': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.redirections.some(r => r.op === condition.op && r.target === condition.path && (condition.fd === undefined || r.fd === condition.fd))); message = condition.op + ' で指定された入力・出力の向きを設定している'; break;
+        case 'output': passed = matches(result.stdout, condition.value, condition.match); message = passed ? t('表示された結果がミッションの条件に合っている') : outputDifference(result.stdout, condition.value, condition.match); break;
+        case 'cwd': passed = session.shell.cwd === condition.value; message = t('指定されたディレクトリへ移動している'); break;
+        case 'directory': passed = session.shell.isDir(session.shell.resolve(condition.path)); message = t('指定されたディレクトリを用意している'); break;
+        case 'absent': {const path = session.shell.resolve(condition.path); passed = !session.shell.isFile(path) && !session.shell.isDir(path); message = t('指定された作業用ファイル・ディレクトリを削除している'); break;}
+        case 'file': { const path = session.shell.resolve(condition.path); passed = session.shell.isFile(path) && matches(session.shell.files[path], condition.value, condition.match); message = t('保存したファイルの内容が条件に合っている'); break; }
+        case 'used': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && (!condition.args || condition.args.every(arg => stage.args.includes(arg))) && (!condition.flags || [...condition.flags].every(flag => flagsFor(stage).has(flag)))); message = condition.command + t(' を使って今回の操作を実行している'); break;
+        case 'status': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && stage.code === condition.code && (!condition.stderrRedirected || stage.stderrRedirected === true)); message = condition.command + t(' の終了コード ') + condition.code + t(' を確認している'); break;
+        case 'redirect': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.redirections.some(r => r.op === condition.op && r.target === condition.path && (condition.fd === undefined || r.fd === condition.fd))); message = condition.op + t(' で指定された入力・出力の向きを設定している'); break;
         case 'connector': passed = condition.afterCommand || condition.skipped !== undefined
           ? (result.flow || []).some(flow => flow.connector === condition.value && (condition.skipped === undefined || flow.executed === !condition.skipped) &&
             (!condition.afterCommand || result.trace.filter(stage => stage.pipeline === flow.pipeline - 1).at(-1)?.command === condition.afterCommand))
           : (result.connectors || []).includes(condition.value);
-          message = (condition.afterCommand ? condition.afterCommand + ' の後を ' : '') + condition.value + ' でつなぎ' + (condition.skipped ? '、条件に応じて次の実行を飛ばしている' : '、実行条件を設定している'); break;
+          message = (condition.afterCommand ? condition.afterCommand + t(' の後を ') : '') + condition.value + t(' でつなぎ') + (condition.skipped ? t('、条件に応じて次の実行を飛ばしている') : t('、実行条件を設定している')); break;
         case 'variable': passed = stages.some((stage, index) => stageAccepted(stage, lesson) && (!condition.command || stage.command === condition.command) &&
           (condition.context === 'arguments' ? stage.argumentVariables || [] : stage.variables || []).includes(condition.name) &&
           (!condition.afterCommand || stages[index - 1]?.command === condition.afterCommand));
-          message = '$' + condition.name + ' を' + (condition.context === 'arguments' ? '引数として展開して値を確認している' : '展開して値を確認している'); break;
-        case 'pipeline': { const counts = new Map(); for (const stage of result.trace) counts.set(stage.pipeline, (counts.get(stage.pipeline) || 0) + 1); passed = [...counts.values()].some(count => count >= condition.minStages); message = '必要な段階をパイプでつないでいる'; break; }
-        case 'pagerClosed': passed = session.pagerOpened && session.pagerClosed && !session.pagerOpen; message = 'ファイルを開き、q で表示を閉じている'; break;
-        case 'source': { const sourceStages = condition.scope === 'last' ? result.trace : session.evidence; passed = sourceStages.some(stage => stageAccepted(stage, lesson) && stage.reads.includes(condition.path)); message = '指定された元ファイルを実際に読み込んでいる'; break; }
-        default: message = '未対応の判定条件です';
+          message = '$' + condition.name + t(' を') + (condition.context === 'arguments' ? t('引数として展開して値を確認している') : t('展開して値を確認している')); break;
+        case 'pipeline': { const counts = new Map(); for (const stage of result.trace) counts.set(stage.pipeline, (counts.get(stage.pipeline) || 0) + 1); passed = [...counts.values()].some(count => count >= condition.minStages); message = t('必要な段階をパイプでつないでいる'); break; }
+        case 'pagerClosed': passed = session.pagerOpened && session.pagerClosed && !session.pagerOpen; message = t('ファイルを開き、q で表示を閉じている'); break;
+        case 'source': { const sourceStages = condition.scope === 'last' ? result.trace : session.evidence; passed = sourceStages.some(stage => stageAccepted(stage, lesson) && stage.reads.includes(condition.path)); message = t('指定された元ファイルを実際に読み込んでいる'); break; }
+        default: message = t('未対応の判定条件です');
       }
       return {passed, message};
     });
     const passed = details.length > 0 && details.every(detail => detail.passed);
-    return {passed, message: passed ? lesson.success || 'ミッションクリアです！' : 'もう一歩です。未達成の条件を判定欄で確認しましょう。', details};
+    return {passed, message: passed ? lesson.success || t('ミッションクリアです！') : t('もう一歩です。未達成の条件を判定欄で確認しましょう。'), details};
   }
 
   function cleanStage(value) {

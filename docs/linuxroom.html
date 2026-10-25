@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-Linuxroom v0.3. Virtual shell derived from Logroom.
+Linuxroom v0.4. Virtual shell derived from Logroom.
 MIT License
 
 Copyright (c) 2026 Logroom contributors
@@ -50,13 +50,18 @@ SOFTWARE.
 @media(max-width:560px){.sandbox-callout{margin-top:45px;padding:21px;align-items:stretch;flex-direction:column;gap:18px}.sandbox-callout h2{font-size:18px}.sandbox-callout p:last-child{font-size:11px}.sandbox-callout .eyebrow{font-size:8px}.sandbox-callout+.course-levels{margin-top:35px}.terminal-command .history-prompt{font-size:9px}}
 
 .trace-input{margin-top:12px;border:1px solid #e0e8dc;border-radius:6px;background:#fafbf7}.trace-input summary{font-size:10px;color:var(--muted);padding:7px 10px;cursor:pointer}.trace-input summary span{font-size:9px;margin-left:6px;color:#839987}#trace-input{margin:0 10px 10px;max-height:160px;overflow:auto;font-size:10px;line-height:1.9;color:#5b7463}.trace-output-label{font-size:10px;color:var(--muted);margin:12px 0 0}.trace-output-label+#trace-output{margin-top:5px}
+/* Language selection stays available in the HTML menu, including offline. */
+.language-control{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);white-space:nowrap}.language-control select{font:inherit;min-height:34px;border:1px solid var(--line);border-radius:6px;padding:5px 7px;color:var(--ink);background:var(--white)}select:focus-visible{outline:3px solid #d6a944;outline-offset:3px}.header-actions{flex-wrap:wrap;justify-content:flex-end;gap:4px 10px}html[lang="en"] .nav-button{white-space:normal}html[lang="en"] .lesson-link-title{overflow-wrap:anywhere}html[lang="en"] .hero-sticker{max-width:190px}html[lang="en"] .level-card .button{white-space:normal}html[lang="en"] .key-guide dl{grid-template-columns:145px minmax(0,1fr)}
+@media(max-width:800px){.site-header{height:auto;min-height:83px;padding-top:14px;padding-bottom:14px}.header-actions{max-width:65%;gap:4px}.language-control{justify-content:flex-end;width:100%}.language-control select{font-size:16px}.language-control span{font-size:10px}.nav-button{padding:6px;font-size:10px}html[lang="en"] .welcome h1{font-size:clamp(36px,8vw,64px)}}
+@media(max-width:560px){.site-header{padding-left:13px;padding-right:13px}.brand{font-size:18px}.brand-mark{width:28px;height:28px}.header-actions{max-width:64%}.header-actions .nav-button{font-size:9px;padding:5px}.language-control select{min-height:34px}html[lang="en"] .key-guide dl{grid-template-columns:100px minmax(0,1fr)}html[lang="en"] .hero-sticker{max-width:145px}html[lang="en"] .terminal-header{gap:8px}}
 </style>
 </head>
 <body>
   <a class="skip-link" href="#main">本文へ移動</a>
   <header class="site-header">
-    <button id="home-button" class="brand" aria-label="Linuxroom ホーム"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>linuxroom<span id="brand-version" class="brand-version">STEP BY STEP / v0.3</span></span></button>
+    <button id="home-button" class="brand" aria-label="Linuxroom ホーム"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>linuxroom<span id="brand-version" class="brand-version">STEP BY STEP / v0.4</span></span></button>
     <nav class="header-actions" aria-label="メインメニュー">
+      <label class="language-control" for="language-select"><span>Language</span><select id="language-select" aria-label="Language"><option value="ja" data-language-name>日本語</option><option value="en" data-language-name>English</option></select></label>
       <button id="map-button" class="nav-button">学習マップ</button>
       <button id="reference-button" class="nav-button">コマンド帳</button>
       <button id="save-button" class="nav-button" aria-label="進捗の保存と読み込み">進捗を保存</button>
@@ -129,7 +134,7 @@ SOFTWARE.
       </div>
     </section>
   </main>
-  <footer class="site-footer"><span>LINUXROOM <span class="footer-dot">/</span> Small commands. Real understanding.</span><span id="footer-version">Offline learning lab · v0.3</span></footer>
+  <footer class="site-footer"><span>LINUXROOM <span class="footer-dot">/</span> Small commands. Real understanding.</span><span id="footer-version">Offline learning lab · v0.4</span></footer>
 
   <dialog id="map-dialog" class="app-dialog map-dialog" aria-labelledby="map-title"><div class="dialog-top"><div><p class="eyebrow">YOUR LEARNING PATH</p><h2 id="map-title">学習マップ</h2></div><button class="close-dialog icon-button" aria-label="学習マップを閉じる">×</button></div><p class="dialog-intro">初級 → 応用 → 発展の順に、操作を積み重ねます。どの段階・課題からでも選べます。</p><div id="map-levels" class="map-levels" role="group" aria-label="学習する段階を選ぶ"></div><p id="map-level-description" class="map-level-description"></p><div class="map-progress-row"><div id="map-progress" class="map-progress"></div><span id="map-overall" class="map-overall"></span></div><div id="chapter-list" class="chapter-list"></div><button id="sandbox-button" class="button secondary full-width">自由練習のターミナルを開く →</button><p class="muted">✓ は修了済み。ヒント・解答例を見た課題も、何度でも復習できます。</p></dialog>
   <dialog id="reference-dialog" class="app-dialog reference-dialog" aria-labelledby="reference-title"><div class="dialog-top"><div><p class="eyebrow">KEEP IT HANDY</p><h2 id="reference-title">コマンド帳</h2></div><button class="close-dialog icon-button" aria-label="コマンド帳を閉じる">×</button></div><p class="dialog-intro">覚えていなくても大丈夫。必要なときに見ながら試そう。</p><label class="sr-only" for="reference-search">コマンドや用語を探す</label><input id="reference-search" class="search-input" placeholder="コマンドや用語を探す" type="search"><div id="reference-lessons" class="reference-lessons"></div><div id="reference-list" class="reference-list"></div><div id="prompt-guide" class="key-guide"><h3>プロンプトの読み方</h3><code>analyst@linuxroom:~$</code><dl><dt>analyst</dt><dd>操作しているユーザー名</dd><dt>linuxroom</dt><dd>ホスト名（コンピューター名）</dd><dt>:~</dt><dd>: の後ろは現在地。~ は /home/analyst の省略。cd で移動すると ~/logs などに変わる</dd><dt>$ / #</dt><dd>一般ユーザー / 管理者の目印としてよく使われる。この教材は一般ユーザーの $</dd></dl><p class="muted">プロンプトの見た目は環境によって変わります。プロンプト自体は入力せず、その後ろにコマンドだけを打ちます。</p><h3>ターミナルの操作</h3><dl><dt>Enter</dt><dd>コマンドを実行</dd><dt>↑ / ↓</dt><dd>実行したコマンドを呼び出す</dd><dt>Tab</dt><dd>コマンド・ファイル名を補完</dd><dt>Ctrl + C</dt><dd>入力を消す / 閲覧画面を閉じる</dd><dt>Ctrl + L</dt><dd>ターミナルの表示を消す</dd><dt>less / more で q</dt><dd>閲覧を終えてターミナルへ戻る</dd></dl><p class="muted">実機では man grep などでマニュアルを調べます。この教材では man を help と同じ学習用の案内にしています。</p></div></dialog>
@@ -139,6 +144,7 @@ SOFTWARE.
   <script>/* Browser-only virtual text shell for LogLab. No host processes or network access. */
 (function (root) {
   'use strict';
+  const t = value => root.LinuxroomI18n ? root.LinuxroomI18n.t(value) : value;
   const MAX_INPUT = 8192, MAX_OUTPUT = 524288, MAX_FILE = 2097152;
   const COMMANDS = ['help','pwd','cd','ls','cat','tac','less','more','grep','rg','sort','uniq','cut','tr','column','nl','diff','jq','base64','tee','head','tail','wc','sed','awk','find','echo','printf','paste','comm','join','xargs','rev','strings','basename','dirname','realpath','file','stat','du','date','clear','history','mkdir','touch','cp','mv','rm','rmdir'];
   const USAGE = {
@@ -323,7 +329,7 @@ SOFTWARE.
     write(path,text,append=false,cmd='redirection') { const p=this.resolve(path);if(p==='/dev/null')return; if(this.isDir(p)) fail(cmd+': '+path+': Is a directory',1); if(!this.isDir(dirname(p))) fail(cmd+': '+path+': No such file or directory',1); const value=(append&&this.isFile(p)?this.files[p]:'')+text; if(value.length>MAX_FILE) fail(cmd+': '+path+': virtual file exceeds the 2 MiB text limit',1); this.files[p]=value;this.getMetadata(p).mtime=this.clock(); this.addParents(p); }
     getHelp(command) {
       if(command) {
-        if(command==='man')return 'man COMMAND — この教材では help COMMAND をページ表示します。実機では man でマニュアルを読みます。\n';
+        if(command==='man')return t('man COMMAND — この教材では help COMMAND をページ表示します。実機では man でマニュアルを読みます。\n');
         if(!COMMANDS.includes(command)) fail('help: unknown command '+command,1);
         let extra='';
         if(command==='grep') extra='\nDefault grep uses basic regex: + ? | ( ) are literal unless escaped; -E enables extended regex.\n-F matches literal text. -r/-R recurse (virtual filesystem has no symlinks); -m limits selected lines per file.\n-L lists files without matching lines. Exit status still follows line matches: 0 match, 1 no match, 2 error.\nLong aliases: --recursive, --ignore-case, --invert-match, --line-number, --count, --regexp,\n--fixed-strings, --extended-regexp, --word-regexp, --line-regexp, --only-matching, --quiet,\n--files-with-matches, --files-without-match, --max-count, --after-context, --before-context, --context.\n--include/--exclude filter basenames; --exclude-dir filters directory names with * and ? globs.\nPCRE (-P), binary options, and color flags are unsupported.';
@@ -363,12 +369,12 @@ SOFTWARE.
         if(command==='rev') extra='\nReverse Unicode characters within each line; preserve line endings.';
         return USAGE[command]+extra+'\n';
       }
-      return 'Linuxroom 学習用の仮想ターミナル — Linux コマンドの一部を再現\n'+
+      return t('Linuxroom 学習用の仮想ターミナル — Linux コマンドの一部を再現\n')+
         'Commands: '+COMMANDS.join(', ')+'\n'+
         'Syntax: quotes, escapes, |, <, >, >>, 2>, 2>>, 2>&1, ;, &&, ||, unquoted ~ / * / ? and $? status.\n'+
         'Use help COMMAND for exact options. Files and redirects stay in virtual memory.\n'+
         'No host OS, server execution, package installation, general shell variables, scripts, or network.\n'+
-        'less/more open the viewer; q closes. help は教材専用ヘルプ。実機では man COMMAND。man は教材ヘルプの別名です。\n';
+        t('less/more open the viewer; q closes. help は教材専用ヘルプ。実機では man COMMAND。man は教材ヘルプの別名です。\n');
     }
     complete(input) {
       const m=input.match(/(?:^|[\s|;])([^\s|;]*)$/); if(!m) return [];
@@ -459,12 +465,12 @@ SOFTWARE.
       return {stdout,stderr,code,trace,connectors,flow,...(clear?{clear:true}:{}),...(pager?{pager:true}:{})};
     }
     execute(cmd,args,stdin,context={}) {
-      if(['vi','view','sl'].includes(cmd)) fail(cmd+': Linuxroom では利用できません。ファイルを読むには cat または less を使ってください。',127);
+      if(['vi','view','sl'].includes(cmd)) fail(cmd+t(': Linuxroom では利用できません。ファイルを読むには cat または less を使ってください。'),127);
       if(!COMMANDS.includes(cmd)&&cmd!=='man') fail(cmd+': command not found. Type help for the supported training commands.',127);
       const result=(stdout='',code=0,extra={})=>({stdout,stderr:'',code,...extra});
       if(args.includes('--help')&&(args.indexOf('--')<0||args.indexOf('--help')<args.indexOf('--'))) return result(this.getHelp(cmd));
       switch(cmd) {
-        case 'man': if(args.length!==1)fail('man: one command name is required',2);return result('Linuxroom 学習用ヘルプ — 実機の man マニュアルではありません。実機では man COMMAND で詳細を調べます。\n\n'+this.getHelp(args[0]),0,{pager:true});
+        case 'man': if(args.length!==1)fail('man: one command name is required',2);return result(t('Linuxroom 学習用ヘルプ — 実機の man マニュアルではありません。実機では man COMMAND で詳細を調べます。\n\n')+this.getHelp(args[0]),0,{pager:true});
         case 'help': if(args.length>1) usageError(cmd,'too many arguments'); return result(this.getHelp(args[0]));
         case 'pwd': if(args.length) usageError(cmd,'no options are supported'); return result(this.cwd+'\n');
         case 'clear': if(args.length) usageError(cmd,'no arguments are supported'); return result('',0,{clear:true});
@@ -1470,7 +1476,7 @@ SOFTWARE.
 (function (root) {
   'use strict';
   const D = root.LINUXROOM_DATA;
-  D.release = '0.3';
+  D.release = '0.4';
   D.levels = [
     {id:'beginner', title:'初級編', subtitle:'一つずつ、つなげる', description:'現在地とファイル操作から、検索・列の抽出・集計・保存まで。短いコマンドを一段ずつ組み立てます。'},
     {id:'applied', title:'応用編', subtitle:'条件を選んで、整える', description:'正規表現、複数ファイル検索、文字の整形、条件付き集計。必要な記録を狙って取り出します。'},
@@ -2597,10 +2603,1312 @@ SOFTWARE.
     {term:'jqの配列と集計',text:'[]は各要素を展開、-sは入力全体を配列へ、group_byはキーでグループ化、lengthは配列の件数。@tsvは配列をタブ区切りの行へ変えます。',example:"jq -sr 'group_by(.actor.name) | .[] | [.[0].actor.name, length] | @tsv' audit.jsonl"}
   );
 })(globalThis);
+
+/* English teaching copy. Executable examples, fixtures and validation remain canonical. */
+(function (root) {
+  'use strict';
+  const rows = [
+    ['01-echo', 'Run your first command', 'Use echo to display ready.', 'A terminal lets you request an operation by typing a command and pressing Enter. echo prints the arguments after its name.', 'analyst@linuxroom:~$ is the prompt: user, host, home directory and the input marker. Type only the command after it. $ commonly means a regular user; # commonly means root.'],
+    ['02-quotes', 'Keep words together with quotes', 'Pass linux room to echo as one argument and display it.', 'Spaces normally separate arguments. Single quotes keep a phrase containing spaces together as one argument.', 'Use straight quotes, with one at each end of the phrase. The shell removes the quotes before passing the argument to echo.'],
+    ['03-pwd', 'Check your current directory', 'Run pwd to display your current directory.', 'pwd prints the working directory. This is the starting point for relative paths.', 'A path starting with / is an absolute path. Your home directory in this lab is /home/analyst.'],
+    ['04-ls', 'List what is here', 'Run ls to list the current directory. ls . and ls -1 are also accepted.', 'ls lists file and directory names. A plain ls may use columns on a real terminal; ls -1 explicitly requests one entry per line.', 'The dot in ls . means the current directory. Listing a directory does not move you into it.'],
+    ['05-cd', 'Move into a directory', 'Move from /home/analyst into its logs directory.', 'cd changes your working directory. A relative path is interpreted from where you are now.', 'After moving, the prompt changes from ~ to ~/logs. Use pwd or ls whenever you need to check your location.'],
+    ['06-paths', 'Go up one directory', 'Use .. to move from logs up to /home/analyst.', '.. means the parent directory; . means the current directory.', 'cd .. moves up one level. An absolute path would name the destination starting from / instead.'],
+    ['07-cat', 'Read a whole file', 'Use cat to display all 10 lines of app.log.', 'cat reads the named file and writes its contents to standard output.', 'Each app.log record has a time, a level, a user and an action. Reading a file does not change it.'],
+    ['08-head', 'Read the first lines', 'Display the first 3 lines of app.log.', 'head shows the beginning of a file. -n sets how many lines to display.', 'Start with a small preview to learn the structure before processing a larger file.'],
+    ['09-tail', 'Read the last lines', 'Display the last 3 lines of app.log.', 'tail shows the end of a file. -n sets how many lines to display.', 'For records stored in time order, the end contains the most recent entries.'],
+    ['10-less', 'Open, read and close a file', 'Open app.log with less, read it, and press q to close the viewer.', 'less opens a file viewer. You can scroll without printing the entire file into the terminal transcript.', 'Press q to return to the command input. This exercise checks both opening and closing the viewer.'],
+    ['11-grep', 'Select lines containing text', 'Display the 6 lines of app.log that contain uppercase ERROR.', 'grep selects complete lines that match a pattern. Matching is case sensitive by default.', 'ERROR and error differ. Keep the search word in quotes and pass the target file after it.'],
+    ['12-grep-number', 'Include original line numbers', 'Display the lines containing uppercase ERROR with their original line numbers.', 'grep -n prefixes each matching line with its position in the original file.', 'Line numbers help you locate the original record. They are not the numbering of the filtered result.'],
+    ['13-grep-case', 'Ignore letter case', 'Display all 7 lines containing either ERROR or error.', 'grep -i ignores uppercase and lowercase differences in the search.', 'Keep the same search term and file, and change just the option to compare the result.'],
+    ['14-grep-invert', 'Exclude a kind of record', 'Display the 8 lines of app.log that do not contain INFO.', 'grep -v inverts the match: lines that match the pattern are omitted.', 'This keeps ERROR, error and WARN records because they do not contain INFO.'],
+    ['15-pipe-count', 'Count the selected lines', 'Use grep to select uppercase ERROR lines, then count them with wc -l.', 'A pipe, |, passes standard output from the command on the left into standard input on the right.', 'wc -l counts newline characters. Let it read the piped result instead of naming the original file again.'],
+    ['16-pipe-head', 'Preview a filtered result', 'Select uppercase ERROR lines, then display the first 2 matching lines.', 'head can read a pipeline as well as a named file.', 'The order matters: filter first, then select the beginning of that filtered result.'],
+    ['17-awk', 'Select a whitespace-separated field', 'Display only the names in field 3 from all 10 lines of app.log.', 'awk normally splits each line on whitespace. $1 is the first field, $3 the third, and $0 the entire line.', 'Put the awk program in single quotes so the shell does not expand its dollar signs.'],
+    ['18-grep-awk', 'Select rows, then a field', 'From the uppercase ERROR lines, display only the names in field 3.', 'grep chooses the rows, then awk chooses a field from each row it receives.', 'Keep the source filename on grep. The awk stage should read standard input from the pipe.'],
+    ['19-cut', 'Choose a delimiter and field', 'Display only the team names in field 2 of teams.csv.', 'cut -d chooses the delimiter and -f chooses the field number.', 'This file uses simple comma-separated fields. The delimiter must be a comma, not a space.'],
+    ['20-sort', 'Put matching names together', 'Sort names.txt and display the result.', 'sort orders the input lines. Equal names become adjacent.', 'This is a useful preparation for uniq, which only combines neighboring equal lines.'],
+    ['21-uniq', 'Count adjacent equal lines', 'Use uniq -c on sorted-names.txt to display the count for each name.', 'uniq -c combines adjacent identical lines and prefixes their count.', 'The input is already sorted. On unsorted data, a name in separate runs would be counted separately.'],
+    ['22-pipeline-sort', 'Build a summary: sort', 'Add sort after extracting names from ERROR lines, and display the names in order.', 'Build a pipeline one stage at a time: choose records, extract names, then sort them.', 'Inspect the flow panel to see the names before and after sorting.'],
+    ['23-pipeline-uniq', 'Build a summary: count', 'Add uniq -c to the three-stage pipeline and display ERROR counts by name.', 'Sorted names are ready for uniq -c. Each adjacent run becomes a count and a name.', 'The result is still ordered by name. Counting alone does not rank the counts.'],
+    ['24-pipeline-rank', 'Build a summary: rank', 'Add sort -nr and display names from the largest ERROR count to the smallest.', 'sort -n compares numeric values and -r reverses the order.', 'Use numeric sorting for counts: ordinary text ordering does not reliably put larger numbers first.'],
+    ['25-mkdir', 'Create a place for results', 'Use mkdir to create /home/analyst/reports.', 'mkdir creates a directory. You are in logs, so ../reports refers to a sibling directory.', 'A file cannot be saved into a directory that does not yet exist.'],
+    ['26-redirect', 'Save output to a file', 'Save the 6 uppercase ERROR lines to ../reports/errors.txt.', '> redirects standard output into a file and replaces any existing contents.', 'A successful redirection may produce no terminal output. Read the saved file to verify its contents.'],
+    ['27-append', 'Append without losing existing text', 'Keep the existing line 確認開始 and append exactly one line containing 確認完了.', '>> appends to a file, whereas > replaces it. The fixture deliberately retains its Japanese text in both languages.', '確認開始 means “check started”; 確認完了 means “check complete”. Copy these exact characters so the exercise data stays unchanged.'],
+    ['28-tee', 'Display and save a summary', 'Display ERROR counts by name in descending order and save the same result to ../reports/ranking.txt.', 'tee writes its input to a file and also passes the same text to standard output.', 'Put tee at the end of the finished ranking pipeline to see and save the same result.'],
+    ['29-copy', 'Copy your result', 'Copy ../reports/ranking.txt to ../reports/ranking-copy.txt.', 'cp takes the source path followed by the destination path.', 'Copying keeps the source and creates a second file with the same contents.'],
+    ['30-move', 'Rename a file', 'Rename ../reports/ranking-copy.txt to ../reports/summary.txt.', 'mv moves or renames a file. Supply its current path and then its new path.', 'After renaming, the old name disappears and the new name has the original contents.'],
+    ['31-jq-read', 'Read JSON clearly', 'Use the jq filter . to display all of profile.json.', 'JSON represents structured values using keys, objects and arrays. jq . formats the whole input value.', 'A dot alone keeps the input unchanged; it does not select a single field.'],
+    ['32-jq-field', 'Read a named JSON field', 'Display the user value from all 10 events.jsonl records without quotation marks.', 'A jq filter such as .user selects a field by its key. JSON Lines stores one JSON value per line.', '-r prints string values as raw text, removing the JSON quotation marks.'],
+    ['33-jq-select', 'Filter JSON by a value', 'Display the 6 JSON records whose level equals uppercase ERROR.', 'jq select keeps input values that satisfy a condition.', 'Use == to compare the level field with the JSON string "ERROR". Keep the full record as the output.'],
+    ['34-jq-compose', 'Filter JSON, then select a field', 'For the 6 records with level ERROR, display only user without quotation marks.', 'Inside a quoted jq program, | connects jq filters rather than separate shell commands.', 'Select matching objects first, then extract .user and use -r for plain strings.'],
+    ['35-final-extract', 'Final practice: inspect new records', 'Read inbox/shift.log and display only the lines containing uppercase ERROR.', 'Apply the same search method to a different log and set of users.', 'You start in /home/analyst. Check the path before building the command.'],
+    ['36-final-ranking', 'Final practice: finish the summary', 'Count uppercase ERROR records in inbox/shift.log by user, display counts in descending order, and save the same result to /home/analyst/reports/ranking.txt.', 'Combine filtering, field extraction, sorting, counting, ranking and saving.', 'Create the reports directory first. mkdir -p also succeeds when it already exists. Inspect intermediate output if the final result differs.'],
+    ['ap-01-help', 'Look up supported options', 'Use help to display the supported grep syntax and find the descriptions of -F and -E.', 'help explains the commands supported by this teaching shell. Its man command displays the same teaching help in a viewer.', 'On a real Linux system, man grep opens the installed manual. This offline lab implements a documented subset.'],
+    ['ap-02-history', 'Review the steps you entered', 'Run echo ready, then display history and verify that it includes echo ready.', 'history lists commands you have entered. The arrow keys also recall earlier input.', 'History helps reconstruct the steps of an investigation without changing its files.'],
+    ['ap-03-clear', 'Clear the display and continue', 'Run clear to tidy the terminal display. Keep notes.txt.', 'clear removes the displayed terminal transcript, not the exercise files or completion record.', 'You can continue using the same working directory and files after clearing the screen.'],
+    ['ap-38-ls-human', 'Read sizes in convenient units', 'Use ls -lh on samples/payload.log and check that its size is 2.0K.', 'ls -l displays details, and -h formats sizes in readable units.', 'The lab uses deterministic virtual metadata. Exact formatting can differ between real systems.'],
+    ['ap-39-ls-time', 'List newest files first', 'Use ls -lt on snapshots/*.log to show details in the order z-new, m-middle, a-old.', 'ls -t orders entries by modification time, newest first. Combine it with -l for details.', 'The glob *.log selects filenames. Sorting by timestamp is different from sorting their names.'],
+    ['ap-04-tac', 'Read backward from the end', 'Use tac and head to display the last 3 session.log lines, newest first.', 'tac reverses the order of lines. Piping it into head gives a short reverse-order preview.', 'tail alone keeps the original order of the lines it selects.'],
+    ['ap-40-large-head', 'Preview the format of a large log', 'Use head to display only the first 3 lines of server.log.', 'The fixture has 400 lines. A short preview helps you understand its format without printing everything.', 'Choose the number of lines with -n.'],
+    ['ap-41-large-tail', 'Check the end of a large log', 'Use tail to display only the last 3 lines of server.log.', 'Read the end when you need the latest records in a chronological log.', 'The file contains 400 lines; select just the requested three.'],
+    ['ap-05-more', 'Open and close with more', 'Open /home/analyst/applied/server.log with more, then press q after reading it.', 'more opens a viewer. In this lab it uses the same viewer as less.', 'An absolute path works independently of the current directory. Press q to finish the exercise.'],
+    ['ap-42-large-count', 'Get only the matching count', 'Use grep -c to display only the number of server.log lines containing ERROR.', 'grep -c prints the count of matching lines instead of the lines themselves.', 'It counts matching lines, not every occurrence of the word within a line.'],
+    ['ap-44-head-bytes', 'Read a fixed number of bytes', 'Use head -c to display the first 9 bytes of header.txt: LINUXROOM, without a newline.', 'head -c selects bytes instead of lines. -n and -c answer different questions.', 'The requested ASCII text is nine bytes. This exercise checks the absence of a trailing newline.'],
+    ['ap-06-nl', 'Number blank lines too', 'Number every line of notes.txt, including the blank line as number 2. Use a number width of 1 and the separator : followed by a space.', 'nl -ba numbers all lines, including empty ones. -w sets the number width and -s sets its separator.', 'Quote the separator because it contains a space.'],
+    ['ap-07-grep-fixed', 'Search for a literal dot', 'Use grep -F to display only peers.log lines containing peer=192.0.2.10.', 'A dot has a special meaning in a regular expression. -F treats the entire search string literally.', 'Use fixed-string searching when punctuation should match exactly as written.'],
+    ['ap-08-grep-alternation', 'Match either of two words', 'Use grep -E once to display the 4 labels.log lines containing ERROR or WARN.', '-E enables extended regular expressions. Inside the quoted pattern, | means either alternative.', 'Keep the pattern quoted so the shell does not interpret its | as a pipeline.'],
+    ['ap-09-grep-anchors', 'Match the beginning and end', 'Display only labels.log lines beginning with ERROR and ending with full, using ^ and $.', '^ anchors a pattern to the start of a line; $ anchors it to the end. .* matches any intervening characters.', 'Anchors distinguish a whole-line structure from a word appearing somewhere in the line.'],
+    ['ap-10-grep-before-after', 'Read after and before a match', 'Search session.log for 10:02, first with -A 1 to include the next line, then with -B 1 to include the previous line.', '-A adds lines after a match, while -B adds lines before it.', 'Run both searches. Compare the neighboring records and keep the original match in each result.'],
+    ['ap-11-grep-context', 'Add line numbers to context', 'Display the 10:02 line with one line before and after it and their original line numbers.', '-C includes context on both sides of a match. Combine -C 1 with -n.', 'The context helps explain what happened around the event rather than showing the match alone.'],
+    ['ap-12-grep-recursive', 'Collect matching filenames', 'Search recursively below archive for .log files containing ERROR. Display only filenames and sort them by name.', '-r descends into directories, -l prints matching filenames, and --include restricts the filename pattern.', 'Sort the resulting names explicitly to make the output order reproducible.'],
+    ['ap-13-rg', 'Search with rg and line numbers', 'Use rg to display ERROR lines from archive/day1/app.log with line numbers.', 'rg searches file contents. Use -n to request line numbers explicitly.', 'The supported subset is documented in help rg.'],
+    ['ap-14-rg-glob', 'Restrict the files searched by rg', 'Use rg to search only .log files below archive and display ERROR lines with filenames, without line numbers. Sort the result.', 'rg -g limits the search to a filename glob.', 'Quote *.log so it is passed to rg as a pattern. The displayed filename tells you which source supplied each record.'],
+    ['ap-15-find', 'Find files by name', 'Use find to display all .log files below archive, including files without ERROR. Sort the names.', 'find selects filesystem entries by properties such as type and name. It does not search their contents.', 'Use -type f for files and quote the pattern supplied to -name.'],
+    ['ap-16-awk-condition', 'Select fields from matching rows', 'Use awk to display field 3, the server name, from session.log rows whose second field is ERROR.', 'An awk condition before the action limits which rows run that action.', 'Compare $2 to the quoted string "ERROR", then print $3.'],
+    ['ap-17-awk-separator', 'Read comma-separated fields', 'Skip the metrics.csv header and display field 3, the user name, in the original order.', 'awk -F sets the input field separator. NR is the current input record number.', 'A condition NR > 1 skips the first line without discarding any data rows.'],
+    ['ap-43-tail-header', 'Skip a header with tail', 'Use tail to omit only the metrics.csv header and display all 3 data rows.', 'tail -n +2 begins at line 2 and continues to the end.', 'The plus sign changes the meaning from the last two lines to starting at the second line.'],
+    ['ap-18-awk-combined', 'Combine text and numeric conditions', 'For portal rows taking at least 150 milliseconds, display time, user and duration separated by spaces.', 'Use && inside the awk program to require both a string comparison and a numeric comparison.', 'Print the required fields in order, separated by commas in the awk print statement.'],
+    ['ap-19-sort-key', 'Sort numerically by a field', 'Sort timings.csv by the duration in field 3, largest first.', 'sort -t sets the delimiter. -k3,3nr selects exactly the third field and compares it numerically in reverse order.', 'Restricting the key to one field prevents later fields from becoming part of that key.'],
+    ['ap-37-input-redirection', 'Read a file through standard input', 'Give names.txt to wc -l using < and display only 6, without a filename.', '< opens a file as standard input. It is different from passing the filename as a command argument.', 'wc does not append a filename label when it reads standard input.'],
+    ['ap-20-tr-case', 'Normalize letter case', 'Pass names.txt to tr and display every username in lowercase. Leave the original file unchanged.', 'tr translates characters read from standard input; it does not take an input filename argument.', 'Map [:upper:] to [:lower:] and use input redirection or a pipe to supply the text.'],
+    ['ap-21-tr-squeeze', 'Collapse repeated spaces', 'Use tr -s to collapse repeated spaces in spaces.txt, then display the usernames in field 3 with cut or awk.', 'tr -s squeezes repeated characters from the selected set into one.', 'Once repeated spaces are reduced, a simple space delimiter gives stable field positions.'],
+    ['ap-22-uniq-duplicates', 'Keep only repeated values', 'Display usernames appearing at least twice in repeated.txt, once each and in name order.', 'uniq -d keeps groups of repeated neighboring lines.', 'Sort first so occurrences of the same name are next to one another.'],
+    ['ap-23-column', 'Align columns for reading', 'Use column -t with a comma separator to display table.csv as a table including its header.', 'column -t aligns fields into readable columns. -s defines the input separator.', 'Formatting a table improves display; it does not change the source file.'],
+    ['ap-24-sed-range', 'Select a range of lines', 'Use sed to display only lines 2 through 4 of session.log.', 'sed addresses can select a line-number range. The p command prints the selected lines.', '-n suppresses automatic printing so lines outside the range are omitted and selected lines are not duplicated.'],
+    ['ap-25-sed-substitute', 'Replace every occurrence', 'Display tags.txt with every ERROR replaced by FAIL, including repeated occurrences on the same line. Keep the original file.', 'sed s/old/new/ substitutes text. The g flag applies the replacement to every match in each line.', 'Without g, only the first match per line is replaced. Printing transformed text does not edit the file.'],
+    ['ap-26-sed-delete', 'Remove comments and blank lines', 'Remove lines starting with # and empty lines from annotated.txt, leaving only the two user/result lines.', 'A sed address followed by d deletes matching lines from the output.', 'Use separate -e expressions for ^# and ^$. An empty line has its beginning immediately followed by its end.'],
+    ['ap-27-printf', 'Write a formatted summary', 'Use printf with %s and %d to display user=ren count=3 followed by a newline.', 'printf uses a format string: %s inserts text and %d inserts an integer.', 'Include \\n in the format because printf does not automatically add a newline.'],
+    ['ap-28-touch', 'Create an empty file', 'Use touch to create the empty file reports/check.txt.', 'touch creates a missing file without adding contents. On a real system it also updates timestamps.', 'The reports directory already exists in this exercise.'],
+    ['ap-29-rm', 'Remove only the draft', 'Use rm to delete only trash/draft.txt. Keep trash/final.txt and its contents.', 'rm removes the specified file from this virtual exercise filesystem.', 'Check the exact target path before executing a deletion.'],
+    ['ap-30-rmdir', 'Remove an empty work directory', 'Create reports/empty with mkdir, then remove it with rmdir. Keep reports and its existing records.', 'rmdir removes an empty directory. It refuses to remove a directory that still contains files.', 'This exercise checks both creating and removing the temporary directory.'],
+    ['ap-45-and-sequence', 'Continue only after success', 'Search for NOT_PRESENT with grep and use && to run echo unexpected only on a match. Then use ; to run echo checked. Display only checked.', '&& runs the following command only when the previous exit status is zero. ; continues regardless of success.', 'A grep search with no match returns 1, so the && branch is skipped while the command after ; still runs.'],
+    ['ap-46-stderr', 'Redirect error output separately', 'Suppress standard error from cat missing.log with 2>/dev/null, then use ; to run cat notes.txt. Display only the note contents.', '2> redirects standard error. /dev/null discards anything written to it.', 'Hiding an error does not change the command exit status. The semicolon lets the next command run anyway.'],
+    ['ap-47-exit-status', 'Read the previous exit status', 'Search session.log for NOT_PRESENT with grep, then immediately use echo $? to display only 1.', '$? expands to the previous command exit status. For grep, 1 means there were no matches.', 'Read it immediately: echo itself succeeds and replaces the previous status.'],
+    ['ap-31-flow-filter', 'Practice 1: choose a record type', 'Use grep -F to display the 7 metrics.csv rows whose type is ERROR.', 'A fixed search for ,ERROR, includes the field delimiters and avoids matching the word inside another field.', 'First establish the correct set of rows before extracting or counting anything.'],
+    ['ap-32-flow-extract', 'Practice 2: choose a service and field', 'Add awk to the preceding grep and display only the 6 usernames for the portal service.', 'The first stage has selected ERROR records. Now compare the service field and extract the username.', 'Set the comma separator in awk and keep its input connected to grep.'],
+    ['ap-33-flow-normalize', 'Practice 3: normalize before counting', 'Add tr to the pipeline and display all 6 portal ERROR usernames in lowercase.', 'Normalize names before grouping so case variants of the same user can be combined.', 'Normalization is appropriate only when the data rules treat these case variants as the same identity.'],
+    ['ap-34-flow-count', 'Practice 4: group and count', 'Append sort and uniq -c to the pipeline and display counts in username order.', 'Sorting puts identical normalized names together; uniq -c then counts each group.', 'Inspect the intermediate flow if the total or groups do not look right.'],
+    ['ap-35-flow-rank', 'Practice 5: put large counts first', 'Append sort -nr to the summary and display the counts in descending order.', 'The prior stage counts users but orders them by name. A second sort ranks those counts numerically.', 'Keep the count as the leading field.'],
+    ['ap-36-flow-save', 'Practice 6: display and save the result', 'Count portal ERROR rows in metrics.csv by lowercase username, rank by descending count, and both display and save the result to reports/error-users.txt.', 'Combine filtering, field selection, normalization, grouping, ranking and tee.', 'Verify that the displayed result and saved file contain the same summary.'],
+    ['ad-01-basename', 'Extract a filename from a path', 'Use basename on /home/analyst/advanced/access.log and remove the .log suffix to display access.', 'basename returns the final component of a path. An optional suffix argument removes that suffix.', 'It prints text; it does not rename or move the file.'],
+    ['ad-02-dirname', 'Extract the parent path', 'Use dirname to display the parent directory of /home/analyst/advanced/bundle/b.log.', 'dirname prints the directory portion of a path.', 'Like basename, it operates on the path text without changing the file.'],
+    ['ad-03-realpath', 'Resolve an absolute path', 'Use realpath -e to display the absolute path of bundle/../access.log.', 'realpath resolves a path into an absolute form and removes parent-directory navigation components.', '-e requires the target to exist. Check the working directory when resolving a relative path.'],
+    ['ad-04-file', 'Check the data format', 'Use file to display the type of audit.jsonl.', 'file describes the apparent content format of a file.', 'A filename extension is a clue, but inspecting the contents gives another check before choosing a reader.'],
+    ['ad-05-stat', 'Record the byte count', 'Use stat -c to display the name and byte count of ready.txt as ready.txt 6.', 'stat -c selects a format: %n is the filename and %s is its size in bytes.', 'The newline is part of a text file and contributes to its byte count.'],
+    ['ad-06-du', 'Measure collected records', 'Use du -cb on bundle/*.log, then tail to display only the total line: 21 total.', 'In this lab du sums content byte sizes. -b requests bytes and -c adds a total.', 'Use tail to keep the final summary line. Real filesystem allocation and du output can differ.'],
+    ['ad-07-date-utc', 'Convert a timestamp to UTC', 'Convert 2026-10-25T09:00:00+09:00 to UTC and display its date, time and UTC label.', 'The +09:00 offset is nine hours ahead of UTC. date -u displays the converted time in UTC.', 'Use -d to supply the input and a quoted format containing %F, %T and %Z.'],
+    ['ad-08-date-epoch', 'Read a UNIX timestamp', 'Use date to convert 1792886400 seconds and display the UTC date, time and UTC label.', 'An input beginning with @ is a UNIX timestamp in seconds.', 'Use -u to make the timezone explicit, rather than relying on the local environment.'],
+    ['ad-09-strings', 'Extract readable text fragments', 'Pipe strings output to grep -F and display only lines containing request_id=.', 'strings extracts printable runs from data that may also contain non-text bytes. -n sets the minimum run length.', 'A readable fragment is a clue, not proof that the entire file is plain text.'],
+    ['ad-10-base64', 'Decode Base64 and read a field', 'Decode payload.b64, then use jq to display only its request_id value, req-02.', 'base64 -d reverses Base64 encoding. Base64 is an encoding, not encryption.', 'The decoded content is JSON, so pipe it into jq and request a raw string.'],
+    ['ad-11-rev', 'Select the last extension', 'Extract the final extension from object-names.txt and display log, json, log in order. awk or a rev-based alternative is accepted.', 'awk $NF selects the final field after choosing a dot separator.', 'An alternative reverses each line with rev, selects the first dot-separated field, then reverses it again. rev reverses characters; tac reverses lines.'],
+    ['ad-12-diff', 'Compare a baseline with current data', 'Use diff -u to show changes from baseline.conf to current.conf. The retention setting changes from 7 to 14.', 'diff -u shows removed lines with - and added lines with +, together with surrounding context.', 'Exit status 1 means differences were found, not a command failure. Status 0 means identical; 2 or higher indicates an error.'],
+    ['ad-13-set-prepare', 'Prepare a list for comparison', 'Sort and deduplicate observed usernames, display them, and save the same list to observed.sorted.', 'sort -u sorts and removes duplicate lines.', 'Set-comparison tools require sorted input. tee can preserve the prepared list while showing it.'],
+    ['ad-14-comm-new', 'Find names present only now', 'Use baseline-users.txt as the first input and current-users.sorted as the second to display only the current-only name sota with comm.', 'comm compares two sorted files. Columns 1, 2 and 3 mean first-only, second-only and common.', 'The digits in -13 suppress columns 1 and 3, leaving only the second-file entries.'],
+    ['ad-15-comm-common', 'Find names in both lists', 'Use comm to display aki, mei and ren, the names shared by the baseline and current lists.', 'Use the same two sorted inputs and select their common column.', '-12 suppresses the two file-specific columns, leaving the shared entries.'],
+    ['ad-16-paste', 'Place corresponding columns side by side', 'Use paste -d to display 3 lines as ID,time. The first line is req-01,00:00.', 'paste combines files by line position. -d chooses the delimiter between their fields.', 'This is valid when the rows already correspond in the same order.'],
+    ['ad-17-join', 'Connect records by ID', 'Use join on status-by-id.txt and actors-by-id.txt to display 4 rows containing ID, status and name.', 'join combines sorted records using a shared key, normally the first field.', 'Check the meaning and ordering of the key before joining data from separate sources.'],
+    ['ad-18-join-filter', 'Filter a joined result', 'Join the records, keep statuses of at least 500, and display only ID and name.', 'After joining, the status and actor are available in one row.', 'Choose the fields based on the joined layout, rather than the layout of either original file.'],
+    ['ad-19-xargs-info', 'Turn input names into arguments', 'Read selected-files.txt and use xargs to call file once per filename, displaying both formats.', 'xargs converts standard-input text into arguments for another command. -n 1 uses one argument per call.', 'Be careful with separators when filenames contain spaces. The supplied list uses simple names.'],
+    ['ad-20-xargs-read', 'Read files from a list and filter', 'Read both files in the target list and display only lines containing WARN.', 'xargs can pass the listed paths to cat, which collects their contents.', 'The final grep filters those contents, not the filename list.'],
+    ['ad-21-awk-nf', 'Count fields from the end', 'Select Failed password lines and display only the source IPs as 4 lines in their original order.', 'NF is the number of fields in the current awk record. $(NF-3) selects a field relative to the end.', 'This avoids assuming a fixed position from the start when preceding fields can vary.'],
+    ['ad-22-awk-count', 'Increment a counter for each match', 'Use awk to count rows with status at least 500 and display 3.', 'A condition selects the rows and count++ increments the counter for each match.', 'The END action runs after all input records, so print the final count there.'],
+    ['ad-23-awk-sum', 'Sum matching numeric values', 'Use awk to sum response bytes for statuses of at least 500 and display 240.', 'total += $4 adds field 4 to an accumulator for each selected row.', 'Counting records and summing their byte values answer different questions.'],
+    ['ad-24-awk-groups', 'Keep a counter for each IP', 'Use awk to count Failed password records per IP and display count IP in IP text order.', 'An associative array such as count[ip] keeps a separate value for each key.', 'An END loop emits the groups. Add an explicit sort because array iteration order is not a ranking.'],
+    ['ad-25-awk-save', 'Save a ranked aggregation', 'Use awk to count Failed password records per IP, display counts in descending order, and save the same result to ip-ranking.txt.', 'Build on the grouped awk count and sort numerically on field 1.', 'Put tee after sorting so the saved artifact has the same order as the display.'],
+    ['ad-26-jq-nested', 'Read a nested JSON field', 'From manifest.json, extract the collector name and display only edge-01.', 'Dot paths access nested objects, for example .collector.name.', '-r prints a selected string without JSON quotation marks.'],
+    ['ad-27-jq-array', 'Read each array element', 'From every events array record, display request IDs req-01 through req-06, one per line in their original order.', '.events[] emits each element of the array as a separate value.', 'Continue with .request.id to select the nested ID from each emitted record.'],
+    ['ad-28-jq-select', 'Filter records from an array', 'From manifest.json events, select records whose result is failed and display their request IDs.', 'Expand the array first, then apply select to each event.', 'After filtering, extract the ID rather than printing the entire object.'],
+    ['ad-29-jq-tsv', 'Turn selected fields into table rows', 'Display failed records as two TSV columns, request ID and actor name, in the original order.', 'A jq array can collect the selected values in a defined column order.', '@tsv converts that array to a tab-separated row; -r emits the row as plain text.'],
+    ['ad-30-jq-slurp', 'Collect JSON Lines into an array', 'Use jq -s to read audit.jsonl as one array and display its record count, 6.', '-s, or slurp, collects all input JSON values into a single array.', 'length on that array counts records. Without -s, the filter runs separately on each record.'],
+    ['ad-31-jq-group', 'Group records by name', 'Group audit.jsonl by actor name and display the group names aki, mei and ren, one per line.', 'group_by(.actor.name) creates arrays of records sharing the same name.', 'Expand the groups and read the name from the first record in each group.'],
+    ['ad-32-jq-group-count', 'Rank group sizes', 'Display all audit.jsonl record counts by name as name and count columns, largest count first.', 'For each group, emit the name and length as a TSV row.', 'The count is field 2, so sort numerically in reverse order on that field.'],
+    ['ad-33-final-join', 'Combine 1: record failed actors', 'Read both original files, display statuses of at least 500 as ID name status in ID order, and save to failed-actors.txt.', 'Connect the sources by ID, select the required statuses, and arrange the output fields.', 'Preserve the useful detail as a file as well as displaying it.'],
+    ['ad-34-final-missing', 'Combine 2: find missing IDs', 'Read both original files, display the IDs that were not received, and also save them to missing-ids.txt.', 'Compare the expected and received sorted ID lists.', 'Expected-only values are the missing records. Keep the input-file order and suppressed comm columns consistent with that question.'],
+    ['ad-35-final-auth', 'Combine 3: keep evidence and a summary', 'Save all 4 Failed password lines in their original order to auth-failed.log, then display IP counts in descending order and save them to auth-summary.txt.', 'tee can save an intermediate result without breaking the pipeline.', 'Keep the source evidence before extracting IPs; save the summary after counting and ranking.'],
+    ['ad-36-final-crosslog', 'Final investigation: connect JSON and text', 'For records whose result is failed, save ID-ordered details to reports/failed.txt, descending counts by name to reports/ranking.txt, and the total response bytes to reports/bytes.txt. Finally display the total, 300.', 'Extract failed IDs and actors from JSON, prepare request/status/byte records from the text log, and join the sorted sources by request ID.', 'Create the output directory, preserve the joined detail, then derive the name counts and byte total from it. Check each stage and all three saved files.']
+  ];
+  root.LINUXROOM_EN_LESSONS = Object.fromEntries(rows.map(([id, title, task, explanation, detail]) => [id, {title, task, explanation: [explanation, detail]}]));
+})(globalThis);
+
+/* English concept definitions; original lesson structure is preserved. */
+globalThis.LINUXROOM_EN_CONCEPTS = {
+  "プロンプトの$と#": "$ and # in the prompt",
+  "多くのLinuxでは$は一般ユーザー、#は管理者rootの目印です。表示は環境で変えられます。この教材は一般ユーザーの$を使います。": "On many Linux systems, $ marks a regular user and # marks the root administrator. Prompts can be customized. This course uses a regular user's $ prompt.",
+  "コマンド": "Command",
+  "実行したい操作の名前。ここではechoです。": "The name of the operation to execute: echo in this example.",
+  "引数": "Argument",
+  "コマンドに渡す情報。ここでは表示したい文字です。": "Information passed to a command: the text to display in this example.",
+  "引用符": "Quotation marks",
+  "空白や記号を含む文字を、ひとまとまりにする印です。全角の「’」ではなく半角の'を使います。": "Marks that keep text containing spaces or symbols together. Use a straight single quote (') rather than a typographic quote (’).",
+  "現在のディレクトリ": "Current directory",
+  "相対パスの出発点になる場所です。": "The starting point for relative paths.",
+  "パス": "Path",
+  "ディレクトリやファイルの場所を示す文字列です。/は区切りです。": "A string identifying a directory or file's location. / separates its components.",
+  "名前を一覧にするコマンド。ファイルの本文を読むコマンドではありません。": "A command that lists names. It does not read file contents.",
+  "相対パス": "Relative path",
+  "logsのように、現在地を出発点にする道順です。": "A path such as logs that starts from the current directory.",
+  "一つ上のディレクトリです。cd ..で戻れます。": "The parent directory, one level up. Use cd .. to move there.",
+  "絶対パス": "Absolute path",
+  "/を出発点にして、目的地まで全部書いたパスです。": "The complete path to a destination, starting at /.",
+  "ログ": "Log",
+  "出来事を記録したものです。この章では意味の判断より、文字を読む操作に慣れます。": "A record of events. This chapter focuses on reading text before interpreting what the events mean.",
+  "オプション": "Option",
+  "コマンドの動きを変える指定です。-n 3は「3行」という指定です。": "An argument that changes a command's behavior. -n 3 specifies three lines.",
+  "末尾": "End of a file",
+  "ファイルの最後側です。tail -n 2なら最後の2行です。": "The final portion of a file. tail -n 2 selects the last two lines.",
+  "ページャー": "Pager",
+  "本文を読むための表示機能です。lessは代表的なページャーです。": "A viewer for reading text. less is a common pager.",
+  "抽出": "Extraction",
+  "必要なものを選んで取り出すこと。grepは該当した行全体を取り出します。": "Selecting the information you need. grep extracts each complete matching line.",
+  "行番号": "Line number",
+  "元ファイルの先頭を1行目として数えた位置です。抽出後の番号ではありません。": "A position counted from line 1 of the original file, not a number assigned after filtering.",
+  "grepで大文字と小文字を区別しない指定です。": "Tells grep to ignore the difference between uppercase and lowercase letters.",
+  "grepの条件に一致しない行を選ぶ指定です。": "Tells grep to select lines that do not match the pattern.",
+  "標準出力": "Standard output",
+  "コマンドが結果の文字を出す先。普段は画面へ出ます。": "The destination for a command's result text, normally the terminal display.",
+  "標準入力": "Standard input",
+  "コマンドが文字を受け取る入口。パイプで前の結果を受け取れます。": "The input channel from which a command receives text. A pipe can supply a previous command's result.",
+  "パイプ |": "Pipe |",
+  "左の標準出力を、右の標準入力につなぎます。": "Connects standard output on the left to standard input on the right.",
+  "処理の順番": "Processing order",
+  "パイプは左から右へ、前の結果を材料にして進みます。": "A pipeline proceeds from left to right, using each previous result as the next stage's input.",
+  "列・フィールド": "Column / field",
+  "1行を区切った中の項目です。app.logでは時刻が$1、種類が$2、名前が$3、操作が$4です。": "An item within a split line. In app.log, time is $1, level is $2, name is $3, and action is $4.",
+  "awkの中で、指定した値を表示する命令です。": "An awk statement that displays the specified values.",
+  "行と列": "Rows and columns",
+  "grepで対象の行を選び、awkで各行の必要な列を選びます。": "Use grep to select rows, then awk to select the required columns from each row.",
+  "区切り文字": "Delimiter",
+  "項目の境目を示す文字です。-dで指定し、-fで列番号を選びます。": "The character separating fields. Set it with -d and choose the field number with -f.",
+  "行を並べ替えるコマンドです。この教材の英小文字の名前はaki、mei、renの順になります。": "A command that sorts lines. The lowercase names in this course sort as aki, mei, ren.",
+  "連続して現れる同じ行をまとめ、「件数 元の行」の形で表示します。": "Combines adjacent identical lines and displays each as 'count original-line'.",
+  "パイプライン": "Pipeline",
+  "複数のコマンドをパイプでつないだものです。一段ずつ目的を説明できれば、長くても読み解けます。": "Multiple commands connected by pipes. Even a long pipeline is understandable when you can explain the purpose of each stage.",
+  "件数と種類数": "Record count and distinct-value count",
+  "6件のERRORに、3種類の名前が登場します。出力の行数と件数は別のものです。": "Six ERROR records contain three distinct names. The number of output rows differs from the number of records counted.",
+  "数値順": "Numeric order",
+  "2より10を大きいとする順序です。文字としての並べ替えでは10が2より先に来る場合があります。": "An order in which 10 is greater than 2. Text sorting may place 10 before 2.",
+  "-nと-rをまとめた指定です。-n -rと分けても同じです。": "Combines -n and -r. Writing -n -r separately has the same effect.",
+  "指定したパスにディレクトリを作るコマンドです。": "A command that creates a directory at the specified path.",
+  "リダイレクト": "Redirection",
+  "出力先などを切り替えること。>は標準出力をファイルに書きます。": "Changing an input or output destination. > writes standard output to a file.",
+  "追記": "Appending",
+  "既存の内容を残したまま、その後ろに追加することです。": "Adding new content after existing content while preserving what is already there.",
+  "入力をファイルと次の出力先の両方へ送るコマンドです。末尾なら画面にも見えます。": "Sends its input both to a file and to standard output. At the end of a pipeline, the output also appears on screen.",
+  "cp 元 先": "cp source destination",
+  "最初がコピー元、次がコピー先です。空白で区切って指定します。": "The first path is the source and the next is the destination. Separate them with a space.",
+  "mv 元 先": "mv source destination",
+  "移動元と移動先を指定します。移動先が既存ファイルなら上書きする場合があるため、名前を確かめます。": "Specify the source and destination. Check the destination name: an existing file there may be overwritten.",
+  "キーと値": "Keys and values",
+  "\"user\": \"aki\"なら、userがキー、akiが値です。": "In \"user\": \"aki\", user is the key and aki is the value.",
+  "jqのフィルター": "jq filter",
+  "どの値を取り出すか、どう処理するかを表す式です。シングルクォートで囲んで渡します。": "An expression describing which values to select or how to process them. Pass it inside single quotes.",
+  "現在のJSONから、userというキーの値を取り出す式です。": "An expression selecting the value of the user key from the current JSON value.",
+  "jqで文字列を引用符なしの通常の文字として出力する指定です。": "Tells jq to output strings as ordinary text without quotation marks.",
+  "条件が成り立つ入力だけを通すjqの処理です。": "A jq operation that keeps only input values satisfying a condition.",
+  "左右の値が等しいか比較する記号です。=を二つ書きます。": "Compares the values on either side for equality. Write two = characters.",
+  "jq内のパイプ": "A pipe inside jq",
+  "JSONの値を次のフィルターへ渡します。シェルのパイプは文字を次のコマンドへ渡します。": "Passes JSON values to the next filter. A shell pipe instead passes text to the next command.",
+  "ここまでの道具": "Tools learned so far",
+  "pwd・ls・cdで場所を確かめ、cat・head・tailで読み、grepで行を選べます。": "Use pwd, ls, and cd to check locations; cat, head, and tail to read; and grep to select lines.",
+  "今回の完成形": "The completed workflow",
+  "ERRORだけを選ぶ → 名前を取る → 同じ名前を並べる → 数える → 多い順にする → 保存する。": "Select ERROR records → extract names → sort equal names together → count → rank largest first → save.",
+  "対応構文": "Supported syntax",
+  "この学習用シェルで使える引数・オプションの組み合わせです。外部マニュアルの全機能があるわけではありません。": "The argument and option combinations available in this teaching shell. It does not implement every feature in external manuals.",
+  "履歴": "History",
+  "このセッションで入力したコマンドの記録です。新しい課題は別のセッションから始まります。": "The record of commands entered in this session. A new exercise starts a separate session.",
+  "画面とデータ": "Display and data",
+  "表示を消す操作と、保存されたファイルを消す操作は別です。": "Clearing the display and deleting saved files are different operations.",
+  "-lで詳細表示、-hで人が読みやすいサイズ表示にします。2.0Kはこの例では2048バイトです。": "-l shows details; -h formats sizes for readability. In this example, 2.0K means 2048 bytes.",
+  "更新日時": "Modification time",
+  "ファイルが更新された時刻です。-tで新しい順、-trなら古い順にできます。": "When a file was last modified. -t sorts newest first, while -tr sorts oldest first.",
+  "行の逆順": "Reverse line order",
+  "最後の行、最後から2行目…の順です。tailは末尾を取り出しますが、取り出した行の順序を維持します。": "The last line, then the next-to-last, and so on. tail selects the end but preserves the original order of those lines.",
+  "先頭の確認": "Previewing the beginning",
+  "head -nで量を制限し、区切りや項目を先に調べます。先頭が全体を代表しているとは限りません。": "Use head -n to limit the amount shown and inspect delimiters and fields first. The beginning may not represent the whole file.",
+  "末尾の確認": "Checking the end",
+  "全体を表示してスクロールする代わりに、必要な最後の数行を直接取り出します。": "Retrieve only the required final lines instead of displaying everything and scrolling.",
+  "文章を少しずつ読むためのページャーです。この教材ではqで閉じる操作を練習します。": "A pager for reading text a little at a time. This course practices closing it with q.",
+  "一致した本文の代わりに、その行数を表示します。": "Displays the number of matching lines instead of their contents.",
+  "ここでは文字数ではなくバイト数です。コマンドが違うと同じ-cでも意味が変わります。": "Here the unit is bytes, not characters. The same -c option can mean different things in different commands.",
+  "body numberingをallにする指定です。空行も1行として番号を付けます。": "Sets body numbering to all. Blank lines also receive line numbers.",
+  "固定文字列": "Fixed string",
+  "記号も含め、指定した文字の並びをそのまま探す方法です。": "Searching for the exact character sequence as written, including symbols.",
+  "選択（|）": "Alternation (|)",
+  "拡張正規表現で「どちらかに一致」を表します。検索語全体を引用符で囲みます。": "Means 'match either alternative' in an extended regular expression. Quote the entire search pattern.",
+  "アンカー": "Anchor",
+  "文字そのものではなく、行頭や行末などの位置を指定する記号です。": "A symbol specifying a position, such as the start or end of a line, rather than a literal character.",
+  ".は任意の1文字、*は直前の要素の0回以上の繰り返しです。": ". matches any single character; * repeats the preceding element zero or more times.",
+  "-A 1は一致行と次の1行、-B 1は前の1行と一致行です。": "-A 1 shows the matching line and the next line; -B 1 shows the previous line and the match.",
+  "一致行の前後1行ずつを追加します。ファイルの端では存在する行だけを表示します。": "Adds one line before and one after a match. At file boundaries, only existing lines are shown.",
+  "グロブ": "Glob",
+  "*.logのようなファイル名のパターン。*は任意の文字列です。正規表現とは書き方や用途が異なります。": "A filename pattern such as *.log, where * matches any string. Its syntax and purpose differ from a regular expression.",
+  "ファイルやディレクトリの本文を探す検索ツールです。この教材ではLogroomと同じ範囲の機能を使えます。": "A tool for searching file contents, including files within directories. This course supports the same subset as Logroom.",
+  "検索対象をファイル名などのパターンで制限します。パターンは引用符で囲んでrgへ渡します。": "Limits the searched files using a filename pattern. Quote the pattern when passing it to rg.",
+  "ディレクトリではなくファイルを対象にする指定です。-type dならディレクトリです。": "Selects files rather than directories. -type d would select directories.",
+  "左右が等しいか比較する記号です。文字列はawkプログラムの中で二重引用符で囲みます。": "Compares the values on both sides for equality. Within the awk program, put string values in double quotes.",
+  "フィールドの区切りを指定します。今回はカンマです。": "Sets the field separator: a comma in this exercise.",
+  "ここまでに読んだ行の数です。1ファイルなら先頭からの行番号になります。": "The number of input records read so far. For one file, it is the line number from the start.",
+  "1行目を除いて、2行目から末尾まで表示します。": "Omits the first line and displays everything from the second line to the end.",
+  "左と右の条件がどちらも成立する行を選びます。awkの引用符の内側に書きます。": "Selects rows satisfying both the left and right conditions. Write it inside the quoted awk program.",
+  "以上を表す比較です。150も条件に含まれます。": "A greater-than-or-equal comparison. 150 itself is included.",
+  "ソートキー": "Sort key",
+  "並べ替えるときに比べる列や範囲です。-k3,3は3列目から3列目までです。": "The field or range compared when sorting. -k3,3 selects only field 3.",
+  "入力リダイレクト <": "Input redirection <",
+  "シェルが指定ファイルを開き、その内容を標準入力としてコマンドへ渡します。元ファイルは変更しません。": "The shell opens the specified file and supplies its contents to the command as standard input. The original file is unchanged.",
+  "正規化": "Normalization",
+  "比較や集計のために表記をそろえることです。大文字小文字が別の意味を持つデータには、同じ変換を無条件で使いません。": "Making representations consistent for comparison or aggregation. Do not blindly normalize case when uppercase and lowercase carry different meanings.",
+  "squeeze。指定した文字が連続しているとき、一つへまとめます。ここでは改行は変えません。": "Squeeze: combine consecutive occurrences of a specified character into one. Newlines are unchanged here.",
+  "繰り返しがある値だけを表示します。2回以上現れる値でも、表示は1行です。": "Displays only values that occur repeatedly. A value appearing twice or more is still displayed once.",
+  "整形": "Formatting",
+  "内容を読める形へ整えることです。表示のために加えた空白を、元の生データの区切りと混同しないようにします。": "Arranging content for readability. Do not confuse spaces added for display with delimiters in the original raw data.",
+  "アドレスと処理": "Address and action",
+  "2,4が対象範囲、pが表示処理です。-nでその他の自動表示を止めます。": "2,4 is the selected range and p is the print action. -n suppresses other automatic printing.",
+  "global。各行で最初の一致だけでなく、すべての一致へ置換を適用します。": "Global: apply substitution to every match within each line, not just the first.",
+  "行頭の直後が行末、つまり空行です。スペースだけがある行とは異なります。": "The line ends immediately after it starts: an empty line. This differs from a line containing only spaces.",
+  "実行するsedの処理を一つ指定します。繰り返して複数の処理を書けます。": "Specifies one sed expression. Repeat it to supply multiple expressions.",
+  "書式": "Format string",
+  "出力のひな形です。%sや%dの場所へ、後ろの引数を順に入れます。": "An output template. Subsequent arguments are inserted in order at placeholders such as %s and %d.",
+  "空ファイル": "Empty file",
+  "名前はありますが、本文の文字数が0のファイルです。ディレクトリとは別のものです。": "A named file containing no text. It is distinct from a directory.",
+  "削除対象": "Deletion target",
+  "rmに渡したファイルが消えます。実際のLinuxでは通常、ゴミ箱には移動しません。": "The file passed to rm is removed. On real Linux systems, it normally does not go to a trash folder.",
+  "空のディレクトリ": "Empty directory",
+  "中にファイルも子ディレクトリもない場所です。隠しファイルも中身に含まれます。": "A directory containing neither files nor subdirectories. Hidden files also count as contents.",
+  "&&と;": "&& and ;",
+  "&&は左が成功した場合だけ右へ進みます。;は結果に関係なく次を実行します。awkの引用符内に書く&&とは別に、シェルの接続として使います。": "&& proceeds only if the command on its left succeeds; ; proceeds regardless of the result. Here they connect shell commands, distinct from && inside a quoted awk program.",
+  "標準エラーの出力だけを捨てます。通常の結果は画面へ出たままです。": "Discards only standard error. Ordinary results still appear on screen.",
+  "直前の終了コードへ展開されるシェルの特別な変数です。プロンプト末尾の$とは役割が異なります。": "A special shell variable that expands to the previous exit status. Its role differs from the $ at the end of a prompt.",
+  "段階ごとの確認": "Check each stage",
+  "一度に完成形を書かず、各段階で意図した行や列になったか確かめます。": "Instead of writing the entire pipeline at once, verify that each stage produces the intended rows or fields.",
+  "行の抽出と列の抽出": "Extracting rows and fields",
+  "どの記録を残すか選んでから、各記録のどの値を使うか選びます。": "First select which records to keep, then choose which values to use from each record.",
+  "変換する範囲": "Scope of transformation",
+  "取り出した値だけを変換すると、関係のない列を不用意に変えずに済みます。": "Transforming only the extracted value avoids unintentionally changing unrelated fields.",
+  "集計の順番": "Aggregation order",
+  "表記をそろえる → 同じ値を隣り合わせにする → 件数を数える、の順です。": "Normalize representations → place equal values next to each other → count occurrences.",
+  "同じコマンドの再利用": "Reusing a command",
+  "入力の形が変われば、同じsortでも別の役割を担えます。": "The same sort command can serve a different purpose when the input structure changes.",
+  "結果を残す": "Preserve results",
+  "画面で確認できることに加えて、後から読み直せるファイルに同じ内容を保存します。": "In addition to checking the display, save the same contents in a file you can read again later.",
+  "パスの最後の部分を取り出します。追加の引数.logがあれば、その末尾を除けます。": "Extracts the final component of a path. An additional .log argument removes that suffix.",
+  "パスの親ディレクトリを文字列として表示します。cdとは異なり移動しません。": "Displays a path's parent directory as text. Unlike cd, it does not move you there.",
+  "正規化したパス": "Normalized path",
+  "現在地や..を解決して、場所を一意に指せる形に整理したパスです。": "A path with the current location and components such as .. resolved into a clear location.",
+  "各行が独立したJSONの記録。後半ではjqで項目を取り出します。": "Independent JSON records, one per line. Later exercises use jq to extract fields.",
+  "バイト": "Byte",
+  "データの大きさの単位です。ASCII文字と改行はそれぞれ1バイトです。": "A unit of data size. Each ASCII character and newline occupies one byte.",
+  "du -cb ファイル": "du -cb files",
+  "-cは総計、-bは見かけのサイズをバイト単位にします。*.logは該当するファイル名へ展開されます。": "-c adds a total; -b reports apparent size in bytes. *.log expands to matching filenames.",
+  "時刻を比較するときの共通の基準です。09:00の+09:00は00:00のUTCと同じ瞬間です。": "A common time basis for comparison. 09:00 at +09:00 is the same instant as 00:00 UTC.",
+  "dateにUNIX時刻の秒数を渡す書き方です。@0は起点の瞬間です。": "The notation for passing seconds since the Unix epoch to date. @0 represents the epoch itself.",
+  "データ内の読める文字列を取り出します。この教材ではASCIIの範囲を扱います。": "Extracts readable character sequences from data. This course handles ASCII characters.",
+  "デコード": "Decoding",
+  "表現を元に戻す処理です。base64 -dの出力は次のコマンドの入力にできます。": "Converting an encoded representation back to its original form. Output from base64 -d can become the next command's input.",
+  "その行の最後のフィールドです。区切りの数が行ごとに違っても末尾を選べます。": "The last field of that line. It selects the end even when the number of delimiters varies by line.",
+  "統一形式の差分": "Unified diff",
+  "変わった行を-と+で示し、周囲の共通行も載せる形式です。差があるだけでは異常と断定できません。": "Shows removed and added lines with - and +, along with common surrounding lines. A difference alone does not establish an anomaly.",
+  "集合としての一覧": "A list as a set",
+  "各名前を1回ずつ載せた一覧です。回数を調べる集計とは目的が異なります。": "A list containing each name once. Its purpose differs from counting occurrences.",
+  "一つ目に存在せず、二つ目に存在する行だけを表示します。": "Displays only lines present in the second file but absent from the first.",
+  "共通部分": "Intersection",
+  "どちらの一覧にも含まれる行です。comm -12で抽出できます。": "Lines present in both lists. Extract them with comm -12.",
+  "ファイルの行の位置をそろえて横に並べます。キーで照合するjoinは次の章で扱います。": "Places corresponding line positions from files side by side. The next chapter covers join, which matches keys instead.",
+  "キー": "Key",
+  "記録同士の対応を決める共通の値です。ここではreq-01などの処理IDです。": "A shared value used to match records. Here it is a request ID such as req-01.",
+  "結合してから抽出": "Join, then filter",
+  "まず共通キーで資料をそろえ、その結果に条件をかける流れです。": "First align records by a common key, then apply conditions to the joined result.",
+  "標準入力と引数": "Standard input and arguments",
+  "パイプは文字データを渡します。xargsは、その文字を後ろのコマンドの引数にする橋渡しです。": "A pipe supplies text data. xargs turns that text into arguments for the following command.",
+  "一覧から本文へ": "From a path list to file contents",
+  "<で読むのはパス一覧、xargsが呼ぶcatが読むのは各ログの本文です。": "< reads the list of paths; cat, invoked by xargs, reads the contents of each log.",
+  "NFと$(NF-3)": "NF and $(NF-3)",
+  "NFはフィールド数です。$(NF-3)は計算した番号の列を参照します。ログの形式を先に確認して使います。": "NF is the field count. $(NF-3) refers to the field at the calculated position. Check the log format before using it.",
+  "ENDとカウンタ": "END and a counter",
+  "行ごとに数を増やし、END {print count}で読み終えた集計値を表示します。": "Increment a count for each row, then use END {print count} to display the final total after reading all input.",
+  "右側の値を左側の変数へ加えます。total += $4は4列目の数値を加算します。": "Adds the value on the right to the variable on the left. total += $4 accumulates numeric values from field 4.",
+  "連想配列とfor": "Associative arrays and for",
+  "名前付きの箱を複数持つ仕組みです。for (ip in count)は各キーをipに入れ、print count[ip], ipで件数とキーを出します。": "A collection of values indexed by named keys. for (ip in count) places each key in ip; print count[ip], ip outputs its count and key.",
+  "集計 → 整列 → 保存": "Aggregate → sort → save",
+  "awkが件数を作り、sortが順を決め、teeが結果を残す分担です。": "awk produces the counts, sort determines their order, and tee preserves the result.",
+  "入れ子": "Nesting",
+  "値として別のオブジェクトや配列が入っている構造です。ドットをつなげて内側へ進みます。": "A structure containing another object or array as a value. Follow a dot path to reach inner values.",
+  "[]と[0]": "[] and [0]",
+  "[]は各要素を展開し、[0]は最初の要素だけを選びます。添字は0から始まります。": "[] emits each element, while [0] selects only the first. Array indexes start at zero.",
+  "selectする順番": "When to apply select",
+  "条件判定に必要なキーがあるうちに絞り、そのあとで欲しい項目だけを取り出します。": "Filter while the keys needed for the condition are still available, then extract only the desired fields.",
+  "TSVと@tsv": "TSV and @tsv",
+  "TSVはタブで項目を区切る表です。@tsvはjqの配列をタブ区切りの文字列にします。": "TSV is a table whose fields are separated by tabs. @tsv turns a jq array into a tab-separated string.",
+  "複数のJSONを一つの配列にまとめます。全件を比較したりグループ化する前に使います。": "Combines multiple JSON values into one array. Use it before comparing or grouping all records.",
+  "指定した値が同じ要素をグループ化します。jqのgroup_byはキー順に整理してからグループを返します。": "Groups elements with equal values for the specified key. jq's group_by orders by the key before returning groups.",
+  "JSONからランキングへ": "From JSON to a ranking",
+  "まとめる → グループ化 → 各グループの名前と件数 → TSV → 数値順、という流れです。": "Collect → group → extract each group's name and count → convert to TSV → sort numerically.",
+  "今回の成果物": "This exercise's output",
+  "二つの資料をIDで対応付け、条件に合う記録だけをfailed-actors.txtへ残します。": "Match the two sources by ID and preserve only the matching records in failed-actors.txt.",
+  "差集合の向き": "Direction of set difference",
+  "AだけにあるものとBだけにあるものは別の結果です。問いに合う順番で比べます。": "Items only in A and items only in B are different results. Compare the lists in the order appropriate to the question.",
+  "抜粋と集計": "Evidence extract and summary",
+  "抜粋は元の行を保ち、集計は全体の傾向を示します。両方あれば件数から元の記録へ戻れます。": "An extract preserves original rows; a summary shows overall patterns. Keeping both lets you trace counts back to the source records.",
+  "完成する3ファイル": "The three completed files",
+  "reports/failed.txtはID 名前 ステータス バイト数。reports/ranking.txtは件数 名前を件数の多い順。reports/bytes.txtは対象の応答バイト数合計です。": "reports/failed.txt contains ID, name, status, and bytes. reports/ranking.txt contains count and name, largest count first. reports/bytes.txt contains the total response bytes for the selected records.",
+  "ls": "ls",
+  "..": "..",
+  "-i": "-i",
+  "-v": "-v",
+  "print": "print",
+  "sort": "sort",
+  "uniq -c": "uniq -c",
+  "-nr": "-nr",
+  "mkdir": "mkdir",
+  "tee": "tee",
+  ".user": ".user",
+  "-r": "-r",
+  "select": "select",
+  "==": "==",
+  "-lh": "-lh",
+  "more": "more",
+  "-c": "-c",
+  "-ba": "-ba",
+  ".*": ".*",
+  "-A / -B": "-A / -B",
+  "-C 1": "-C 1",
+  "rg": "rg",
+  "-g": "-g",
+  "-type f": "-type f",
+  "-F": "-F",
+  "NR": "NR",
+  "-n +2": "-n +2",
+  "&&": "&&",
+  ">=": ">=",
+  "-s": "-s",
+  "-d": "-d",
+  "g": "g",
+  "^$": "^$",
+  "-e": "-e",
+  "2>/dev/null": "2>/dev/null",
+  "$?": "$?",
+  "basename": "basename",
+  "dirname": "dirname",
+  "JSON Lines": "JSON Lines",
+  "UTC": "UTC",
+  "@epoch": "@epoch",
+  "strings": "strings",
+  "$NF": "$NF",
+  "comm -13": "comm -13",
+  "paste": "paste",
+  "+=": "+=",
+  "-s（slurp）": "-s（slurp）",
+  "group_by": "group_by"
+};
+
+/* Example-specific English notes; runnable command examples stay unchanged. */
+globalThis.LINUXROOM_EN_EXAMPLES = {
+  "helloと表示されます。コマンドと引数の間には半角スペースを入れます。": "Prints hello. Separate the command and its argument with a normal space.",
+  "hello linuxが一つの引数としてechoに渡ります。": "Passes hello linux to echo as a single argument.",
+  "pwdには、今回は引数を付けません。": "This pwd command does not need an argument.",
+  "現在地にあるnotesディレクトリの中を表示します。": "Lists the contents of the notes directory under your current directory.",
+  "場所を全部書いて移動する例です。ここでは今の場所を指定しているので、現在地は変わりません。今回の行き先はlogsです。": "Demonstrates an absolute path. It names your current location, so you do not move. The exercise destination is logs.",
+  "絶対パスで場所を指定する例です。lsは現在地を変えずに、指定先の中身を表示できます。": "Demonstrates an absolute path. ls lists the specified location without changing your working directory.",
+  "names.txtに入っている名前の一覧を表示します。": "Displays the list of names in names.txt.",
+  "先頭の2行を表示する例です。": "Displays the first two lines.",
+  "最後の1行を表示します。": "Displays the last line.",
+  "名前一覧を開く例です。qで閉じられます。": "Opens the list of names. Press q to close it.",
+  "INFOを含む2行が表示されます。": "Displays the two lines containing INFO.",
+  "1行目と4行目にINFOがあることが分かります。": "Shows that INFO occurs on original lines 1 and 4.",
+  "小文字のinfoで、大文字のINFOも探せます。": "Searches with lowercase info and also finds uppercase INFO.",
+  "WARNの1行を除いた9行を表示します。": "Displays nine lines, omitting the one WARN line.",
+  "INFOを選んだ結果が2行なので、2と表示されます。": "The INFO search returns two lines, so this prints 2.",
+  "INFOの行を選び、その先頭1行だけを表示します。": "Selects INFO lines, then displays only the first of those lines.",
+  "2列目のINFOやERRORだけが表示されます。": "Displays only the second field, containing values such as INFO and ERROR.",
+  "INFOの行に登場するakiとmeiが表示されます。": "Displays aki and mei, the names appearing on INFO lines.",
+  "1列目の名前を取り出します。cat teams.csvで元の内容も確認できます。": "Extracts the names in field 1. Use cat teams.csv to inspect the original contents too.",
+  "行全体を文字の順で並べます。元ファイル自体は書き換わりません。": "Sorts complete lines as text. The original file is not changed.",
+  "件数なしで、aki、mei、renの3行にまとめます。": "Combines the input into three lines, aki, mei and ren, without counts.",
+  "sortはファイル名を直接指定できます。前の処理結果を並べ替えるときに、パイプでsortへ渡します。": "sort can take a filename directly. Use a pipe when sorting the output of a previous command instead.",
+  "並べてから数える、という2段の基本形です。": "The basic two-stage pattern: sort first, then count.",
+  "counts.txtの10、2、1を数の大きい順にします。cat counts.txtでも中身を確かめられます。": "Sorts the counts 10, 2 and 1 in descending numeric order. Inspect the source with cat counts.txt.",
+  "一つ上にpracticeを作る例です。今回作る名前はreportsです。": "Creates practice in the parent directory. The exercise asks for reports instead.",
+  "INFOの行を保存します。同じ名前のファイルがあれば上書きします。": "Saves INFO lines. An existing file with the same name is overwritten.",
+  "別の練習用ファイルへ追記する例です。今回の保存先はmemo.txt、追加する文字は確認完了です。": "Appends to a separate example file. For the exercise, use memo.txt and append the exact text 確認完了 (“check complete”).",
+  "INFOの行を表示しながら、同じ内容を保存します。": "Displays INFO lines and saves the same contents.",
+  "backup.txtという別名にコピーする例です。": "Copies the file to another name, backup.txt.",
+  "別の練習用ファイルの名前を変更する例です。今回変えるのはranking-copy.txtです。": "Renames a separate example file. The exercise asks you to rename ranking-copy.txt.",
+  "元ファイルは1行です。jqで表示すると、項目ごとに改行されます。": "The original file is one line. jq formats its fields onto separate lines.",
+  "引用符なしのakiが表示されます。": "Displays aki without quotation marks.",
+  "levelがINFOの2件だけを選びます。": "Selects only the two records whose level is INFO.",
+  "INFOを選んだ後、akiとmeiを取り出します。": "Selects INFO records, then extracts aki and mei.",
+  "ファイルの名前を確認するところから始められます。": "You can start by checking the available filenames.",
+  "まず元の記録を確認できます。列番号や選ぶ条件を確かめましょう。": "Inspect the original records first. Check the field positions and the condition you need.",
+  "-nで行数、-cでバイト数を指定できることが確認できます。": "Shows that -n specifies lines and -c specifies bytes.",
+  "sampleと表示する入力を一つ残します。後からhistoryでこの入力も確認できます。": "Enters a command that displays sample. You can find this command later with history.",
+  "数行の記録を表示します。続く課題で画面だけ整理してみます。": "Displays a few records. The exercise then asks you to clear only the display.",
+  "サイズの2048を確認します。-hを足すと2.0Kになります。": "Shows the size as 2048. Adding -h displays it as 2.0K.",
+  "名前順ではa-old、m-middle、z-newですが、調査では新しいファイルから見たい場合があります。": "Name order is a-old, m-middle, z-new. An investigation may call for the newest file first instead.",
+  "finish、review、空行、startの順になります。": "Produces finish, review, an empty line, and start, in that order.",
+  "400行が一度に流れます。先頭の形式を見たい場面では、読む範囲を絞ってみましょう。": "Prints all 400 lines at once. Limit the range when you only need to inspect the beginning.",
+  "先頭はevent=0001からです。末尾の確認にはtailへ切り替えます。": "The beginning starts at event=0001. Switch to tail when checking the end.",
+  "400行を一度に表示すると先頭が流れます。本文全体を読むときはmoreで開いてみましょう。": "Printing 400 lines pushes the beginning out of view. Try more when reading the whole file.",
+  "全体は400行です。次に、そのうちERRORの行だけを数えます。": "The file has 400 lines in total. Next, count only its ERROR lines.",
+  "1行目の改行まで読みます。今回は改行を含めず先頭9バイトだけを読みます。": "Reads through the newline at the end of line 1. The exercise instead asks for just the first nine bytes without that newline.",
+  "空行は番号なしになり、reviewは2番になります。": "Leaves the empty line unnumbered, so review is numbered 2.",
+  "ドットを含む指定どおりの1行だけが表示されます。": "Displays only the one line matching the literal string, including its dots.",
+  "INFOかDETAILを含む2行を選びます。": "Selects the two lines containing INFO or DETAIL.",
+  "WARNで始まりqueueで終わる行に一致します。": "Matches a line starting with WARN and ending with queue.",
+  "10:05のERRORと、その後の10:06のWARNが表示されます。": "Displays the 10:05 ERROR line and the following 10:06 WARN line.",
+  "5-、6:、7-と表示され、6行目が検索に一致したことを確認できます。": "Shows 5-, 6: and 7-, indicating that original line 6 is the matching line.",
+  "説明文にERRORを含むreadme.txtだけが対象になります。": "Selects only readme.txt, whose description contains ERROR.",
+  "1行目と3行目が表示されます。": "Displays original lines 1 and 3.",
+  "readme.txtの説明文だけが見つかります。": "Finds only the description in readme.txt.",
+  "本文の内容に関係なく、.txtファイルのパスを表示します。": "Displays .txt file paths regardless of their contents.",
+  "INFOの4行からサーバー名だけを取り出します。": "Extracts only the server names from the four INFO rows.",
+  "見出しを除き、4列目のサービス名を取り出します。": "Skips the header and extracts service names from field 4.",
+  "最後の2行だけで、最初のデータ行も落ちます。見出しだけを除く指定と比べましょう。": "Keeps only the last two lines, also losing the first data row. Compare this with skipping only the header.",
+  "portalで50ミリ秒未満の2行から、時刻・利用者・処理時間を表示します。": "Displays time, user and duration from two portal rows taking less than 50 milliseconds.",
+  "9、30、100、120の数値が小さい順になります。": "Sorts the numeric values as 9, 30, 100 and 120, smallest first.",
+  "行数4の後ろにnotes.txtも表示されます。入力を<へ変えると表示は行数だけになります。": "Displays the line count 4 followed by notes.txt. Using < for input removes the filename from the output.",
+  "反対向きの変換例です。AKI RENになります。": "Demonstrates the opposite conversion, producing AKI REN.",
+  "oneとtwoの間が1個のスペースになります。": "Leaves one space between one and two.",
+  "-uは反対に、1回だけの値を表示します。今回の例ではmeiです。": "-u instead keeps values that occur only once. In this example that is mei.",
+  "空白区切りの各列をそろえます。": "Aligns the whitespace-separated fields into columns.",
+  "途中の5行目と6行目だけを表示します。": "Displays only lines 5 and 6 from the middle of the file.",
+  "1行目にはERRORが2回ありますが、最初だけがERRになります。": "The first line contains ERROR twice, but only the first occurrence becomes ERR.",
+  "コメントは除かれますが、空行は残ります。": "Removes comments while leaving empty lines.",
+  "user=aki count=2と、末尾の改行を表示します。": "Prints user=aki count=2 followed by a newline.",
+  "例用の空ファイルを作ります。既存のreports/existing.txtには触れません。": "Creates an empty example file without touching reports/existing.txt.",
+  "例専用の一時ファイル1個だけを削除します。": "Deletes only one temporary file reserved for the example.",
+  "例用の空ディレクトリを作成後、削除します。&&は最初が成功したときだけ次を実行する接続です。": "Creates and then removes an empty example directory. && runs the second command only after the first succeeds.",
+  "INFOが見つかるため、その後にfoundが表示されます。": "INFO is found, so found is printed afterward.",
+  "notes.txtは存在するので本文は普通に表示されます。2>は標準出力を消しません。": "notes.txt exists, so its contents are printed normally. 2> does not suppress standard output.",
+  "headは成功するので、本文に続けて0が表示されます。": "head succeeds, so its text is followed by 0.",
+  "種類がWARNの1行を選びます。見出しは一致しません。": "Selects the single WARN record. The header does not match.",
+  "apiサービスのERROR記録からRENだけを取り出す例です。": "Extracts only REN from ERROR records for the api service.",
+  "名前1個を小文字へそろえる短い例です。": "A short example that converts one name to lowercase.",
+  "短い別ファイルで、同じ名前をまとめて数える復習です。": "Reviews grouping and counting matching names using a separate small file.",
+  "件数付きの2行を、大きい順に並べる短い例です。": "A short example sorting two count-prefixed lines from largest to smallest.",
+  "例用の別ファイルへ、表示と保存を同時に行います。": "Displays the result and saves it to a separate example file.",
+  "a.logと表示されます。ファイルを移動したり改名したりする操作ではありません。": "Prints a.log. It does not move or rename the file.",
+  "/home/analyst/advancedと表示されます。": "Prints /home/analyst/advanced.",
+  "/home/analyst/advanced/ready.txtと表示されます。": "Prints /home/analyst/advanced/ready.txt.",
+  "ready.txt: ASCII textと表示されます。ASCIIは英数字などの基本的な文字です。": "Prints ready.txt: ASCII text. ASCII includes basic characters such as English letters and digits.",
+  "%nだけなら名前のready.txtだけを表示します。": "%n alone prints only the filename, ready.txt.",
+  "6とready.txtが表示されます。ファイル一つにも使えます。": "Prints 6 and ready.txt. du can measure a single file too.",
+  "2026-10-25 01:00:00 UTCと表示されます。": "Prints 2026-10-25 01:00:00 UTC.",
+  "1970-01-01 00:00:00 UTCと表示されます。": "Prints 1970-01-01 00:00:00 UTC.",
+  "collector=v1、request_id=req-02、state=queuedが別々の行として出ます。": "Prints collector=v1, request_id=req-02 and state=queued as separate lines.",
+  "readyと改行が復元されます。payload.b64も同じ操作で本文を確認できます。": "Restores ready followed by a newline. Decode payload.b64 the same way to inspect its contents.",
+  "revを使う別解です。同じ結果をawk -F.と$NFなら一つのコマンドで取り出せます。": "An alternative using rev. awk -F. and $NF can extract the same result with one command.",
+  "同じものを比較するので出力は空、終了コードは0です。": "Comparing a file with itself produces no output and exit status 0.",
+  "aki、mei、ren、sotaがそれぞれ1回ずつ並びます。": "Lists aki, mei, ren and sota once each.",
+  "比較順を逆にすると、一つ目だけの列でもsotaを取り出せます。順番と隠す列は組み合わせで考えます。": "Reversing the input order lets the first-only column select sota. Choose input order and suppressed columns together.",
+  "同じ一覧同士なら、すべての名前が共通になります。": "Comparing identical lists makes every name common to both.",
+  "標準ではIDと時刻の間がタブになります。": "The default separator between ID and time is a tab.",
+  "名前側を先に結ぶと、ID・名前・ステータスの順になります。最初の行はreq-01 aki 200です。課題では入力の順を変えます。": "Joining the names file first produces ID, name and status; the first row is req-01 aki 200. Reverse the input order for the exercise.",
+  "成功側のreq-01 akiとreq-03 akiが表示されます。": "Displays the successful records req-01 aki and req-03 aki.",
+  "各パスにbasenameが呼ばれ、a.log、b.logが表示されます。": "Calls basename for each path, displaying a.log and b.log.",
+  "INFO bootとWARN retryが順番に表示されます。": "Displays INFO boot followed by WARN retry.",
+  "通常の失敗行は14列、invalid userの行は16列です。どちらも最後はssh2です。": "Ordinary failure rows have 14 fields; invalid user rows have 16. Both end with ssh2.",
+  "200の行は3行あるため、3と表示されます。": "There are three status-200 rows, so this displays 3.",
+  "200の行の300、250、150を足して700バイトになります。": "Adds 300, 250 and 150 from status-200 rows to obtain 700 bytes.",
+  "成功側のIPごとに数えます。192.0.2.10と192.0.2.30が各1件です。": "Counts successful records by IP. 192.0.2.10 and 192.0.2.30 each have one record.",
+  "数の小さい順にすると、1件のIP、3件のIPの順です。": "Ascending numeric order puts the IP with one record before the IP with three.",
+  "collectorのzoneにはUTCという文字列が入っています。": "The collector's zone field contains the string UTC.",
+  "最初の記録だけならreq-01です。[]へ変えると全件を扱えます。": "The first record alone gives req-01. Change to [] to process every record.",
+  "成功側のreq-01、req-03、req-06が表示されます。": "Displays the successful request IDs req-01, req-03 and req-06.",
+  "最初の記録をreq-01とakiの2列にします。": "Turns the first record into two columns, req-01 and aki.",
+  "6件をまとめた配列の最初の記録を選び、\"req-01\"を表示します。": "Collects six records into an array, selects the first, and displays \"req-01\".",
+  "名前ごとのグループは3個なので3と表示されます。元の記録の6件とは別の数です。": "There are three name groups, so this prints 3. That is different from the six original records.",
+  "名前順でaki 2、mei 1、ren 3となります。ここへsortをつなぎます。": "In name order, the rows are aki 2, mei 1 and ren 3. Connect sort to rank them by count.",
+  "まず対象の列とステータスを確認できます。名前は相手の資料にあります。": "Inspect the source fields and statuses first. The names are in the other source.",
+  "実際に届いた一覧を確認できます。予定の一覧とは別の資料です。": "Displays the list actually received, which is a separate source from the expected list.",
+  "行の並びを確認し、IPの位置が末尾から数えられることを確かめます。": "Inspect the record layout and verify that the IP field can be counted from the end.",
+  "まずJSONの全記録を表にして内容を確認できます。access.logもcatで列を確認してください。": "First display all JSON records as a table. Also use cat on access.log to inspect its fields."
+};
+
+/* Progressive English hints corresponding to the Japanese curriculum. */
+globalThis.LINUXROOM_EN_HINTS = {
+  "コマンドの名前はechoです。": "The command name is echo.",
+  "echoのあとに、半角スペースと表示したい文字を書きます。": "After echo, type a normal space and the text to display.",
+  "echo ready を入力してEnterを押します。": "Type echo ready and press Enter.",
+  "文字列の前と後ろに同じ引用符を置きます。": "Put the same quotation mark before and after the string.",
+  "linux roomの空白も引用符の内側に入れます。": "Keep the space in linux room inside the quotes too.",
+  "場所を表示するコマンドはpwdです。": "The command that displays your location is pwd.",
+  "pwdだけを入力すれば動きます。": "Type pwd by itself.",
+  "pwd を入力してEnterを押します。": "Type pwd and press Enter.",
+  "現在地を確認するなら、lsの後ろにパスは不要です。": "To list the current directory, no path is needed after ls.",
+  "一覧にはinbox、logs、notes、welcome.txtがあります。": "The list includes inbox, logs, notes and welcome.txt.",
+  "移動はcd、行き先はlogsです。": "Use cd to move; the destination is logs.",
+  "何も表示されなくても、現在地が変われば成功です。": "No output is fine: changing the directory is success.",
+  "cdの行き先に..を指定します。": "Give .. as the destination for cd.",
+  "半角ピリオドを二つ、間を空けずに書きます。": "Type two normal periods together, without a space.",
+  "catの後ろに、読みたいファイル名を書きます。": "After cat, type the name of the file to read.",
+  "app.logは現在地にあるので、長いパスは要りません。": "app.log is in the current directory, so a long path is unnecessary.",
+  "cat app.log と入力します。": "Type cat app.log.",
+  "headと-nを使います。": "Use head and -n.",
+  "行数は3です。": "The number of lines is 3.",
+  "先頭のheadを、末尾のtailに変えます。": "Change head, which reads the beginning, to tail, which reads the end.",
+  "-n 3はそのまま使えます。": "Keep -n 3 as it is.",
+  "まずless app.logで開きます。": "First open the file with less app.log.",
+  "開いたままでは完了しません。入力画面へ戻りましょう。": "Leaving the viewer open does not finish the exercise. Return to the command input.",
+  "grepの検索語をERRORにします。": "Set the grep search pattern to ERROR.",
+  "ERRORとerrorは、今の設定では別の文字です。": "With the current options, ERROR and error are different.",
+  "grep 'ERROR' app.log と入力します。": "Type grep 'ERROR' app.log.",
+  "前の検索に-nを足します。": "Add -n to the previous search.",
+  "grepと検索語の間に-nを置けます。": "You can put -n between grep and the search pattern.",
+  "grepに-iを追加します。": "Add -i to grep.",
+  "検索語はERRORのままで構いません。": "The search pattern can remain ERROR.",
+  "検索語はINFOです。": "The search pattern is INFO.",
+  "INFOを表示する検索に-vを付けます。": "Add -v to the search that displays INFO lines.",
+  "前の検索の後ろに|を書きます。": "Add | after the previous search.",
+  "右側のwc -lには、ファイル名を付けません。": "Do not add a filename to wc -l on the right.",
+  "grep 'ERROR' app.log | wc -l と入力します。": "Type grep 'ERROR' app.log | wc -l.",
+  "grepはそのまま使います。": "Keep the grep stage unchanged.",
+  "wc -lの部分をhead -n 2に入れ替えます。": "Replace wc -l with head -n 2.",
+  "名前は左から3番目です。": "The name is the third field from the left.",
+  "printの後ろを$3にします。": "Use $3 after print.",
+  "awk '{print $3}' app.log と入力します。": "Type awk '{print $3}' app.log.",
+  "前の段階はgrepでERRORを選ぶコマンドです。": "The previous step is the grep command that selects ERROR.",
+  "後ろに | awk '{print $3}' を加えます。": "Append | awk '{print $3}'.",
+  "区切りはカンマなので、-dの値は変えません。": "The delimiter is still a comma, so keep the -d value.",
+  "-fの後ろを2にします。": "Change the value after -f to 2.",
+  "sortの後ろにファイル名を書きます。": "Put the filename after sort.",
+  "元の順番はcat names.txtでも確認できます。": "You can check the original order with cat names.txt.",
+  "sort names.txt と入力します。": "Type sort names.txt.",
+  "uniqに-cを付けます。": "Add -c to uniq.",
+  "使うのは並べ替え済みのsorted-names.txtです。": "Use the already sorted file sorted-names.txt.",
+  "前の段階を入力すると、grepとawkまでのコマンドを使えます。": "Fill in the previous step to start with the grep and awk stages.",
+  "その後ろに | sort を追加します。": "Append | sort.",
+  "grep、awk、sortはそのまま残します。": "Keep grep, awk and sort unchanged.",
+  "末尾に | uniq -c を加えます。": "Append | uniq -c.",
+  "名前順に数えるところまでは変えません。": "Keep the steps that count names in name order.",
+  "末尾にもう一段、 | sort -nr を追加します。": "Add another stage at the end: | sort -nr.",
+  "現在地の一つ上を表すのは..です。": ".. means one directory above the current location.",
+  "mkdir ../reportsなら、目的の場所に作れます。絶対パスでも構いません。": "mkdir ../reports creates the directory in the right location. An absolute path works too.",
+  "mkdir ../reports と入力します。": "Type mkdir ../reports.",
+  "前の検索コマンドの末尾に>と保存先を書きます。": "Add > and the destination path after the search command.",
+  "パイプの|ではなく、出力先を変える>を使います。": "Use > to change the output destination, rather than the pipe symbol |.",
+  "文字を出すechoと、追記する>>を組み合わせます。": "Combine echo, which prints text, with >>, which appends it.",
+  ">が一つだと元の内容が消えるので、二つ書きます。": "A single > overwrites the old contents. Use two > characters.",
+  "前の5段の集計は、そのまま使えます。": "Keep the previous five-stage summary pipeline.",
+  "末尾に | tee ../reports/ranking.txt を追加します。": "Append | tee ../reports/ranking.txt.",
+  "コマンドはcpです。": "The command is cp.",
+  "コピー元の後ろに、コピー先のパスを書きます。": "Put the destination path after the source path.",
+  "名前を変更するコマンドはmvです。": "The command that renames a file is mv.",
+  "最初に今の名前、次に新しい名前を書きます。": "Put the current name first and the new name second.",
+  "コマンド名はjqです。": "The command name is jq.",
+  "jqの後ろに'.'、次にファイル名を書きます。": "Put '.' after jq, followed by the filename.",
+  "jq '.' profile.json と入力します。": "Type jq '.' profile.json.",
+  "フィルターは.userです。": "The filter is .user.",
+  "引用符なしにする-rを忘れずに付けます。": "Remember -r to remove quotation marks.",
+  ".levelというキーを条件にします。": "Use the .level field in the condition.",
+  "selectの丸括弧の中を.level == \"ERROR\"にします。": "Inside the select parentheses, use .level == \"ERROR\".",
+  "selectの後ろ、シングルクォートの内側に | .user を加えます。": "After select, add | .user inside the single quotes.",
+  "前に学んだ-rを付けると、名前の引用符を外せます。": "Add the -r option you learned earlier to print names without quotation marks.",
+  "現在地の下にあるファイルは、ディレクトリ名/ファイル名で指定できます。": "Name a file under the current directory as directory/filename.",
+  "必要なのはERRORを含む行全体です。名前の抽出はまだしません。": "You need the complete ERROR lines. Do not extract the names yet.",
+  "名前は3列目です。まずgrepとawkをつなぎ、名前だけ取り出せるか確かめます。": "Names are in field 3. First connect grep and awk and check that you can extract only the names.",
+  "sort → uniq -c → sort -nrで集計できます。mkdir -pでreportsを作り、最後にteeで保存できます。": "Summarize with sort → uniq -c → sort -nr. Create reports with mkdir -p and finish by saving through tee.",
+  "helpの後ろに、調べるコマンド名を置きます。": "Put the command you want to look up after help.",
+  "今回はgrepの案内を表示します。": "This time, display the guide for grep.",
+  "help grep と入力します。": "Type help grep.",
+  "2回に分けて実行します。まずecho readyです。": "Run two commands separately. Start with echo ready.",
+  "そのあとhistoryだけを入力します。": "Then enter history by itself.",
+  "表示だけを消すコマンドはclearです。": "clear removes only the display.",
+  "ファイル名は指定しません。": "Do not specify a filename.",
+  "-lと-hは-lhにまとめられます。": "You can combine -l and -h as -lh.",
+  "対象はsamples/payload.logです。": "The target is samples/payload.log.",
+  "並べ方を時刻へ変える指定は-tです。": "-t changes the ordering to modification time.",
+  "-lと-tを合わせ、日時と名前を読みます。": "Combine -l and -t to inspect timestamps and names.",
+  "tac session.logで全行を逆順にします。": "tac session.log reverses all the lines.",
+  "その出力をhead -n 3に渡します。": "Pass that output to head -n 3.",
+  "headに-nで行数を指定します。": "Use -n with head to specify the line count.",
+  "対象はserver.log、読む量は3行です。": "The target is server.log and the count is 3 lines.",
+  "行数の-n 3はそのまま使えます。": "Keep -n 3 for the line count.",
+  "先頭を読むheadから末尾を読むコマンドへ変えます。": "Change head, which reads the beginning, to the command that reads the end.",
+  "moreの引数に/home/analyst/applied/server.logを指定します。": "Give /home/analyst/applied/server.log as the argument to more.",
+  "開いただけで終わらず、qで戻ります。": "Opening it is not enough; press q to return.",
+  "検索語はERRORです。": "The search pattern is ERROR.",
+  "本文を表示するgrepへ-cを足します。": "Add -c to the grep command that normally displays matching lines.",
+  "行数の-nではなくバイト数の-cです。": "Use -c for bytes rather than -n for lines.",
+  "LINUXROOMはASCIIの9文字です。": "LINUXROOM consists of nine ASCII characters.",
+  "空行も数えるために-baを加えます。": "Add -ba to number empty lines too.",
+  "番号欄は-w 1、区切りは-s ': 'です。": "Set the number width with -w 1 and the separator with -s ': '.",
+  "検索語の前に-Fを指定します。": "Put -F before the search pattern.",
+  "検索語を引用符で囲み、記号もそのまま書きます。": "Quote the search string and keep its punctuation exactly as written.",
+  "候補の語を|でつなぎます。": "Connect the alternative words with |.",
+  "検索条件は'ERROR|WARN'です。": "The search pattern is 'ERROR|WARN'.",
+  "始まりを^ERROR、終わりをfull$で指定します。": "Use ^ERROR for the beginning and full$ for the end.",
+  "その間を.*でつなぎます。": "Connect them with .*.",
+  "最初はgrep -A 1で10:02を探します。": "First search for 10:02 using grep -A 1.",
+  "2回目は-Aを-Bへ変更します。最後の表示は10:01と10:02です。": "On the second run, change -A to -B. The final output contains 10:01 and 10:02.",
+  "-Bを-Cへ変えると両側を指定できます。": "Change -B to -C to include both sides.",
+  "行番号の-nも付けます。": "Add -n for line numbers too.",
+  "本文ではなく名前を表示する-lと、下まで探す-rを組み合わせます。": "Combine -l to print filenames with -r to search subdirectories.",
+  "--include '*.log'で対象を絞ります。": "Restrict targets with --include '*.log'.",
+  "コマンド名をrgにし、-nを付けます。": "Use the command name rg and add -n.",
+  "検索語はERROR、対象はarchive/day1/app.logです。": "Search for ERROR in archive/day1/app.log.",
+  "対象をファイルからarchiveディレクトリへ変えます。": "Change the target from a file to the archive directory.",
+  "-g '*.log'を加えます。": "Add -g '*.log'.",
+  "探し始める場所はarchiveです。": "Start the search at archive.",
+  "-type fと-name '*.log'を付けます。": "Add -type f and -name '*.log'.",
+  "条件は$2 == \"ERROR\"です。": "The condition is $2 == \"ERROR\".",
+  "取り出す列は{print $3}で指定します。": "Select the output field with {print $3}.",
+  "-Fでカンマを区切りにします。": "Use -F to set a comma delimiter.",
+  "NR > 1で2行目以降を選び、$3を表示します。": "NR > 1 selects line 2 onward; print $3.",
+  "数の前の+が開始位置の指定になります。": "The + before the number makes it a starting position.",
+  "開始位置は先頭から数えて2行目です。": "The starting position is line 2, counted from the beginning.",
+  "サービスは4列目、処理時間は5列目です。": "The service is field 4 and the duration is field 5.",
+  "$4 == \"portal\"と$5 >= 150を&&でつなぎます。": "Connect $4 == \"portal\" and $5 >= 150 with &&.",
+  "区切り文字は-tで指定します。": "Specify the delimiter with -t.",
+  "3列目を数値の逆順にする指定は-k3,3nrです。": "Use -k3,3nr to sort field 3 numerically in descending order.",
+  "ファイル名はそのままにし、名前の前へ<を入れます。": "Keep the filename and place < before it.",
+  "この問題では<を実際に使います。catからのパイプは次のtrでも試せます。": "This exercise requires using <. You can try a pipe from cat in the following tr exercise.",
+  "trに< names.txtで本文を渡します。catからパイプで渡しても構いません。": "Supply the contents to tr with < names.txt. A pipe from cat is accepted too.",
+  "大文字の集合から小文字の集合へ変換します。": "Translate the uppercase character set to the lowercase set.",
+  "tr -sへ< spaces.txtでファイルを入力します。catからのパイプでも構いません。": "Supply the file to tr -s with < spaces.txt. A pipe from cat works too.",
+  "最後にcut -d ' ' -f 3を追加します。": "Append cut -d ' ' -f 3.",
+  "最初にsortで同じ名前を集めます。": "First use sort to group equal names together.",
+  "件数の-cではなく、繰り返しだけの-dを付けます。": "Use -d for repeated values, rather than -c for counts.",
+  "表の表示は-tです。": "-t requests table formatting.",
+  "入力のカンマを-s ','で指定します。": "Set the input comma delimiter with -s ','.",
+  "自動表示を止める-nを付けます。": "Add -n to suppress automatic printing.",
+  "範囲は2,4、処理はpです。": "The range is 2,4 and the action is p.",
+  "s/ERROR/FAIL/で置換先を指定します。": "Set the replacement with s/ERROR/FAIL/.",
+  "最後にgを加えて、各行の全一致を置き換えます。": "Add g at the end to replace every match on each line.",
+  "1つ目の処理は/^#/dです。": "The first expression is /^#/d.",
+  "2つ目の処理/^$/dも-eで指定します。": "Supply the second expression /^$/d with another -e.",
+  "書式の%sへren、%dへ3を渡します。": "Pass ren for %s and 3 for %d in the format.",
+  "書式の最後は\\nです。引用符の内側に書きます。": "End the format with \\n, inside the quotes.",
+  "touchの後ろに、新しいファイルのパスを書きます。": "Put the new file's path after touch.",
+  "reportsディレクトリは作成済みです。": "The reports directory already exists.",
+  "削除する名前を1個だけ指定します。": "Specify only the one filename to delete.",
+  "完成版final.txtは引数に入れません。": "Do not include final.txt as an argument.",
+  "最初にmkdir reports/emptyを実行します。": "First run mkdir reports/empty.",
+  "次に同じパスをrmdirへ渡します。": "Then give the same path to rmdir.",
+  "検索とecho unexpectedの間を&&でつなぎます。": "Connect the search and echo unexpected with &&.",
+  "最後のecho checkedへは;でつなぎ、検索結果に関係なく進めます。": "Connect the final echo checked with ; so it runs regardless of the search result.",
+  "エラーの番号は2です。>の直前に空白を入れず2>と書きます。": "Standard error is descriptor 2. Write 2> with no space between 2 and >.",
+  "失敗後もメモを読むため、&&ではなく;でつなぎます。": "Use ; rather than && so the note is read even after a failure.",
+  "grepに一致がないため、通常の本文出力は空です。": "grep finds no match, so its normal text output is empty.",
+  "検索の直後へ; echo $?を続けます。": "Immediately follow the search with ; echo $?.",
+  "検索語の前後にカンマを含めます。": "Include a comma on each side of the search word.",
+  "固定文字列検索の-Fを付けます。": "Add -F for fixed-string searching.",
+  "grep -F ',ERROR,' metrics.csv と入力します。": "Type grep -F ',ERROR,' metrics.csv.",
+  "4列目がportalという条件を付けます。": "Require field 4 to equal portal.",
+  "表示するのは3列目の$3です。": "Display field 3, $3.",
+  "これまでのgrepとawkはそのまま使います。": "Keep the grep and awk stages unchanged.",
+  "最後に大文字から小文字へ変換するtrを追加します。": "Append tr to convert uppercase to lowercase.",
+  "まずsortを追加し、aki、mei、renがまとまることを確認します。": "First add sort and check that aki, mei and ren are grouped together.",
+  "その後にuniq -cを追加します。": "Then add uniq -c.",
+  "途中のsortは残します。": "Keep the earlier sort stage.",
+  "最後へ数値の逆順のsort -nrを追加します。": "Append sort -nr for descending numeric order.",
+  "ERRORを選ぶ → portalの利用者名を取る → 小文字にする → 同じ名前を集めて数える → 件数順、の流れです。": "Select ERROR → extract portal usernames → lowercase → group and count names → rank by count.",
+  "できた集計の末尾にteeを付けると、表示と保存を両方できます。": "Add tee after the completed summary to display and save it together.",
+  "名前を取り出すコマンドに、まず対象パスを渡します。": "First pass the target path to the command that extracts its name.",
+  "二つ目の引数.logは、末尾から取り除く文字列です。": "The second argument, .log, is the suffix to remove.",
+  "basename /home/analyst/advanced/access.log .log と入力します。": "Type basename /home/analyst/advanced/access.log .log.",
+  "対象はbundleの中のb.logです。": "The target is b.log inside bundle.",
+  "dirnameの後ろに対象のパス全体を書きます。": "Put the full target path after dirname.",
+  "bundleへ進んでから..で戻るため、access.logは現在地にあります。": "The path goes into bundle and back through .., so access.log is in the current directory.",
+  "-eに続けて、課題で指定したパスを渡します。": "After -e, supply the path specified in the exercise.",
+  "fileに調べたいファイル名を渡します。": "Give file the name of the file to inspect.",
+  "jsonlの最後は数字の1ではなく、英小文字のlです。": "The last character of jsonl is a lowercase L, not the digit 1.",
+  "書式に名前の%nとサイズの%sを並べます。": "Put %n for the name and %s for the size in the format.",
+  "書式中の空白を保つため、全体を引用符で囲みます。": "Quote the whole format to preserve its space.",
+  "duに-cbを付け、対象をbundle/*.logにします。": "Give du the options -cb and target bundle/*.log.",
+  "総計は最後の行なのでtail -n 1へ渡します。": "The total is the final line, so pipe it into tail -n 1.",
+  "見本の入力時刻10:00:00を09:00:00に変えます。": "Change the example's input time from 10:00:00 to 09:00:00.",
+  "書式は+%F %T %Zです。空白があるので引用符を付けます。": "The format is +%F %T %Z. Quote it because it contains spaces.",
+  "date -u -d '2026-10-25T09:00:00+09:00' '+%F %T %Z' と入力します。": "Type date -u -d '2026-10-25T09:00:00+09:00' '+%F %T %Z'.",
+  "@のすぐ後ろに秒数を書きます。": "Put the seconds immediately after @.",
+  "表示の書式と-uは前の課題と同じです。": "Keep the format and -u from the previous exercise.",
+  "読める文字列を取り出してから、行を絞ります。": "Extract readable strings first, then filter the lines.",
+  "固定文字列としてrequest_id=を検索します。": "Search for request_id= as a fixed string.",
+  "まずbase64 -d payload.b64でJSONが見えるか確認します。": "First check the JSON with base64 -d payload.b64.",
+  "その右にjq -rをつなぎ、.request_idを指定します。": "Pipe it into jq -r with the filter .request_id.",
+  "区切りはピリオドです。awkの-F.で指定します。": "The separator is a dot. Use the -F. option with awk.",
+  "最後のフィールドの番号はNFです。値として読むときは$NFにします。": "NF is the last field's number. Use $NF to read its value.",
+  "比較元を先、比較先を後に書きます。": "Put the baseline file first and the current file second.",
+  "結果の-retention=7と+retention=14を確認しましょう。": "Look for -retention=7 and +retention=14 in the result.",
+  "diff -u baseline.conf current.conf と入力します。終了コード1はこの課題では差の検出です。": "Type diff -u baseline.conf current.conf. In this exercise, exit status 1 means a difference was detected.",
+  "sort -uの結果をteeで受け取ります。": "Feed the output of sort -u into tee.",
+  "保存先は現在地のobserved.sortedです。": "Save to observed.sorted in the current directory.",
+  "残したいのは2列目です。": "Keep column 2.",
+  "1列目と3列目を隠す指定は-13です。": "Use -13 to hide columns 1 and 3.",
+  "共通部分は3列目なので、3を隠してはいけません。": "Common entries are in column 3, so do not suppress 3.",
+  "一つ目だけと二つ目だけを隠します。": "Suppress the first-only and second-only columns.",
+  "区切り文字にカンマを指定します。": "Set a comma as the delimiter.",
+  "左側にIDファイル、右側に時刻ファイルを渡します。": "Pass the ID file first and the time file second.",
+  "joinの後ろに、結びたい二つのファイルを書きます。": "Put the two files to connect after join.",
+  "出力順のため、ステータス側を先にします。": "Put the status file first to get the requested field order.",
+  "join status-by-id.txt actors-by-id.txt と入力します。": "Type join status-by-id.txt actors-by-id.txt.",
+  "joinを左、awkを右に置きます。": "Put join on the left and awk on the right.",
+  "条件は$2 >= 500、表示する列は$1と$3です。": "Use the condition $2 >= 500 and print fields $1 and $3.",
+  "xargsへ< selected-files.txtで一覧を入力します。catからパイプで渡しても構いません。": "Supply the list to xargs with < selected-files.txt. A pipe from cat works too.",
+  "呼び出すコマンドはfile、1回の引数は-n 1です。": "The command to invoke is file; -n 1 supplies one argument per call.",
+  "前の段階で本文が集まっているため、最後は普通のgrepです。": "The preceding stage already collects the file contents, so the last stage is an ordinary grep.",
+  "grep側にファイル名を追加せず、標準入力を検索します。": "Do not add filenames to grep; search standard input.",
+  "必要なIPは最後から4番目にあります。": "The required IP is the fourth field from the end.",
+  "awkの列番号としてNF-3という計算を使います。": "Use the expression NF-3 for the awk field number.",
+  "grep 'Failed password' auth.log | awk '{print $(NF-3)}' と入力します。": "Type grep 'Failed password' auth.log | awk '{print $(NF-3)}'.",
+  "表示のprint $0を、count++という加算に変えます。": "Replace print $0 with the increment count++.",
+  "全体を読み終えた後ろにEND {print count}を付けます。": "Add END {print count} to print after all input has been read.",
+  "条件の$3 >= 500はそのまま使います。": "Keep the condition $3 >= 500.",
+  "count++をtotal += $4に変え、最後はtotalを表示します。": "Replace count++ with total += $4 and print total at the end.",
+  "printでIPを出す部分をcount[IP]++へ変えます。": "Replace the part that prints the IP with count[IP]++.",
+  "ENDで全キーの件数を表示し、sort -k2,2でIP列を並べます。": "Print the count for every key in END, then sort the IP column with sort -k2,2.",
+  "最後のsortを、1列目を数値の逆順にする指定へ変えます。": "Change the final sort to descending numeric order on field 1.",
+  "tee ip-ranking.txtを最後につなげます。": "Append tee ip-ranking.txt.",
+  "収集器のキーはcollectorです。": "The collector's key is collector.",
+  "その内側のnameへドットで進みます。": "Follow the dot path to its nested name field.",
+  "jq -r '.collector.name' manifest.json と入力します。": "Type jq -r '.collector.name' manifest.json.",
+  "最初の要素だけを選ぶ[0]を、全要素の[]に変えます。": "Replace [0], which selects only the first element, with [] for all elements.",
+  "配列を展開してから.request.idを選びます。": "Expand the array, then select .request.id.",
+  "配列を展開した後、IDを取り出す前にselectを入れます。": "Put select after expanding the array and before extracting the ID.",
+  "文字列failedはjqの式の中でダブルクォートで囲みます。": "Inside the jq program, put double quotes around the string failed.",
+  "最後の.request.idだけの部分を、二つの値の配列へ変えます。": "Replace the final .request.id with an array containing both required values.",
+  "配列の後ろに| @tsvを加えます。": "Add | @tsv after the array.",
+  "全体をまとめるため-sを付けます。": "Add -s to collect all input.",
+  "その配列にlengthを実行します。": "Apply length to the resulting array.",
+  "-sでまとめてからgroup_byします。": "Collect the input with -s before group_by.",
+  "各グループを.[]で取り出し、その先頭の記録から名前を選びます。": "Expand each group with .[] and select the name from its first record.",
+  "jqの各グループから名前とlengthを出します。": "Emit the name and length for each jq group.",
+  "件数は2列目なのでsortのキーは-k2,2nrです。": "The count is field 2, so use the sort key -k2,2nr.",
+  "IDをキーにjoinすると、ID・ステータス・名前の順になります。": "Joining by ID produces ID, status and name.",
+  "awkで2列目を条件にし、print $1, $3, $2で並べます。": "In awk, test field 2 and arrange the output with print $1, $3, $2.",
+  "予定の一覧を一つ目、受信した一覧を二つ目として比較できます。": "Compare the expected list first and the received list second.",
+  "一つ目だけを残すには、commの2列目と3列目を隠します。": "To retain first-only entries, suppress comm columns 2 and 3.",
+  "最初の抽出にtee auth-failed.logを加えると、元の行を保存したまま次へ渡せます。": "Add tee auth-failed.log after the initial extraction to save the original lines and pass them onward.",
+  "IPを$(NF-3)で取り出し、sort → uniq -c → sort -nrをつなげられます。": "Extract the IP with $(NF-3), then connect sort → uniq -c → sort -nr.",
+  "JSONから失敗したIDと名前を抽出して整列します。access.logからID・ステータス・バイト数を取り出して整列し、IDで結びます。": "Extract failed IDs and names from JSON and sort them. Extract ID, status and bytes from access.log, sort, and join by ID.",
+  "mkdir reportsで置き場を作ります。joinした明細を保存し、その2列目を件数集計、4列目をawkで合計します。": "Create the output directory with mkdir reports. Save the joined detail, count its field-2 names, and sum its field-4 bytes with awk.",
+  "___に、ここまでで学んだ操作や指定を補ってください。": "Replace ___ with the operation or option you have learned.",
+  "読みやすい単位にするオプションを補います。": "Fill in the option for readable size units.",
+  "新しい順にするオプションを補います。": "Fill in the option for newest-first ordering.",
+  "先頭3行に絞ります。": "Limit the output to the first three lines.",
+  "末尾を読むコマンド名を入れます。": "Fill in the command that reads the end of a file.",
+  "一致行数を出すオプションを入れます。": "Fill in the option that prints the count of matching lines.",
+  "改行を含めないバイト数を指定します。": "Specify the byte count without the newline.",
+  "2行目からを表す指定を入れます。": "Fill in the option value that starts at line 2.",
+  "本文を入力する向きの記号を入れます。": "Fill in the symbol that supplies file contents as input.",
+  "成功時だけ進む記号を入れます。": "Fill in the connector that continues only after success.",
+  "標準エラーの出力先を変える記号を入れます。": "Fill in the symbol that redirects standard error.",
+  "直前の終了コードを表す変数を入れます。": "Fill in the variable for the previous exit status.",
+  "最後の1行だけを表示します。": "Display only the final line.",
+  "最後のフィールドを指定します。": "Select the last field."
+};
+</script>
+  <script>/* Offline Japanese/English presentation catalog. Never translate learner data. */
+(function (root) {
+  'use strict';
+  const messages = {
+  "初級編": "Beginner",
+  "一つずつ、コマンドを覚える": "Learn one command at a time",
+  "ファイルを読むところから、パイプをつないで集計するところまで。": "From reading files to building pipelines and summaries.",
+  "まねて、試す": "Follow and try",
+  "少し変えて、使う": "Change and practice",
+  "自分で、組み立てる": "Build it yourself",
+  "ブラウザへの自動保存ができません。「進捗を保存」からファイルをダウンロードすると、あとで続きから学習できます。": "Browser autosave is unavailable. Use Save progress to download a file and continue later.",
+  "このブラウザに自動保存しました。": "Saved automatically in this browser.",
+  " レッスン修了": " lessons completed",
+  " レッスン修了 · ": " lessons completed · ",
+  "全体 ": "Overall ",
+  " レッスン修了。今日も一歩ずつ。": " lessons completed. Keep learning, one step at a time.",
+  " 段階 · 全 ": " levels · ",
+  " レッスン": " lessons",
+  "続きから学ぶ ": "Continue learning ",
+  "最初のレッスンをはじめる ": "Start the first lesson ",
+  "小さな操作をつなぎながら、できることを増やします。": "Connect small operations and build your skills.",
+  " 修了": " completed",
+  "の続きへ →": ": continue →",
+  "をはじめる →": ": start →",
+  "を選んで学習する": ": select this level",
+  "FREE PRACTICE / 自由練習": "FREE PRACTICE",
+  "自由に、コマンドを試そう": "Try commands freely",
+  "一歩ずつ練習": "Practice step by step",
+  "自分のペースで": "At your own pace",
+  "約 ": "About ",
+  " 分": " min",
+  "時間制限なし": "No time limit",
+  "習ったコマンドを、何度でも。": "Practice what you have learned, as often as you like.",
+  "ファイルを開いたり、探したり、パイプでつないだり。自由に操作してみましょう。": "Open files, search their contents, and connect commands with pipes. Explore freely.",
+  "パイプでつないだら、「コマンドが、結果になるまで」で各段を選んでみよう。その段が受け取った入力と、次へ渡した出力を見比べられます。": "After running a pipeline, select each stage in From command to result to compare the input it received with the output it passed on.",
+  "下の「この課題で使えるファイル」でファイル名を確認できます。迷ったら help やコマンド帳を使ってください。": "Check filenames under Files for this exercise. Use help or the command reference when you need a reminder.",
+  "この教材で使えるコマンドを表示します。": "Displays the commands supported by this lab.",
+  "まずは pwd と ls で、現在地とファイルを見てみよう。": "Start with pwd and ls to check your location and files.",
+  "前の段階を入力": "Fill in the previous step",
+  "書きはじめを入力": "Fill in a starting command",
+  "課題に戻る ↑": "Back to the exercise ↑",
+  "解答例": "Example solution",
+  "見ながら入力しても大丈夫。実行した結果を確かめて、自分の操作にしていきましょう。": "It is fine to follow the example. Run it and inspect the result to understand each step.",
+  "修了・次の課題へ ↑": "Completion and next exercise ↑",
+  "へ進む →": ": continue →",
+  "次のレッスンへ →": "Next lesson →",
+  "次は SOCroom-easy でログの読み方を学び、Logroom でコマンドを使ったログ分析へ進みましょう。": "Next, learn to read logs in SOCroom-easy, then analyze them with commands in Logroom.",
+  " 各 GitHub ページから教材を入手できます。": " Download each lab from its GitHub page.",
+  "の最後の実習ができました。次は": " final practice completed. Next: ",
+  "です。今までのコマンドに新しい操作を足していきましょう。": ". Build on familiar commands with new operations.",
+  " を修了しました": " completed",
+  "あと少し。課題の条件をもう一度確かめてみよう。": "Almost there. Check the exercise requirements again.",
+  "課題の条件と、左側のヒントを確認してみよう": "Check the requirements and the hints on the left.",
+  "Linuxroom · virtual terminal\n\nanalyst@linuxroom:~$ はプロンプトの例です。\nユーザー名@ホスト名:現在地 のあとに、入力を待つ $ が付きます。\nプロンプトは入力せず、コマンドだけを打って Enter。": "Linuxroom · virtual terminal\n\nanalyst@linuxroom:~$ is an example prompt.\nIt shows user@host:working-directory, followed by $ when ready for input.\nType only the command, without the prompt, and press Enter.",
+  "実行前の現在地: ": "Working directory before execution: ",
+  "旧版の履歴には実行前の現在地が保存されていません。": "Older history entries did not save their working directory.",
+  "現在地: ": "Current directory: ",
+  "analyst はユーザー名、linuxroom はホスト名。: の後ろは現在地、~ はホームフォルダ。$ は一般ユーザーの入力待ちです。プロンプトは入力しません。": "analyst is the user; linuxroom is the host. After : is the directory; ~ means home. $ indicates a regular user ready for input. Do not type the prompt.",
+  "入力欄に ": "Add ",
+  " を追加": " to the command input",
+  "この操作を実行できませんでした。コマンドを短くして、もう一度試してください。": "This operation could not run. Try a shorter command and run it again.",
+  "差分が見つかりました。diff の終了状態 1 は、二つの内容が異なることを表します。": "Differences found. A diff exit status of 1 means the two contents differ.",
+  "一致する行がありませんでした。検索語や大文字・小文字を確認してみよう。": "No matching lines. Check the search text and letter case.",
+  "終了状態 ": "Exit status ",
+  " です。画面に何も表示されなくても、コマンドが成功したとは限りません。": ". Empty output does not necessarily mean the command succeeded.",
+  "実行しました。画面に何も表示しないコマンドもあります。": "Command finished. Some successful commands do not print output.",
+  "閲覧画面を開きました。q で閉じます。": "Viewer opened. Press q to close it.",
+  " 個の処理 · 実行結果": " operations · execution results",
+  "次の実行 →": "Next command →",
+  "処理 ": "Stage ",
+  " の入力と出力を見る": ": inspect input and output",
+  "出力 ": "Output: ",
+  " 行": " lines",
+  "（標準入力は空です。ファイル名を引数で渡す処理は、そのファイルを直接読みます）": "(Standard input is empty. Commands given a filename can read that file directly.)",
+  "（表示する出力はありません）": "(No output to display.)",
+  "この処理でエラーが発生しました。エラー文と入力を確認してみよう。": "This stage reported an error. Check the error message and input.",
+  "終了状態 1 は「差分あり」を表します。diff では、違いが見つかると 1 を返します。": "Exit status 1 means differences were found. diff returns 1 when the files differ.",
+  "終了状態 1 は「一致する行なし」を表します。検索語や大文字・小文字を確認してみよう。": "Exit status 1 means no matching lines. Check the search text and letter case.",
+  " です。このコマンドの説明と結果を確認しましょう。": ". Check the command description and its result.",
+  "この欄は保存・リダイレクト前の実際の出力です。": "This panel shows the actual output before saving or redirection. ",
+  "前の処理から ": "Received ",
+  " 行を受け取りました。": " lines from the previous stage.",
+  "最初の処理です。必要な入力は、ファイルや引数から受け取ります。": "This is the first stage. It obtains any required input from files or arguments.",
+  "補完の候補がありません。ファイル名や現在地を確認してみよう。": "No completion candidates. Check the filename and current directory.",
+  "補完しました。": "Completed.",
+  "候補: ": "Candidates: ",
+  "入力中のコマンドを取り消しました。": "Current command input canceled.",
+  "閲覧を終え、ターミナルに戻りました。": "Viewer closed; back at the terminal.",
+  "閲覧画面を閉じました。次のコマンドを入力できます。": "Viewer closed. You can enter the next command.",
+  "ヒントあり": "Hints used",
+  "プロンプト / analyst@linuxroom:~$": "Prompt / analyst@linuxroom:~$",
+  "コマンドの入力を待つ表示。analyst はユーザー名、linuxroom はホスト名（コンピューター名）、: の後ろが現在地。~ はホームフォルダ。$ は一般ユーザー、# は管理者の目印としてよく使われる。この教材では一般ユーザーで操作する。表示は環境ごとに異なる。プロンプト自体は入力しない。": "A prompt indicates readiness for a command. analyst is the user, linuxroom is the host, and the part after : is the current directory. ~ means home. $ commonly indicates a regular user and # an administrator. This lab uses a regular user. Prompts vary between environments. Do not type the prompt itself.",
+  "今いるフォルダの場所を表示する。": "Displays the current working directory.",
+  "ls は中身の一覧。実機の端末では横に並ぶこともあり、ls -1 なら1行1項目。cd はフォルダを移動する。.. は一つ上、~ はホームフォルダ。移動するとプロンプトの現在地も変わる。": "ls lists directory contents. A real terminal may arrange them in columns; ls -1 requests one entry per line. cd changes directories. .. means the parent and ~ means home. The prompt changes to show your location.",
+  "-l は権限・サイズ・更新日時などの詳細、-h は読みやすいサイズ単位、-t は更新日時の新しい順。更新日時やサイズの表記は実機の環境でも異なる。": "-l displays details such as permissions, size and modification time. -h uses readable size units; -t sorts newest first. Size and timestamp formatting can differ on real systems.",
+  "順に、全体・先頭・末尾・閲覧画面で読む。head -c は先頭のバイト数、tail -n +2 は2行目から最後まで。less は q で終了。": "Read the whole file, its beginning, its end, or open a viewer. head -c selects bytes from the start. tail -n +2 reads from line 2 to the end. Press q to exit less.",
+  "指定した文字を含む行を探す。-F は文字をそのまま検索、-n は行番号、-i は大文字と小文字を区別しない、-v は一致しない行。": "Select matching lines. -F treats the search text literally, -n adds line numbers, -i ignores case, and -v keeps nonmatching lines.",
+  "|（パイプ）は左の出力を右の入力へ渡す。wc -l は改行の数を数える。": "A pipe, |, passes the left command's output to the right command's input. wc -l counts newline characters.",
+  "必要な列を取り出す。cut -d は区切り文字、-f は列番号。awk の $1 は1列目、$NF は最後の列。": "Extract fields. cut -d specifies a delimiter and -f a field number. In awk, $1 is the first field and $NF the last.",
+  "sort で並べ、uniq -c で隣り合う同じ行を数える。sort -nr は数字として大きい順に並べる。sort -u は並べ替えて重複を取り除く。": "sort orders lines; uniq -c counts adjacent equal lines. sort -nr orders numbers from largest to smallest. sort -u sorts and removes duplicates.",
+  "フォルダを作る・ファイルをコピーする・移動や名前の変更をする。mkdir -p はフォルダが存在していても成功し、必要な親フォルダも作る。": "Create directories, copy files, or move and rename them. mkdir -p also creates missing parents and succeeds if the directory already exists.",
+  "< / 標準入力": "< / standard input",
+  "< はファイルをコマンドの標準入力へ渡す。tr はファイル名を引数に取らないので、この書き方が使える。cat file | command と同じ入力を渡せる。wc -l < file はファイル名を付けずに行数だけを出す。": "< passes a file's contents as standard input. Use it with tr, which does not accept an input filename argument. It can supply the same text as cat file | command. wc -l < file prints a count without a filename label.",
+  "&& / ; / 終了状態": "&& / ; / exit status",
+  "&& は左のコマンドが成功（終了状態 0）したときだけ次を実行する。; は左の成否にかかわらず次を実行する。準備に失敗したら止めたいときは && を使う。": "&& runs the next command only if the left command succeeds with status 0. ; continues regardless of the preceding status. Use && when a failed preparation step should stop the next operation.",
+  "2>/dev/null / 標準エラー出力": "2>/dev/null / standard error",
+  "2> はエラーメッセージの出力先を変える。/dev/null は受け取った内容を捨てる特殊な出力先。エラーを非表示にしても、終了状態は変わらない。原因を調べるときは表示を戻そう。": "2> changes where error messages go. /dev/null discards its input. Hiding an error does not change the exit status. Show error messages when diagnosing a problem.",
+  "$? / 終了状態": "$? / exit status",
+  "$? は直前のコマンドの終了状態。通常は 0 が成功、0 以外が失敗や特別な状態を表す。grep の 1 は一致なし、diff の 1 は差分あり。echo $? 自体は成功するので、確認は直後に行う。": "$? holds the previous command's exit status. Usually 0 means success; other values can mean failures or special conditions. grep uses 1 for no match and diff uses 1 for differences. Check it immediately because echo itself succeeds and changes the status.",
+  "> はファイルを上書き、>> は末尾に追記。tee は画面とファイルの両方へ出力。": "> overwrites a file; >> appends. tee writes to both a file and standard output.",
+  "JSON の項目を取り出す。select は条件で絞り込む。-r は文字列の引用符を外す。": "Extract JSON fields. select filters by a condition. -r removes quotation marks around string values.",
+  "実機でコマンドのマニュアルを読むときは man grep などを使う。この教材の man は学習用 help と同じ案内を表示する。history は入力履歴、clear は画面の表示を消す。ファイルや修了記録は消えない。": "On a real system, use man grep to read the installed manual. This lab's man shows the same teaching guide as help. history lists commands; clear clears the display without deleting files or completion records.",
+  "文字を出力する。printf では書式を指定できる。%s は文字列、\\n は改行。": "Print text. printf uses a format: %s inserts a string and \\n inserts a newline.",
+  "tac は行を逆の順番で表示する。more はファイルを閲覧する。この教材では less と同じ閲覧画面で、q で終了する。": "tac reverses line order. more opens a viewer; this lab shares its viewer with less. Press q to leave it.",
+  "rg はファイル内の文字を検索する。find は名前などの条件でファイルを探す。find の名前パターンは引用符で囲む。": "rg searches file contents. find selects files by conditions such as their names. Quote filename patterns passed to find.",
+  "-E は拡張正規表現。^ は行頭、$ は行末、| はいずれかに一致。-A は後ろ、-B は前、-C は前後の行も表示する。": "-E enables extended regular expressions. ^ anchors the start, $ anchors the end, and | matches either alternative. -A includes following lines, -B preceding lines, and -C both.",
+  "tr は文字を変換する。sed は置換や行の抽出。nl は行番号を付け、column は列を見やすく整える。": "tr translates characters. sed substitutes text and selects lines. nl adds line numbers and column aligns fields for reading.",
+  "touch は空ファイルの作成などに使う。rm はファイルを削除し、rmdir は空フォルダを削除する。この教材では課題内の仮想ファイルだけが変わる。": "touch can create an empty file; rm removes files and rmdir removes empty directories. These commands affect only this exercise's virtual files.",
+  "diff は二つのファイルの違いを表示する。終了状態 1 は差分あり。comm は並べ替え済みの二つのファイルの、共通・片方だけの行を調べる。": "diff shows differences; exit status 1 means differences were found. comm compares sorted files for shared and file-specific lines.",
+  "join は共通のキーで行を結合し、paste は行を横に並べる。xargs は入力から次のコマンドの引数を組み立てる。": "join connects records by a shared key; paste places corresponding lines side by side. xargs turns input text into command arguments.",
+  "base64 は文字データの符号化・復号。strings は表示可能な文字の並びを抽出する。rev は各行の文字順を逆にする。": "base64 encodes or decodes data. strings extracts printable runs. rev reverses the characters in each line.",
+  "パスのファイル名部分・親フォルダ部分・絶対パスを調べる。": "Print the filename portion, parent directory, or resolved absolute path.",
+  "file は種類、stat は詳細情報、du は使用量、date は日時を調べる。ファイル情報は学習用の仮想情報。date -u はブラウザの現在時刻を UTC で表示する。": "file checks the format, stat shows details, du measures usage and date handles timestamps. File metadata is virtual in this lab. date -u without an input shows the browser's current time in UTC.",
+  "該当する項目がありません。短い言葉で探してみよう。": "No matching entries. Try a shorter search.",
+  "この言葉を練習するレッスン": "Lessons for this term",
+  "ほか ": "Another ",
+  " 件。言葉を追加すると、さらに絞り込めます。": " matches. Add search words to narrow the results.",
+  "この課題の操作・ファイル・入力を最初からやり直します。修了記録とヒントの記録は残ります。よろしいですか？": "Restart this exercise's operations, files and draft? Completion and hint records will be kept.",
+  "課題のファイルと現在地を初期状態に戻しました": "Exercise files and working directory restored to their initial state.",
+  "進捗ファイルをダウンロードしました。個人情報を含むコマンドを入力した場合、その入力も保存されます。": "Progress file downloaded. If your commands contained personal information, those inputs are included in the file.",
+  "ファイルが大きすぎます。Linuxroom で保存した進捗ファイルを選んでください。": "This file is too large. Choose a progress file saved by Linuxroom.",
+  "Linuxroom の進捗ファイルとして読み込めませんでした。": "This file could not be read as Linuxroom progress.",
+  "進捗データが保存上限の 8 MiB を超えています。現在の進捗は変更していません。": "Progress exceeds the 8 MiB storage limit. Your current progress has not changed.",
+  "未対応の課題や壊れた作業データが含まれるため、読み込みを中止しました。現在の進捗は変更していません。": "Import stopped because the file contains unsupported lessons or invalid workspace data. Your current progress has not changed.",
+  "このブラウザの進捗と課題の作業状態を、選んだファイルの内容に置き換えます。よろしいですか？": "Replace this browser's progress and exercise workspaces with the selected file?",
+  "進捗を読み込みました。続きから学べます。": "Progress imported. Continue where you left off.",
+  "JSON の形式を読み取れませんでした。Linuxroom で保存したファイルを選んでください。": "The JSON could not be read. Choose a file saved by Linuxroom.",
+  "ファイルを読み込めませんでした。": "The file could not be read.",
+  "指定した場所が見つかりません。pwd で現在地、ls でファイル名を確認できます。": "That path was not found. Use pwd to check your location and ls to check filenames.",
+  "指定した名前はディレクトリです。ls で中のファイルを確認しましょう。": "That name is a directory. Use ls to inspect its files.",
+  "引用符が閉じていない可能性があります。開始と終わりの引用符を確認しましょう。": "A quotation mark may be unclosed. Check the opening and closing quotes.",
+  "この学習用ターミナルが扱うコマンドには範囲があります。help で対応内容を確認できます。": "This teaching terminal supports a limited set of commands. Use help to check what is available.",
+  "エラーの行を確認して、コマンド・引数・オプションを見直しましょう。": "Read the error and check the command, arguments and options.",
+  "検索条件に一致する行はありませんでした。grep の終了コード 1 は「一致なし」です。文字・大文字小文字・対象ファイルを確認しましょう。": "No lines matched. grep exit status 1 means no match. Check the text, letter case and target file.",
+  "コマンドは終了しました。cd や保存など、成功しても文字を表示しない操作があります。": "Command finished. Operations such as cd or saving a file can succeed without printing text.",
+  "less: 表示中です。q で閉じてからコマンドを入力してください。\n": "less: The viewer is open. Press q to close it before entering a command.\n",
+  "必要な文字列「": "Required text 「",
+  "」が見つかりません。": "」 was not found.",
+  "行の順序が異なります。並べ方を確認しましょう。": "The line order differs. Check the sorting step.",
+  "末尾の改行または空白が異なります。": "Trailing newlines or spaces differ.",
+  "足りない行:「": "Missing line: 「",
+  "余分な行:「": "Extra line: 「",
+  "自由練習には採点がありません。コマンドの結果を自由に確かめてください。": "Free practice is not graded. Explore the command results freely.",
+  "まずミッションに合うコマンドを実行してみましょう。": "First run a command that addresses the exercise.",
+  "一致する行がありません。検索条件と対象ファイルを確認しましょう。": "No matching lines. Check the search conditions and target file.",
+  "直前の操作にエラーがあります。パイプの途中も確認して、もう一度実行しましょう。": "The last operation reported an error. Check intermediate pipeline stages and try again.",
+  "表示された結果がミッションの条件に合っている": "The displayed output meets the exercise requirements",
+  "指定されたディレクトリへ移動している": "You have moved into the required directory",
+  "指定されたディレクトリを用意している": "The required directory exists",
+  "指定された作業用ファイル・ディレクトリを削除している": "The specified temporary file or directory has been removed",
+  "保存したファイルの内容が条件に合っている": "The saved file contents meet the requirements",
+  " を使って今回の操作を実行している": " has been used for this operation",
+  " の終了コード ": " exit status ",
+  " を確認している": " has been checked",
+  " で指定された入力・出力の向きを設定している": " sets the required input/output redirection",
+  " の後を ": " is followed by ",
+  " でつなぎ": " as the connector",
+  "、条件に応じて次の実行を飛ばしている": ", skipping the next command when required",
+  "、実行条件を設定している": ", setting the execution condition",
+  " を": ": ",
+  "引数として展開して値を確認している": "expanded as an argument to check its value",
+  "展開して値を確認している": "expanded to check its value",
+  "必要な段階をパイプでつないでいる": "The required stages are connected by pipes",
+  "ファイルを開き、q で表示を閉じている": "The file was opened and the viewer closed with q",
+  "指定された元ファイルを実際に読み込んでいる": "The specified source file was actually read",
+  "未対応の判定条件です": "Unsupported validation condition",
+  "ミッションクリアです！": "Exercise complete!",
+  "もう一歩です。未達成の条件を判定欄で確認しましょう。": "Almost there. Check the unmet conditions below.",
+  "man COMMAND — この教材では help COMMAND をページ表示します。実機では man でマニュアルを読みます。\n": "man COMMAND — This lab displays help COMMAND in a viewer. On real Linux, man opens the installed manual.\n",
+  "Linuxroom 学習用の仮想ターミナル — Linux コマンドの一部を再現\n": "Linuxroom virtual learning terminal — a subset of Linux commands\n",
+  "less/more open the viewer; q closes. help は教材専用ヘルプ。実機では man COMMAND。man は教材ヘルプの別名です。\n": "less/more open the viewer; q closes. help is specific to this lab; man is an alias for the teaching guide. On real Linux use man COMMAND.\n",
+  ": Linuxroom では利用できません。ファイルを読むには cat または less を使ってください。": ": Unavailable in Linuxroom. Use cat or less to read a file.",
+  "Linuxroom 学習用ヘルプ — 実機の man マニュアルではありません。実機では man COMMAND で詳細を調べます。\n\n": "Linuxroom teaching help — not a real system man page. Use man COMMAND on Linux for its installed documentation.\n\n",
+  "Linuxroom — コマンドを、一歩ずつ。": "Linuxroom — Commands, step by step.",
+  "本文へ移動": "Skip to main content",
+  "学習マップ": "Learning map",
+  "コマンド帳": "Command reference",
+  "進捗を保存": "Save progress",
+  "ログ分析へつながる、最初の一歩": "Your first step toward log analysis",
+  "コマンドを、": "Commands,",
+  "一歩ずつ。": "step by step.",
+  "ファイルを開く。必要な行を探す。": "Open files. Find the lines you need.",
+  "小さな操作をつないで、": "Connect small operations",
+  "自分でログを調べる力を育てよう。": "and learn to investigate logs yourself.",
+  "最初のレッスンをはじめる": "Start the first lesson",
+  "インストール不要 · ブラウザだけで完結 · 自分のペースで": "No installation · All in your browser · At your own pace",
+  "小さく試して、つないでいく": "Try small steps, then connect them",
+  "まずは、ファイルを読む": "First, read a file",
+  "必要な行だけ、取り出す": "Select the lines you need",
+  "結果を次のコマンドへ": "Pass the result to another command",
+  "絞った行数がわかる": "Count the matching lines",
+  "長いコマンドも、": "Even a long command",
+  "小さな操作の積み重ね。": "is built from small operations.",
+  "パイプの途中を、のぞいてみよう。": "Look inside a pipeline.",
+  "好きなコマンドを試せるターミナル。": "A terminal for trying commands freely.",
+  "つないだ各段の「入力 → 処理 → 出力」を見比べられます。": "Compare input → operation → output at every connected stage.",
+  "自由練習を開く": "Open free practice",
+  "3 段階のレッスン": "Three levels of lessons",
+  "初級から、発展まで。": "From beginner to advanced.",
+  "一つの操作から、複数のコマンドへ。": "Start with one operation, then combine commands.",
+  "どの段階からでも始められます。": "You can begin at any level.",
+  "初めてなら「初級編 → 応用編 → 発展編」の順がおすすめ。各段階の続きと作業内容は自動保存されます。": "New here? Start with Beginner, then Applied, then Advanced. Your place and work in each level are saved automatically.",
+  "コマンドを覚え、つないで使う": "Learn commands and connect them",
+  "ログの読み方を知る": "Learn to read logs",
+  "コマンドでログを分析する": "Analyze logs with commands",
+  "学んだことを、調査に生かす": "Apply your skills to an investigation",
+  "1レッスンは数分。ヒントを見ても大丈夫。": "Each lesson takes a few minutes. Hints are welcome.",
+  "「なぜそうなる？」を、実際の出力で確かめます。": "See the actual output and understand why it happens.",
+  "学習内容を見てみる": "Explore the lessons",
+  "コマンドの見本": "Example command",
+  "見本を入力欄に入れる": "Copy the example into the input",
+  "YOUR TURN / やってみよう": "YOUR TURN",
+  "ターミナルで試す ↓": "Try it in the terminal ↓",
+  "今回変えるところ": "What changes this time",
+  "前の操作を少し変えて、結果の違いを確かめよう。": "Change one part of the previous command and compare the result.",
+  "ヒントを見る": "Show a hint",
+  "できました！": "You did it!",
+  "SOCroom-easy を GitHub で開く ↗": "Open SOCroom-easy on GitHub ↗",
+  "Logroom を GitHub で開く ↗": "Open Logroom on GitHub ↗",
+  "この課題を最初からやり直す": "Restart this exercise",
+  "学習用の仮想ターミナル": "Virtual learning terminal",
+  "使い方": "Help",
+  "Enter で実行": "Enter to run",
+  "プロンプトは入力せず、Linux コマンドだけを入力": "Enter only the Linux command, without the prompt",
+  "実行": "Run",
+  "表示をクリア": "Clear display",
+  "できたか確認する": "Check my work",
+  "コマンドが、結果になるまで": "From command to result",
+  "入力 → 処理 → 出力": "Input → operation → output",
+  "コマンドを実行すると、実際の処理と結果がここに表示されます。": "Run a command to see its actual operations and results here.",
+  "パイプをつないだら、途中の結果ものぞいてみよう。": "For a pipeline, inspect the intermediate results too.",
+  "標準入力": "Standard input",
+  "出力": "Output",
+  "この課題で使えるファイル": "Files for this exercise",
+  "ファイル名を選ぶと、入力中のコマンドの末尾に追加できます。": "Select a filename to append it to your current command.",
+  "この中の操作は学習用ファイルにだけ反映されます。実機の Linux とは使える機能が異なります。": "These operations affect only virtual learning files. Supported features differ from a real Linux system.",
+  "初級 → 応用 → 発展の順に、操作を積み重ねます。どの段階・課題からでも選べます。": "Build skills through Beginner, Applied and Advanced. You can select any level or lesson.",
+  "自由練習のターミナルを開く →": "Open the free-practice terminal →",
+  "✓ は修了済み。ヒント・解答例を見た課題も、何度でも復習できます。": "✓ means completed. Revisit any lesson, including those completed with hints or solutions.",
+  "覚えていなくても大丈夫。必要なときに見ながら試そう。": "You do not need to memorize everything. Look things up as you practice.",
+  "コマンドや用語を探す": "Search commands or terms",
+  "プロンプトの読み方": "Reading the prompt",
+  "操作しているユーザー名": "The current user's name",
+  "ホスト名（コンピューター名）": "The hostname (computer name)",
+  ": の後ろは現在地。~ は /home/analyst の省略。cd で移動すると ~/logs などに変わる": "The part after : is the working directory. ~ means /home/analyst. Moving with cd changes it to something like ~/logs.",
+  "一般ユーザー / 管理者の目印としてよく使われる。この教材は一般ユーザーの $": "Common markers for a regular user / administrator. This lab uses $ for a regular user.",
+  "プロンプトの見た目は環境によって変わります。プロンプト自体は入力せず、その後ろにコマンドだけを打ちます。": "Prompt appearance varies by environment. Type only the command after it, not the prompt itself.",
+  "ターミナルの操作": "Terminal controls",
+  "コマンドを実行": "Run the command",
+  "実行したコマンドを呼び出す": "Recall previous commands",
+  "コマンド・ファイル名を補完": "Complete a command or filename",
+  "入力を消す / 閲覧画面を閉じる": "Clear input / close the viewer",
+  "ターミナルの表示を消す": "Clear the terminal display",
+  "less / more で q": "q in less / more",
+  "閲覧を終えてターミナルへ戻る": "Close the viewer and return to the terminal",
+  "実機では man grep などでマニュアルを調べます。この教材では man を help と同じ学習用の案内にしています。": "On real Linux, man grep opens its manual. In this lab, man displays the same teaching guide as help.",
+  "進捗の保存": "Save progress",
+  "修了した課題と、各課題のファイル・現在地・入力途中のコマンドを、このブラウザに自動保存します。": "Completed lessons, exercise files, working directories and command drafts are saved automatically in this browser.",
+  "別のブラウザや端末に移すときは、進捗ファイルをダウンロードしてください。": "Download a progress file to move to another browser or device.",
+  "進捗ファイルをダウンロード ↓": "Download progress file ↓",
+  "進捗ファイルを読み込む ↑": "Import progress file ↑",
+  "ファイルを読む": "Reading files",
+  "q で閉じる": "Press q to close",
+  "スクロールして読めます。q を押すとコマンド入力に戻ります。": "Scroll to read. Press q to return to the command input.",
+  "q：終了 · Ctrl + C：終了": "q: close · Ctrl + C: close",
+  "Linuxroom ホーム": "Linuxroom home",
+  "メインメニュー": "Main menu",
+  "進捗の保存と読み込み": "Save and import progress",
+  "一つのコマンドから、パイプでつなぐ操作へ": "From a single command to connected pipelines",
+  "学習の流れ": "Learning journey",
+  "学習スペース": "Learning workspace",
+  "ターミナルの操作方法": "Terminal instructions",
+  "コマンドの実行結果": "Command execution results",
+  "プロンプト": "Prompt",
+  "ここにコマンドを入力": "Enter a command here",
+  "学習マップを閉じる": "Close the learning map",
+  "学習する段階を選ぶ": "Choose a learning level",
+  "コマンド帳を閉じる": "Close the command reference",
+  "保存画面を閉じる": "Close the save dialog",
+  "コマンド": "Command",
+  "文字で指定する操作の名前。後ろに引数やオプションを付けます。": "The name of an operation requested with text. Arguments and options follow it.",
+  "analyst@linuxroom:~$はユーザー名・ホスト名・現在地・入力待ちの印。~はホーム、$は通常のユーザー、#はよく管理者に使われる表示です。プロンプトは入力しません。": "analyst@linuxroom:~$ shows user, host, working directory and readiness for input. ~ means home; $ commonly marks a regular user and # an administrator. Do not type the prompt.",
+  "引数": "Argument",
+  "コマンドに渡す情報。検索語やファイル名などです。": "Information passed to a command, such as a search pattern or filename.",
+  "オプション": "Option",
+  "コマンドの動きを調整する指定。同じ文字でもコマンドによって意味が異なります。": "A setting that changes a command's behavior. The same option letter can mean different things in different commands.",
+  "引用符": "Quotes",
+  "空白や記号を含む文字列をひとまとまりにします。awkの処理には半角のシングルクォートを使います。": "Keep text containing spaces or symbols together. Use straight single quotes around an awk program.",
+  "ディレクトリ": "Directory",
+  "ファイルをまとめる場所。一般的な画面操作でいうフォルダです。": "A place that groups files, also known as a folder.",
+  "現在地": "Working directory",
+  "今いるディレクトリ。相対パスの出発点です。": "Your current directory, which is the starting point for relative paths.",
+  "絶対パス": "Absolute path",
+  "/から始まり、場所を全部指定した道順です。": "A complete path starting at the root, /.",
+  "相対パス": "Relative path",
+  "現在地からたどる道順。..は一つ上、.は現在地です。": "A path from the current directory. .. means the parent and . means the current directory.",
+  "パイプ |": "Pipe |",
+  "左の標準出力を、右の標準入力に渡します。右側に元ファイルを指定すると、届いた結果を使わない場合があります。": "Passes standard output on the left to standard input on the right. Naming the original file again on the right may cause the command to ignore the piped text.",
+  "標準入力・標準出力": "Standard input and output",
+  "コマンドが文字を受け取る入口と、結果を出す出口。パイプでつなげられます。": "A command's text input and result output. A pipe connects them.",
+  "grep": "grep",
+  "条件に合う行を選びます。-nは行番号、-iは大文字小文字を区別しない、-vは除外、-Fは検索語を正規表現でなく文字列として扱います。": "Select matching lines. -n adds line numbers, -i ignores letter case, -v inverts the match, and -F treats the search string literally rather than as a regular expression.",
+  "一致しない検索": "No matching lines",
+  "grepで見つからないと、出力は空になります。見つからないことを示す終了コード1は、構文エラーとは違います。": "grep produces empty output when nothing matches. Status 1 means no match, which is different from a syntax error.",
+  "列・フィールド": "Column / field",
+  "行を区切った項目。awkでは通常、空白区切りの左から$1、$2…です。$0は行全体、$NFは最後の列です。": "A part of a line. awk normally splits on whitespace, numbering fields $1, $2 and so on. $0 is the whole line and $NF the final field.",
+  "cut": "cut",
+  "区切り文字や文字位置を指定して、一部分を取り出します。単純な区切りのデータに使います。": "Selects fields or character positions. Useful for simply delimited data.",
+  "sortとuniq": "sort and uniq",
+  "uniqは隣り合う同じ行をまとめます。離れた同じ行もまとめて数えるなら、まずsortで並べます。": "uniq groups adjacent equal lines. To count equal lines even when originally separated, sort them first.",
+  "数値順": "Numeric order",
+  "sort -nは数値として比較、-rは逆順です。-nrで数の多い順にします。": "sort -n compares numeric values; -r reverses the order. -nr puts larger numbers first.",
+  "保存と追記": "Overwrite and append",
+  ">は上書き、>>は追記です。保存先の親ディレクトリは先に作ります。": "> overwrites and >> appends. Create the destination's parent directory first. The Japanese sample text remains exact exercise data in both languages.",
+  "tee": "tee",
+  "受け取った文字を保存し、同時に標準出力にも流します。通常は保存先を上書きします。": "Saves incoming text while also writing it to standard output. By default, it overwrites the destination.",
+  "JSONとJSON Lines": "JSON and JSON Lines",
+  "JSONはキーと値を持つデータ形式。JSON Linesは1行に一つずつJSONを置く形式です。": "JSON represents structured values including objects with keys. JSON Lines stores one JSON value on each line.",
+  "jqのselect": "jq select|Selects input JSON values by a condition on their fields. Inside quotes, ",
+  "JSONのキーの値を条件に、入力を選びます。引用符内の|はjqのフィルターをつなぎます。": " connects jq filters.",
+  "操作の補助": "Terminal shortcuts",
+  "↑・↓で入力履歴、Tabで名前の補完、Ctrl+Lで表示を整理できます。lessはqで閉じます。": "Use ↑ and ↓ for input history, Tab for completion, Ctrl + L to clear the display, and q to close less.",
+  "この教材のhelp": "Help in this lab",
+  "学習用シェルが対応するコマンドを案内します。この教材のmanもhelpへつながる簡易案内です。実機のmanはより詳しいマニュアルを開きます。": "Documents the supported teaching-shell commands. man displays this same simplified help; real Linux man opens the installed manual.",
+  "入力リダイレクト <": "Input redirection <",
+  "ファイルの本文を標準入力へ渡します。名前を引数として渡す操作との違いを意識しましょう。": "Passes file contents to standard input. This differs from passing a filename as an argument.",
+  "標準エラー 2>": "Standard error 2>",
+  "エラーの説明は標準エラー2に出ます。2>/dev/nullはその表示を捨てますが、終了コードは変えません。": "Errors go to standard error, descriptor 2. 2>/dev/null hides that output without changing the exit status.",
+  "終了コード $?": "Exit status $?",
+  "直前のコマンドの終了コードです。0以外の意味はコマンドによって異なります。": "The previous command's exit status. The meanings of nonzero values depend on the command.",
+  "接続 && と ;": "Connectors && and ;",
+  "&&は左が成功したときだけ次を実行し、;は結果に関係なく次を実行します。本文を渡すパイプとは用途が異なります。": "&& continues only after success; ; continues regardless. They control execution rather than passing text like a pipe.",
+  "固定文字列検索": "Fixed-string search",
+  "grep -Fやrg -Fで、記号も文字どおりに検索する方法です。": "grep -F and rg -F search punctuation literally.",
+  "正規表現": "Regular expression",
+  "^、$、.*、選択の|などを使い、文字列の条件を表す書き方です。grep -Eで拡張正規表現を使えます。": "A pattern using syntax such as ^, $, .* and alternation to describe matching text. grep -E enables extended regular expressions.",
+  "文脈（context）": "Context",
+  "一致行の前後にある記録です。grepの-A・-B・-Cで追加表示します。": "Records before or after a matching line. grep -A, -B and -C include them.",
+  "グロブ": "Glob",
+  "*.logなど、ファイル名のパターンです。find -nameやrg -gへ渡す場合は引用符で囲みます。": "A filename pattern such as *.log. Quote it when passing it to find -name or rg -g.",
+  "正規化": "Normalization",
+  "比較・集計の前に表記をそろえることです。元データの意味やルールを確かめて適用します。": "Making representations consistent before comparing or counting. Apply it only after checking the meaning and rules of the source data.",
+  "ソートキー": "Sort key",
+  "並べ替えで比較する列や範囲です。sort -k3,3nrなら3列目を数値の大きい順にします。": "The field or range used for comparison. sort -k3,3nr compares field 3 numerically, largest first.",
+  "パスを加工する道具": "Path tools",
+  "basenameは末尾の名前、dirnameは親の場所、realpathは整理した絶対パスを表示します。ファイルの改名や移動はしません。": "basename prints the final name, dirname its parent, and realpath a resolved absolute path. They do not rename or move files.",
+  "ファイル情報": "File metadata",
+  "fileは形式、statは名前やバイト数、duは場所全体の大きさを調べます。教材のメタデータは仮想で、duは本文のサイズだけを合計します。": "file checks the format; stat reports details such as name and byte count; du measures usage. Metadata is virtual in this lab, and du sums content bytes only.",
+  "UTCとUNIX時刻": "UTC and UNIX time",
+  "ZはUTC、+09:00はUTCから9時間進んだ表記です。date -u -dでUTCへそろえ、@秒数ならUNIX時刻を指定できます。": "Z means UTC; +09:00 is nine hours ahead. date -u -d converts a supplied timestamp to UTC. An @ prefix supplies UNIX seconds.",
+  "stringsとBase64": "strings and Base64",
+  "stringsは読める文字の断片を抽出します。base64 -dはBase64表現を元のデータへ戻します。Base64は暗号ではありません。": "strings extracts readable fragments; base64 -d restores Base64-encoded data. Base64 is not encryption.",
+  "rev": "rev",
+  "各行の文字を逆順にします。行の順を逆にするtacとは異なります。": "Reverses characters within each line. tac reverses the order of lines instead.",
+  "diffの終了コード": "diff exit status",
+  "diffは0が同一、1が差あり、2以上がエラーです。-uは周辺行とともに-と+で差を示します。": "0 means identical, 1 means different, and 2 or higher means an error. -u shows context and marks removals with - and additions with +.",
+  "comm": "comm",
+  "整列済みの2ファイルを比較します。1列目は一つ目だけ、2列目は二つ目だけ、3列目は共通。-123の数字は隠す列です。": "Compares two sorted files. Columns 1, 2 and 3 mean first-only, second-only and common. Digits in -123 suppress those columns.",
+  "joinとpaste": "join and paste",
+  "joinは整列済みの共通キーで照合します。pasteは行の位置で横に並べます。両者を選ぶ前に対応関係を確認します。": "join matches sorted records by a shared key. paste combines records by line position. Check how the rows correspond before choosing either tool.",
+  "xargs": "xargs",
+  "標準入力の文字をコマンドの引数へ変換します。-n 1なら1引数ずつ呼びます。空白を含む名前では区切り方にも注意します。": "Turns standard-input text into command arguments. -n 1 supplies one argument per call. Filenames containing spaces require attention to separators.",
+  "awkの集計": "Aggregation with awk",
+  "count++は件数、total += $4は4列目の合計、count[値]++は値ごとの件数。ENDは全行の処理後に実行します。": "count++ counts rows; total += $4 sums field 4; count[value]++ counts per value. END runs after all records.",
+  "jqの配列と集計": "jq arrays and aggregation",
+  "[]は各要素を展開、-sは入力全体を配列へ、group_byはキーでグループ化、lengthは配列の件数。@tsvは配列をタブ区切りの行へ変えます。": "[] emits array elements; -s collects all input into an array; group_by groups on a key; length counts elements. @tsv turns an array into a tab-separated row.",
+  "ターミナルの入口": "Getting started with the terminal",
+  "入力する・実行する・結果を見る": "Type, run and inspect the result",
+  "場所とファイル": "Locations and files",
+  "現在地から、読みたいファイルへ": "From your current directory to the file you need",
+  "全部・先頭・末尾を使い分ける": "Read all, the beginning, or the end",
+  "必要な行を選ぶ": "Selecting lines",
+  "grepで条件を一つずつ変える": "Change one grep condition at a time",
+  "コマンドをつなぐ": "Connecting commands",
+  "左の結果を、右の材料にする": "Use one result as the next command's input",
+  "必要な列を選ぶ": "Selecting fields",
+  "行を選んでから、名前を取り出す": "Choose rows, then extract names",
+  "集計を組み立てる": "Building a summary",
+  "並べる → 数える → 多い順にする": "Sort → count → rank",
+  "結果を残す": "Keeping your results",
+  "保存・追記・コピー・名前の変更": "Save, append, copy and rename",
+  "JSONの記録を読む": "Reading JSON records",
+  "キーで選び、条件で絞る": "Select keys and filter by conditions",
+  "卒業実習": "Final practice",
+  "新しい記録から、自分で集計を作る": "Build a summary from new records",
+  "調べながら操作する": "Look things up as you work",
+  "ヘルプ・履歴・画面の整理": "Help, history and clearing the display",
+  "読み方を選ぶ": "Choose how to read",
+  "逆順・閲覧・行番号": "Reverse order, viewers and line numbers",
+  "検索条件を育てる": "Refine your search",
+  "固定文字 → 正規表現 → 前後の文脈": "Literal text → patterns → context",
+  "複数ファイルを探す": "Search across files",
+  "本文検索・名前検索と順序の固定": "Content search, filename search and stable ordering",
+  "列で選び、並べる": "Select and sort fields",
+  "条件・区切り・数値の順序": "Conditions, delimiters and numeric order",
+  "表記をそろえる": "Normalize representations",
+  "文字の変換 → 重複確認 → 表示": "Transform text → check duplicates → format output",
+  "必要な部分を整える": "Prepare the parts you need",
+  "sedで行の選択・置換・除外": "Select, substitute and remove lines with sed",
+  "作業用ファイルを扱う": "Manage work files",
+  "書式・空ファイル・片付け": "Formats, empty files and cleanup",
+  "応用実習：集計を組み立てる": "Applied practice: build a summary",
+  "検索 → 列抽出 → 正規化 → 件数 → 保存": "Search → extract → normalize → count → save",
+  "調査対象を確かめる": "Inspect the investigation inputs",
+  "パス・形式・サイズを調べる6問": "Six exercises on paths, formats and sizes",
+  "時刻と文字の表現をそろえる": "Normalize time and text",
+  "UTC・文字列・Base64を扱う5問": "Five exercises on UTC, strings and Base64",
+  "二つの記録を比較する": "Compare two sets of records",
+  "差分・集合・行の対応を見る5問": "Five exercises on differences, sets and row alignment",
+  "ファイルを横断して調べる": "Investigate across files",
+  "キー結合と引数の受け渡し4問": "Four exercises on joining keys and passing arguments",
+  "awkで集計を組み立てる": "Build summaries with awk",
+  "列の位置から件数と合計へ進む5問": "Five exercises from field positions to counts and sums",
+  "構造のあるJSONを集計する": "Aggregate structured JSON",
+  "入れ子・配列・グループ化7問": "Seven exercises on nested data, arrays and grouping",
+  "発展の統合実習": "Advanced combined practice",
+  "複数の資料から成果物を作る4問": "Four exercises creating results from multiple sources",
+  "一つずつ、つなげる": "Learn and connect, one step at a time",
+  "現在地とファイル操作から、検索・列の抽出・集計・保存まで。短いコマンドを一段ずつ組み立てます。": "Start with locations and files, then search, extract fields, summarize and save. Build short commands one stage at a time.",
+  "応用編": "Applied",
+  "条件を選んで、整える": "Choose conditions and prepare data",
+  "正規表現、複数ファイル検索、文字の整形、条件付き集計。必要な記録を狙って取り出します。": "Use regular expressions, search across files, transform text and build conditional summaries to find the records you need.",
+  "発展編": "Advanced",
+  "比較して、組み合わせる": "Compare and combine",
+  "差分・照合、JSONの集約、日時・ファイルの確認を組み合わせ、調査用の結果を作ります。": "Combine differences, matching, JSON aggregation, timestamps and file inspection to produce useful investigation results."
+};
+  let locale = 'ja';
+  const languages = ['ja', 'en'];
+  const D = root.LINUXROOM_DATA;
+  const copy = value => JSON.parse(JSON.stringify(value));
+  const fields = ['title', 'goal', 'explanation', 'concepts', 'task', 'hints', 'success', 'bridge'];
+  const originals = new Map(D.lessons.map(lesson => [lesson.id, Object.fromEntries(fields.map(key => [key, copy(lesson[key] === undefined ? '' : lesson[key])]).concat([['exampleNote', lesson.example?.note || '']]))]));
+  const metadata = [...D.levels, ...D.chapters, ...D.glossary].map(item => [item, Object.fromEntries(['title', 'subtitle', 'description', 'term', 'text'].filter(key => typeof item[key] === 'string').map(key => [key, item[key]]))]);
+  const staticNodes = [];
+  const staticAttributes = [];
+  function t(value) {
+    return locale === 'en' && Object.prototype.hasOwnProperty.call(messages, value) ? messages[value] : value;
+  }
+  function setLocale(value) {
+    locale = languages.includes(value) ? value : 'ja';
+    metadata.forEach(([item, original]) => Object.entries(original).forEach(([key, text]) => { item[key] = t(text); }));
+    D.lessons.forEach((lesson, index) => {
+      const original = originals.get(lesson.id);
+      fields.forEach(key => { lesson[key] = copy(original[key]); });
+      if (lesson.example) lesson.example.note = original.exampleNote;
+      if (locale !== 'en') return;
+      const text = root.LINUXROOM_EN_LESSONS[lesson.id];
+      if (!text) throw new Error('Missing English lesson: ' + lesson.id);
+      lesson.title = text.title;
+      lesson.goal = text.title + '.';
+      lesson.task = text.task;
+      lesson.explanation = copy(text.explanation);
+      const translated = (catalog, value, kind) => {
+        if (!Object.prototype.hasOwnProperty.call(catalog, value)) throw new Error('Missing English ' + kind + ': ' + lesson.id);
+        return catalog[value];
+      };
+      lesson.concepts = original.concepts.map(concept => ({...concept,
+        term: translated(root.LINUXROOM_EN_CONCEPTS, concept.term, 'concept term'),
+        text: translated(root.LINUXROOM_EN_CONCEPTS, concept.text, 'concept definition')
+      }));
+      if (lesson.example) lesson.example.note = translated(root.LINUXROOM_EN_EXAMPLES, original.exampleNote, 'example note');
+      lesson.hints = original.hints.map(hint => {
+        if (hint.startsWith('穴埋め：')) {
+          const boundary = hint.indexOf('。');
+          return 'Fill in the blank: ' + hint.slice('穴埋め：'.length, boundary) + '\n' + translated(root.LINUXROOM_EN_HINTS, hint.slice(boundary + 1), 'hint explanation');
+        }
+        return translated(root.LINUXROOM_EN_HINTS, hint, 'hint');
+      });
+      lesson.success = 'You completed: ' + text.title.toLowerCase() + '.';
+      const next = D.lessons[index + 1];
+      lesson.bridge = next ? 'Next: ' + root.LINUXROOM_EN_LESSONS[next.id].title + '.' : 'Continue with SOCroom-easy to read logs and Logroom to analyze them with commands.';
+    });
+    return locale;
+  }
+  function captureStatic(document) {
+    const walker = document.createTreeWalker(document, 4);
+    let text;
+    while ((text = walker.nextNode())) {
+      if (!text.parentElement || text.parentElement.closest('script,style,textarea,[data-language-name]')) continue;
+      if (Object.prototype.hasOwnProperty.call(messages, text.textContent.trim())) staticNodes.push([text, text.textContent]);
+    }
+    document.querySelectorAll('*').forEach(element => ['title', 'aria-label', 'placeholder'].forEach(attribute => {
+      const text = element.getAttribute(attribute);
+      if (text && Object.prototype.hasOwnProperty.call(messages, text)) staticAttributes.push([element, attribute, text]);
+    }));
+  }
+  function applyStatic(document) {
+    staticNodes.forEach(([node, original]) => {
+      // Keep the surrounding whitespace and all child elements/listeners intact.
+      if (node.isConnected) node.textContent = original.replace(original.trim(), t(original.trim()));
+    });
+    staticAttributes.forEach(([element, attribute, original]) => element.setAttribute(attribute, t(original)));
+    document.documentElement.lang = locale;
+    document.getElementById('language-select').value = locale;
+  }
+  root.LinuxroomI18n = Object.freeze({t, setLocale, captureStatic, applyStatic, languages, messages, get locale() {return locale;}});
+})(globalThis);
 </script>
   <script>/* Linuxroom lesson engine. All commands operate on LogLabShell's virtual files. */
 (function (root) {
   'use strict';
+  const t = value => root.LinuxroomI18n ? root.LinuxroomI18n.t(value) : value;
   const VERSION = 1, MAX_SAVE = 8 * 1024 * 1024, MAX_TEXT = 524288;
   const META = new Set(['help', 'man', 'history', 'clear']);
   const data = () => root.LINUXROOM_DATA;
@@ -2636,13 +3944,13 @@ SOFTWARE.
     const error = result.stderr || result.trace.find(stage => stage.stderr)?.stderr;
     let feedback = '';
     if (error) {
-      if (/no such file|no such directory/i.test(error)) feedback = '指定した場所が見つかりません。pwd で現在地、ls でファイル名を確認できます。';
-      else if (/is a directory/i.test(error)) feedback = '指定した名前はディレクトリです。ls で中のファイルを確認しましょう。';
-      else if (/quote/.test(error)) feedback = '引用符が閉じていない可能性があります。開始と終わりの引用符を確認しましょう。';
-      else if (/unsupported|command not found|利用できません/.test(error)) feedback = 'この学習用ターミナルが扱うコマンドには範囲があります。help で対応内容を確認できます。';
-      else feedback = 'エラーの行を確認して、コマンド・引数・オプションを見直しましょう。';
-    } else if (noMatch) feedback = '検索条件に一致する行はありませんでした。grep の終了コード 1 は「一致なし」です。文字・大文字小文字・対象ファイルを確認しましょう。';
-    else if (!result.stdout && result.code === 0 && result.trace.length) feedback = 'コマンドは終了しました。cd や保存など、成功しても文字を表示しない操作があります。';
+      if (/no such file|no such directory/i.test(error)) feedback = t('指定した場所が見つかりません。pwd で現在地、ls でファイル名を確認できます。');
+      else if (/is a directory/i.test(error)) feedback = t('指定した名前はディレクトリです。ls で中のファイルを確認しましょう。');
+      else if (/quote/.test(error)) feedback = t('引用符が閉じていない可能性があります。開始と終わりの引用符を確認しましょう。');
+      else if (/unsupported|command not found|利用できません/.test(error)) feedback = t('この学習用ターミナルが扱うコマンドには範囲があります。help で対応内容を確認できます。');
+      else feedback = t('エラーの行を確認して、コマンド・引数・オプションを見直しましょう。');
+    } else if (noMatch) feedback = t('検索条件に一致する行はありませんでした。grep の終了コード 1 は「一致なし」です。文字・大文字小文字・対象ファイルを確認しましょう。');
+    else if (!result.stdout && result.code === 0 && result.trace.length) feedback = t('コマンドは終了しました。cd や保存など、成功しても文字を表示しない操作があります。');
     return Object.assign(result, {feedback, noMatch});
   }
 
@@ -2655,7 +3963,7 @@ SOFTWARE.
     input = String(input);
     if (session.pagerOpen) {
       if (input.trim() === 'q') { closePager(session); return decorate({stdout: '', stderr: '', code: 0, trace: [], pagerClosed: true}); }
-      return decorate({stdout: '', stderr: 'less: 表示中です。q で閉じてからコマンドを入力してください。\n', code: 2, trace: []});
+      return decorate({stdout: '', stderr: t('less: 表示中です。q で閉じてからコマンドを入力してください。\n'), code: 2, trace: []});
     }
     const result = decorate(session.shell.run(input));
     if (input.trim()) remember(session, {type: 'command', input: input.slice(0, 8192)});
@@ -2696,14 +4004,14 @@ SOFTWARE.
     const tidy = value => mode === 'exact' ? String(value) : String(value).trim();
     const lines = value => tidy(value).split('\n').map(line => mode === 'lines' ? line.trim().replace(/\s+/g, ' ') : line);
     const shown = value => value.length > 70 ? value.slice(0, 67) + '…' : value;
-    if (mode === 'contains') return '必要な文字列「' + shown(String(expected).trim()) + '」が見つかりません。';
+    if (mode === 'contains') return t('必要な文字列「') + shown(String(expected).trim()) + t('」が見つかりません。');
     const got = lines(actual), wanted = lines(expected);
     const remaining = got.slice();
     const missing = [];
     for (const line of wanted) { const at = remaining.indexOf(line); if (at >= 0) remaining.splice(at, 1); else missing.push(line); }
-    if (!missing.length && !remaining.length) return '行の順序が異なります。並べ方を確認しましょう。';
-    if (mode === 'exact' && String(actual).trimEnd() === String(expected).trimEnd()) return '末尾の改行または空白が異なります。';
-    return [missing.length ? '足りない行:「' + shown(missing[0]) + '」' : '', remaining.length ? '余分な行:「' + shown(remaining[0]) + '」' : ''].filter(Boolean).join(' / ');
+    if (!missing.length && !remaining.length) return t('行の順序が異なります。並べ方を確認しましょう。');
+    if (mode === 'exact' && String(actual).trimEnd() === String(expected).trimEnd()) return t('末尾の改行または空白が異なります。');
+    return [missing.length ? t('足りない行:「') + shown(missing[0]) + '」' : '', remaining.length ? t('余分な行:「') + shown(remaining[0]) + '」' : ''].filter(Boolean).join(' / ');
   }
 
   // These are parsed argument tokens from real executions, never a regex on input.
@@ -2727,40 +4035,40 @@ SOFTWARE.
 
   function check(session) {
     const lesson = lessonFor(session.lessonId);
-    if (!lesson) return {passed: false, message: '自由練習には採点がありません。コマンドの結果を自由に確かめてください。', details: []};
+    if (!lesson) return {passed: false, message: t('自由練習には採点がありません。コマンドの結果を自由に確かめてください。'), details: []};
     const result = session.lastResult;
-    if (!result) return {passed: false, message: 'まずミッションに合うコマンドを実行してみましょう。', details: []};
-    if (!isSuccess(result, lesson)) return {passed: false, message: result.noMatch ? '一致する行がありません。検索条件と対象ファイルを確認しましょう。' : '直前の操作にエラーがあります。パイプの途中も確認して、もう一度実行しましょう。', details: []};
+    if (!result) return {passed: false, message: t('まずミッションに合うコマンドを実行してみましょう。'), details: []};
+    if (!isSuccess(result, lesson)) return {passed: false, message: result.noMatch ? t('一致する行がありません。検索条件と対象ファイルを確認しましょう。') : t('直前の操作にエラーがあります。パイプの途中も確認して、もう一度実行しましょう。'), details: []};
     const details = (lesson.validation?.all || []).map(condition => {
       let passed = false, message = '';
       const stages = condition.scope === 'any' ? session.evidence : result.trace;
       switch (condition.type) {
-        case 'output': passed = matches(result.stdout, condition.value, condition.match); message = passed ? '表示された結果がミッションの条件に合っている' : outputDifference(result.stdout, condition.value, condition.match); break;
-        case 'cwd': passed = session.shell.cwd === condition.value; message = '指定されたディレクトリへ移動している'; break;
-        case 'directory': passed = session.shell.isDir(session.shell.resolve(condition.path)); message = '指定されたディレクトリを用意している'; break;
-        case 'absent': {const path = session.shell.resolve(condition.path); passed = !session.shell.isFile(path) && !session.shell.isDir(path); message = '指定された作業用ファイル・ディレクトリを削除している'; break;}
-        case 'file': { const path = session.shell.resolve(condition.path); passed = session.shell.isFile(path) && matches(session.shell.files[path], condition.value, condition.match); message = '保存したファイルの内容が条件に合っている'; break; }
-        case 'used': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && (!condition.args || condition.args.every(arg => stage.args.includes(arg))) && (!condition.flags || [...condition.flags].every(flag => flagsFor(stage).has(flag)))); message = condition.command + ' を使って今回の操作を実行している'; break;
-        case 'status': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && stage.code === condition.code && (!condition.stderrRedirected || stage.stderrRedirected === true)); message = condition.command + ' の終了コード ' + condition.code + ' を確認している'; break;
-        case 'redirect': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.redirections.some(r => r.op === condition.op && r.target === condition.path && (condition.fd === undefined || r.fd === condition.fd))); message = condition.op + ' で指定された入力・出力の向きを設定している'; break;
+        case 'output': passed = matches(result.stdout, condition.value, condition.match); message = passed ? t('表示された結果がミッションの条件に合っている') : outputDifference(result.stdout, condition.value, condition.match); break;
+        case 'cwd': passed = session.shell.cwd === condition.value; message = t('指定されたディレクトリへ移動している'); break;
+        case 'directory': passed = session.shell.isDir(session.shell.resolve(condition.path)); message = t('指定されたディレクトリを用意している'); break;
+        case 'absent': {const path = session.shell.resolve(condition.path); passed = !session.shell.isFile(path) && !session.shell.isDir(path); message = t('指定された作業用ファイル・ディレクトリを削除している'); break;}
+        case 'file': { const path = session.shell.resolve(condition.path); passed = session.shell.isFile(path) && matches(session.shell.files[path], condition.value, condition.match); message = t('保存したファイルの内容が条件に合っている'); break; }
+        case 'used': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && (!condition.args || condition.args.every(arg => stage.args.includes(arg))) && (!condition.flags || [...condition.flags].every(flag => flagsFor(stage).has(flag)))); message = condition.command + t(' を使って今回の操作を実行している'); break;
+        case 'status': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && stage.code === condition.code && (!condition.stderrRedirected || stage.stderrRedirected === true)); message = condition.command + t(' の終了コード ') + condition.code + t(' を確認している'); break;
+        case 'redirect': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.redirections.some(r => r.op === condition.op && r.target === condition.path && (condition.fd === undefined || r.fd === condition.fd))); message = condition.op + t(' で指定された入力・出力の向きを設定している'); break;
         case 'connector': passed = condition.afterCommand || condition.skipped !== undefined
           ? (result.flow || []).some(flow => flow.connector === condition.value && (condition.skipped === undefined || flow.executed === !condition.skipped) &&
             (!condition.afterCommand || result.trace.filter(stage => stage.pipeline === flow.pipeline - 1).at(-1)?.command === condition.afterCommand))
           : (result.connectors || []).includes(condition.value);
-          message = (condition.afterCommand ? condition.afterCommand + ' の後を ' : '') + condition.value + ' でつなぎ' + (condition.skipped ? '、条件に応じて次の実行を飛ばしている' : '、実行条件を設定している'); break;
+          message = (condition.afterCommand ? condition.afterCommand + t(' の後を ') : '') + condition.value + t(' でつなぎ') + (condition.skipped ? t('、条件に応じて次の実行を飛ばしている') : t('、実行条件を設定している')); break;
         case 'variable': passed = stages.some((stage, index) => stageAccepted(stage, lesson) && (!condition.command || stage.command === condition.command) &&
           (condition.context === 'arguments' ? stage.argumentVariables || [] : stage.variables || []).includes(condition.name) &&
           (!condition.afterCommand || stages[index - 1]?.command === condition.afterCommand));
-          message = '$' + condition.name + ' を' + (condition.context === 'arguments' ? '引数として展開して値を確認している' : '展開して値を確認している'); break;
-        case 'pipeline': { const counts = new Map(); for (const stage of result.trace) counts.set(stage.pipeline, (counts.get(stage.pipeline) || 0) + 1); passed = [...counts.values()].some(count => count >= condition.minStages); message = '必要な段階をパイプでつないでいる'; break; }
-        case 'pagerClosed': passed = session.pagerOpened && session.pagerClosed && !session.pagerOpen; message = 'ファイルを開き、q で表示を閉じている'; break;
-        case 'source': { const sourceStages = condition.scope === 'last' ? result.trace : session.evidence; passed = sourceStages.some(stage => stageAccepted(stage, lesson) && stage.reads.includes(condition.path)); message = '指定された元ファイルを実際に読み込んでいる'; break; }
-        default: message = '未対応の判定条件です';
+          message = '$' + condition.name + t(' を') + (condition.context === 'arguments' ? t('引数として展開して値を確認している') : t('展開して値を確認している')); break;
+        case 'pipeline': { const counts = new Map(); for (const stage of result.trace) counts.set(stage.pipeline, (counts.get(stage.pipeline) || 0) + 1); passed = [...counts.values()].some(count => count >= condition.minStages); message = t('必要な段階をパイプでつないでいる'); break; }
+        case 'pagerClosed': passed = session.pagerOpened && session.pagerClosed && !session.pagerOpen; message = t('ファイルを開き、q で表示を閉じている'); break;
+        case 'source': { const sourceStages = condition.scope === 'last' ? result.trace : session.evidence; passed = sourceStages.some(stage => stageAccepted(stage, lesson) && stage.reads.includes(condition.path)); message = t('指定された元ファイルを実際に読み込んでいる'); break; }
+        default: message = t('未対応の判定条件です');
       }
       return {passed, message};
     });
     const passed = details.length > 0 && details.every(detail => detail.passed);
-    return {passed, message: passed ? lesson.success || 'ミッションクリアです！' : 'もう一歩です。未達成の条件を判定欄で確認しましょう。', details};
+    return {passed, message: passed ? lesson.success || t('ミッションクリアです！') : t('もう一歩です。未達成の条件を判定欄で確認しましょう。'), details};
   }
 
   function cleanStage(value) {
@@ -2862,6 +4170,8 @@ SOFTWARE.
 </script>
   <script>(function () {
   'use strict';
+  const i18n = globalThis.LinuxroomI18n;
+  const t = value => i18n.t(value);
   const DATA = globalThis.LINUXROOM_DATA;
   const Engine = globalThis.LinuxroomEngine;
   const KEY = 'linuxroom.progress.v1';
@@ -2869,7 +4179,7 @@ SOFTWARE.
   const $ = id => document.getElementById(id);
   const lessons = DATA.lessons;
   const byId = new Map(lessons.map(lesson => [lesson.id, lesson]));
-  const levels = Array.isArray(DATA.levels) && DATA.levels.length ? DATA.levels : [{ id: 'beginner', title: '初級編', subtitle: '一つずつ、コマンドを覚える', description: 'ファイルを読むところから、パイプをつないで集計するところまで。' }];
+  const levels = Array.isArray(DATA.levels) && DATA.levels.length ? DATA.levels : [{ id: 'beginner', title: t('初級編'), subtitle: t('一つずつ、コマンドを覚える'), description: t('ファイルを読むところから、パイプをつないで集計するところまで。') }];
   const levelById = new Map(levels.map(level => [level.id, level]));
   const levelLessons = id => lessons.filter(lesson => (lesson.level || 'beginner') === id);
   const levelOf = lesson => lesson && levelById.has(lesson.level) ? lesson.level : levels[0].id;
@@ -2878,7 +4188,7 @@ SOFTWARE.
   const modeLabels = { guide: 'まねて、試す', practice: '少し変えて、使う', challenge: '自分で、組み立てる' };
   const sessions = new Map();
   let progress = Engine.createProgress();
-  let ui = { started: false, drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
+  let ui = { started: false, locale: 'ja', drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
   let activeLevel = levels[0].id;
   let currentSession = null;
   let currentLesson = null;
@@ -2906,9 +4216,10 @@ SOFTWARE.
 
   function validId(id) { return id === 'sandbox' || byId.has(id); }
   function safeUI(raw) {
-    const clean = { started: false, drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
+    const clean = { started: false, locale: 'ja', drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return clean;
     clean.started = raw.started === true;
+    clean.locale = i18n.languages.includes(raw.locale) ? raw.locale : 'ja';
     levels.forEach(level => {
       const id = raw.currentByLevel && raw.currentByLevel[level.id];
       if (byId.has(id) && levelOf(byId.get(id)) === level.id) clean.currentByLevel[level.id] = id;
@@ -2929,7 +4240,7 @@ SOFTWARE.
 
   function storageFailure() {
     $('storage-warning').hidden = false;
-    $('storage-warning').textContent = 'ブラウザへの自動保存ができません。「進捗を保存」からファイルをダウンロードすると、あとで続きから学習できます。';
+    $('storage-warning').textContent = t('ブラウザへの自動保存ができません。「進捗を保存」からファイルをダウンロードすると、あとで続きから学習できます。');
   }
 
   function load() {
@@ -2965,7 +4276,7 @@ SOFTWARE.
     try {
       localStorage.setItem(KEY, JSON.stringify(progress));
       localStorage.setItem(UI_KEY, JSON.stringify(ui));
-      $('save-status').textContent = 'このブラウザに自動保存しました。';
+      $('save-status').textContent = t('このブラウザに自動保存しました。');
     } catch (_) { storageFailure(); }
   }
 
@@ -2979,17 +4290,17 @@ SOFTWARE.
 
   function stats() {
     const s = Engine.stats(progress);
-    $('progress-label').textContent = s.completed + ' / ' + s.total + ' レッスン修了';
+    $('progress-label').textContent = s.completed + ' / ' + s.total + t(' レッスン修了');
     $('progress-fill').style.width = s.percent + '%';
     const selected = levelById.get(activeLevel);
     const current = levelStats(activeLevel);
-    $('map-progress').textContent = selected.title + '　' + current.completed + ' / ' + current.total + ' レッスン修了 · ' + current.percent + '%';
-    $('map-overall').textContent = '全体 ' + s.completed + ' / ' + s.total + ' レッスン修了';
-    $('welcome-progress').textContent = s.completed ? '全体 ' + s.completed + ' / ' + s.total + ' レッスン修了。今日も一歩ずつ。' : '';
-    $('course-summary').textContent = levels.length + ' 段階 · 全 ' + s.total + ' レッスン';
-    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.3');
-    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.3');
-    $('start-learning').replaceChildren(document.createTextNode(ui.started ? '続きから学ぶ ' : '最初のレッスンをはじめる '), node('span', '', '→'));
+    $('map-progress').textContent = selected.title + '　' + current.completed + ' / ' + current.total + t(' レッスン修了 · ') + current.percent + '%';
+    $('map-overall').textContent = t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了');
+    $('welcome-progress').textContent = s.completed ? t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了。今日も一歩ずつ。') : '';
+    $('course-summary').textContent = levels.length + t(' 段階 · 全 ') + s.total + t(' レッスン');
+    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.4');
+    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.4');
+    $('start-learning').replaceChildren(document.createTextNode(ui.started ? t('続きから学ぶ ') : t('最初のレッスンをはじめる ')), node('span', '', '→'));
     renderLevelCards();
   }
 
@@ -3010,17 +4321,17 @@ SOFTWARE.
       const s = levelStats(level.id);
       const card = node('section', 'level-card' + (levelOf(currentLesson || byId.get(progress.currentId)) === level.id ? ' level-current' : ''));
       const heading = node('div', 'level-card-heading');
-      heading.append(node('span', 'level-step', 'STEP ' + String(index + 1).padStart(2, '0')), node('span', 'level-count', s.total + ' レッスン'));
-      card.append(heading, node('h3', '', level.title), node('p', 'level-subtitle', level.subtitle || ''), node('p', 'level-description', level.description || '小さな操作をつなぎながら、できることを増やします。'));
+      heading.append(node('span', 'level-step', 'STEP ' + String(index + 1).padStart(2, '0')), node('span', 'level-count', s.total + t(' レッスン')));
+      card.append(heading, node('h3', '', level.title), node('p', 'level-subtitle', level.subtitle || ''), node('p', 'level-description', level.description || t('小さな操作をつなぎながら、できることを増やします。')));
       const progressLabel = node('div', 'level-progress-label');
-      progressLabel.append(node('span', '', s.completed + ' / ' + s.total + ' 修了'), node('span', '', s.percent + '%'));
+      progressLabel.append(node('span', '', s.completed + ' / ' + s.total + t(' 修了')), node('span', '', s.percent + '%'));
       const track = node('div', 'progress-track');
       const fill = node('span');
       fill.style.width = s.percent + '%';
       track.append(fill);
-      const button = node('button', 'button secondary full-width', level.title + (ui.started && ui.currentByLevel[level.id] ? 'の続きへ →' : 'をはじめる →'));
+      const button = node('button', 'button secondary full-width', level.title + (ui.started && ui.currentByLevel[level.id] ? t('の続きへ →') : t('をはじめる →')));
       button.dataset.level = level.id;
-      button.setAttribute('aria-label', level.title + 'を選んで学習する');
+      button.setAttribute('aria-label', level.title + t('を選んで学習する'));
       button.addEventListener('click', () => resumeLevel(level.id));
       card.append(progressLabel, track, button);
       return card;
@@ -3091,14 +4402,14 @@ SOFTWARE.
     const selected = levelLessons(activeLevel);
     const index = selected.findIndex(lesson => lesson.id === id);
     const chapter = currentLesson ? DATA.chapters.find(ch => ch.id === currentLesson.chapter) : null;
-    $('lesson-position').textContent = currentLesson ? levelById.get(activeLevel).title + '　' + String(index + 1).padStart(2, '0') + ' / ' + selected.length + '　' + (chapter ? chapter.title : '') : 'FREE PRACTICE / 自由練習';
-    $('lesson-title').textContent = currentLesson ? currentLesson.title : '自由に、コマンドを試そう';
-    $('lesson-mode').textContent = currentLesson ? modeLabels[currentLesson.mode] || '一歩ずつ練習' : '自分のペースで';
-    $('lesson-minutes').textContent = currentLesson ? '約 ' + currentLesson.minutes + ' 分' : '時間制限なし';
-    $('lesson-goal').textContent = currentLesson ? currentLesson.goal : '習ったコマンドを、何度でも。';
-    $('lesson-explanation').replaceChildren(...(currentLesson ? currentLesson.explanation : ['ファイルを開いたり、探したり、パイプでつないだり。自由に操作してみましょう。', 'パイプでつないだら、「コマンドが、結果になるまで」で各段を選んでみよう。その段が受け取った入力と、次へ渡した出力を見比べられます。', '下の「この課題で使えるファイル」でファイル名を確認できます。迷ったら help やコマンド帳を使ってください。']).map(text => node('p', '', text)));
+    $('lesson-position').textContent = currentLesson ? levelById.get(activeLevel).title + '　' + String(index + 1).padStart(2, '0') + ' / ' + selected.length + '　' + (chapter ? chapter.title : '') : t('FREE PRACTICE / 自由練習');
+    $('lesson-title').textContent = currentLesson ? currentLesson.title : t('自由に、コマンドを試そう');
+    $('lesson-mode').textContent = currentLesson ? t(modeLabels[currentLesson.mode]) || t('一歩ずつ練習') : t('自分のペースで');
+    $('lesson-minutes').textContent = currentLesson ? t('約 ') + currentLesson.minutes + t(' 分') : t('時間制限なし');
+    $('lesson-goal').textContent = currentLesson ? currentLesson.goal : t('習ったコマンドを、何度でも。');
+    $('lesson-explanation').replaceChildren(...(currentLesson ? currentLesson.explanation : [t('ファイルを開いたり、探したり、パイプでつないだり。自由に操作してみましょう。'), t('パイプでつないだら、「コマンドが、結果になるまで」で各段を選んでみよう。その段が受け取った入力と、次へ渡した出力を見比べられます。'), t('下の「この課題で使えるファイル」でファイル名を確認できます。迷ったら help やコマンド帳を使ってください。')]).map(text => node('p', '', text)));
     const concepts = node('dl');
-    (currentLesson ? currentLesson.concepts : [{ term: 'help', text: 'この教材で使えるコマンドを表示します。' }]).forEach(concept => {
+    (currentLesson ? currentLesson.concepts : [{ term: 'help', text: t('この教材で使えるコマンドを表示します。') }]).forEach(concept => {
       const row = node('div', 'concept-item');
       row.append(node('dt', '', concept.term), node('dd', '', concept.text));
       concepts.append(row);
@@ -3108,11 +4419,11 @@ SOFTWARE.
     $('example-details').open = !!(currentLesson && currentLesson.mode === 'guide');
     $('example-command').textContent = currentLesson && currentLesson.example ? currentLesson.example.command : '';
     $('example-note').textContent = currentLesson && currentLesson.example ? currentLesson.example.note : '';
-    $('lesson-task').textContent = currentLesson ? currentLesson.task : 'まずは pwd と ls で、現在地とファイルを見てみよう。';
+    $('lesson-task').textContent = currentLesson ? currentLesson.task : t('まずは pwd と ls で、現在地とファイルを見てみよう。');
     $('new-part-box').hidden = !(currentLesson && currentLesson.newPart);
     $('new-part').textContent = currentLesson && currentLesson.newPart || '';
     $('starter-fill').hidden = !(currentLesson && currentLesson.starter);
-    $('starter-fill').textContent = currentLesson && currentLesson.newPart ? '前の段階を入力' : '書きはじめを入力';
+    $('starter-fill').textContent = currentLesson && currentLesson.newPart ? t('前の段階を入力') : t('書きはじめを入力');
     $('starter-fill').title = currentLesson && currentLesson.starter || '';
     $('hint-button').disabled = !currentLesson;
     $('solution-button').disabled = !currentLesson;
@@ -3120,7 +4431,7 @@ SOFTWARE.
     $('solution-box').hidden = true;
     $('lesson-feedback').hidden = true;
     $('success-box').hidden = true;
-    $('jump-mission').textContent = '課題に戻る ↑';
+    $('jump-mission').textContent = t('課題に戻る ↑');
     $('run-feedback').textContent = '';
     $('run-feedback').className = 'run-feedback';
     $('command-input').value = ui.drafts[id] || '';
@@ -3169,7 +4480,7 @@ SOFTWARE.
 
   function renderSolution() {
     const box = $('solution-box');
-    box.replaceChildren(node('h3', '', '解答例'), node('p', '', '見ながら入力しても大丈夫。実行した結果を確かめて、自分の操作にしていきましょう。'));
+    box.replaceChildren(node('h3', '', t('解答例')), node('p', '', t('見ながら入力しても大丈夫。実行した結果を確かめて、自分の操作にしていきましょう。')));
     (currentLesson.solution || []).forEach(command => box.append(node('code', '', command)));
     box.hidden = false;
   }
@@ -3188,18 +4499,18 @@ SOFTWARE.
     if (!currentLesson) return;
     $('lesson-feedback').hidden = true;
     $('success-box').hidden = false;
-    $('jump-mission').textContent = '修了・次の課題へ ↑';
+    $('jump-mission').textContent = t('修了・次の課題へ ↑');
     $('success-text').textContent = currentLesson.success;
     $('bridge-text').textContent = currentLesson.bridge || '';
     const next = nextLesson(currentLesson);
     const last = !next;
     $('next-lesson').hidden = last;
-    $('next-lesson').textContent = next && levelOf(next) !== levelOf(currentLesson) ? levelById.get(levelOf(next)).title + 'へ進む →' : '次のレッスンへ →';
+    $('next-lesson').textContent = next && levelOf(next) !== levelOf(currentLesson) ? levelById.get(levelOf(next)).title + t('へ進む →') : t('次のレッスンへ →');
     $('graduation-link').hidden = !last;
     $('logroom-link').hidden = !last;
-    if (last) $('bridge-text').textContent = (currentLesson.bridge || '次は SOCroom-easy でログの読み方を学び、Logroom でコマンドを使ったログ分析へ進みましょう。') + ' 各 GitHub ページから教材を入手できます。';
-    else if (levelOf(next) !== levelOf(currentLesson)) $('bridge-text').textContent = levelById.get(levelOf(currentLesson)).title + 'の最後の実習ができました。次は' + levelById.get(levelOf(next)).title + 'です。今までのコマンドに新しい操作を足していきましょう。';
-    if (newlyCompleted) toast('✓ ' + currentLesson.title + ' を修了しました');
+    if (last) $('bridge-text').textContent = (currentLesson.bridge || t('次は SOCroom-easy でログの読み方を学び、Logroom でコマンドを使ったログ分析へ進みましょう。')) + t(' 各 GitHub ページから教材を入手できます。');
+    else if (levelOf(next) !== levelOf(currentLesson)) $('bridge-text').textContent = levelById.get(levelOf(currentLesson)).title + t('の最後の実習ができました。次は') + levelById.get(levelOf(next)).title + t('です。今までのコマンドに新しい操作を足していきましょう。');
+    if (newlyCompleted) toast('✓ ' + currentLesson.title + t(' を修了しました'));
   }
 
   function checkAnswer(manual) {
@@ -3213,7 +4524,7 @@ SOFTWARE.
       checkpoint();
     } else if (manual) {
       const feedback = $('lesson-feedback');
-      feedback.replaceChildren(node('p', '', result.message || 'あと少し。課題の条件をもう一度確かめてみよう。'));
+      feedback.replaceChildren(node('p', '', result.message || t('あと少し。課題の条件をもう一度確かめてみよう。')));
       const remaining = (result.details || []).filter(detail => !detail.passed);
       if (remaining.length) {
         const list = node('ul');
@@ -3221,7 +4532,7 @@ SOFTWARE.
         feedback.append(list);
       }
       feedback.hidden = false;
-      toast('課題の条件と、左側のヒントを確認してみよう');
+      toast(t('課題の条件と、左側のヒントを確認してみよう'));
     }
   }
 
@@ -3233,7 +4544,7 @@ SOFTWARE.
     const output = $('terminal-output');
     output.replaceChildren();
     const entries = ui.transcripts[currentSession.lessonId] || [];
-    if (!entries.length) output.append(node('div', 'terminal-welcome', 'Linuxroom · virtual terminal\n\nanalyst@linuxroom:~$ はプロンプトの例です。\nユーザー名@ホスト名:現在地 のあとに、入力を待つ $ が付きます。\nプロンプトは入力せず、コマンドだけを打って Enter。'));
+    if (!entries.length) output.append(node('div', 'terminal-welcome', t('Linuxroom · virtual terminal\n\nanalyst@linuxroom:~$ はプロンプトの例です。\nユーザー名@ホスト名:現在地 のあとに、入力を待つ $ が付きます。\nプロンプトは入力せず、コマンドだけを打って Enter。')));
     entries.forEach(entry => output.append(transcriptNode(entry)));
     output.scrollTop = output.scrollHeight;
   }
@@ -3242,12 +4553,12 @@ SOFTWARE.
     const row = node('div', 'terminal-entry');
     const command = node('div', 'terminal-command');
     const prompt = node('span', 'history-prompt', entry.cwd ? promptFor(entry.cwd) : '$');
-    prompt.title = entry.cwd ? '実行前の現在地: ' + entry.cwd : '旧版の履歴には実行前の現在地が保存されていません。';
+    prompt.title = entry.cwd ? t('実行前の現在地: ') + entry.cwd : t('旧版の履歴には実行前の現在地が保存されていません。');
     command.append(prompt, node('span', '', entry.input));
     row.append(command);
     if (entry.stdout) row.append(node('pre', '', entry.stdout));
     if (entry.stderr) row.append(node('pre', 'error', entry.stderr));
-    if (!entry.stdout && !entry.stderr && entry.note) row.append(node('div', 'terminal-empty-output', entry.note));
+    if (!entry.stdout && !entry.stderr && entry.note) row.append(node('div', 'terminal-empty-output', t(entry.note)));
     return row;
   }
 
@@ -3267,14 +4578,14 @@ SOFTWARE.
   }
 
   function updateShellView() {
-    $('terminal-cwd').textContent = '現在地: ' + currentSession.shell.cwd;
+    $('terminal-cwd').textContent = t('現在地: ') + currentSession.shell.cwd;
     $('terminal-prompt').textContent = promptFor(currentSession.shell.cwd);
-    $('terminal-prompt').title = 'analyst はユーザー名、linuxroom はホスト名。: の後ろは現在地、~ はホームフォルダ。$ は一般ユーザーの入力待ちです。プロンプトは入力しません。';
+    $('terminal-prompt').title = t('analyst はユーザー名、linuxroom はホスト名。: の後ろは現在地、~ はホームフォルダ。$ は一般ユーザーの入力待ちです。プロンプトは入力しません。');
     const files = Object.keys(currentSession.shell.files || {}).sort();
     $('file-count').textContent = files.length + ' files';
     $('file-list').replaceChildren(...files.slice(0, 100).map(path => {
       const button = node('button', 'file-button', path);
-      button.title = '入力欄に ' + path + ' を追加';
+      button.title = t('入力欄に ') + path + t(' を追加');
       button.addEventListener('click', () => {
         const value = $('command-input').value;
         fillInput(value + (value && !/\s$/.test(value) ? ' ' : '') + quoteArg(path));
@@ -3293,7 +4604,7 @@ SOFTWARE.
     let result;
     try { result = Engine.run(currentSession, input); }
     catch (_) {
-      result = { stdout: '', stderr: 'この操作を実行できませんでした。コマンドを短くして、もう一度試してください。', code: 2, trace: [] };
+      result = { stdout: '', stderr: t('この操作を実行できませんでした。コマンドを短くして、もう一度試してください。'), code: 2, trace: [] };
     }
     $('command-input').value = '';
     ui.drafts[currentSession.lessonId] = '';
@@ -3301,10 +4612,10 @@ SOFTWARE.
     historyDraft = '';
     const noOutput = !result.stdout && !result.stderr;
     const lastStage = Array.isArray(result.trace) && result.trace[result.trace.length - 1];
-    const fallback = result.code === 1 && lastStage && lastStage.command === 'diff' ? '差分が見つかりました。diff の終了状態 1 は、二つの内容が異なることを表します。' : result.code === 1 && noOutput && lastStage && ['grep', 'rg'].includes(lastStage.command) ? '一致する行がありませんでした。検索語や大文字・小文字を確認してみよう。' : noOutput && result.code !== 0 ? '終了状態 ' + result.code + ' です。画面に何も表示されなくても、コマンドが成功したとは限りません。' : noOutput && result.code === 0 ? '実行しました。画面に何も表示しないコマンドもあります。' : '';
+    const fallback = result.code === 1 && lastStage && lastStage.command === 'diff' ? t('差分が見つかりました。diff の終了状態 1 は、二つの内容が異なることを表します。') : result.code === 1 && noOutput && lastStage && ['grep', 'rg'].includes(lastStage.command) ? t('一致する行がありませんでした。検索語や大文字・小文字を確認してみよう。') : noOutput && result.code !== 0 ? t('終了状態 ') + result.code + t(' です。画面に何も表示されなくても、コマンドが成功したとは限りません。') : noOutput && result.code === 0 ? t('実行しました。画面に何も表示しないコマンドもあります。') : '';
     const feedback = result.feedback || fallback;
     if (result.clear) clearTerminal();
-    else appendTranscript(input, result, result.pager ? '閲覧画面を開きました。q で閉じます。' : fallback, cwdBefore);
+    else appendTranscript(input, result, result.pager ? t('閲覧画面を開きました。q で閉じます。') : fallback, cwdBefore);
     $('run-feedback').textContent = feedback;
     $('run-feedback').className = 'run-feedback' + (result.stderr && !result.expectedStatus ? ' error' : '');
     if (Array.isArray(result.trace) && result.trace.length) {
@@ -3337,17 +4648,17 @@ SOFTWARE.
   function renderTrace() {
     $('trace-empty').hidden = latestTrace.length > 0;
     $('trace-detail').hidden = !latestTrace.length;
-    $('trace-summary').textContent = latestTrace.length ? latestTrace.length + ' 個の処理 · 実行結果' : '';
+    $('trace-summary').textContent = latestTrace.length ? latestTrace.length + t(' 個の処理 · 実行結果') : '';
     const stages = $('trace-stages');
     stages.replaceChildren();
     latestTrace.forEach((stage, i) => {
       if (i) {
         const piped = stage.pipeline === latestTrace[i - 1].pipeline && Number(stage.index) > 0;
-        stages.append(node('span', piped ? 'stage-arrow' : 'stage-chain', piped ? '|' : '次の実行 →'));
+        stages.append(node('span', piped ? 'stage-arrow' : 'stage-chain', piped ? '|' : t('次の実行 →')));
       }
       const button = node('button', 'stage-button');
       button.setAttribute('aria-pressed', String(i === traceIndex));
-      button.setAttribute('aria-label', '処理 ' + (i + 1) + ': ' + stageCommand(stage) + ' の入力と出力を見る');
+      button.setAttribute('aria-label', t('処理 ') + (i + 1) + ': ' + stageCommand(stage) + t(' の入力と出力を見る'));
       button.title = stageCommand(stage);
       button.append(node('strong', '', 'STEP ' + (i + 1)), document.createTextNode(stage.command));
       button.addEventListener('click', () => { traceIndex = i; renderTrace(); });
@@ -3356,16 +4667,16 @@ SOFTWARE.
     const stage = latestTrace[traceIndex];
     if (!stage) return;
     $('trace-detail-title').textContent = stageCommand(stage);
-    $('trace-line-count').textContent = '出力 ' + lineCount(stage.stdout) + ' 行';
-    $('trace-input-count').textContent = lineCount(stage.stdin) + ' 行';
-    $('trace-input').textContent = stage.stdin || '（標準入力は空です。ファイル名を引数で渡す処理は、そのファイルを直接読みます）';
+    $('trace-line-count').textContent = t('出力 ') + lineCount(stage.stdout) + t(' 行');
+    $('trace-input-count').textContent = lineCount(stage.stdin) + t(' 行');
+    $('trace-input').textContent = stage.stdin || t('（標準入力は空です。ファイル名を引数で渡す処理は、そのファイルを直接読みます）');
     $('trace-input-details').open = Boolean(stage.stdin);
-    $('trace-output').textContent = stage.stdout || (stage.stderr ? stage.stderr : '（表示する出力はありません）');
-    let note = stage.stderr ? 'この処理でエラーが発生しました。エラー文と入力を確認してみよう。' : stage.code === 1 && stage.command === 'diff' ? '終了状態 1 は「差分あり」を表します。diff では、違いが見つかると 1 を返します。' : stage.code === 1 && ['grep', 'rg'].includes(stage.command) ? '終了状態 1 は「一致する行なし」を表します。検索語や大文字・小文字を確認してみよう。' : stage.code ? '終了状態 ' + stage.code + ' です。このコマンドの説明と結果を確認しましょう。' : '';
-    if (stage.redirections && stage.redirections.length) note += (note ? ' ' : '') + 'この欄は保存・リダイレクト前の実際の出力です。' + stage.redirections.map(redir => (redir.fd === 2 ? '2' : '') + redir.op + ' ' + redir.target).join(' / ');
-    if (Number(stage.index) > 0 && latestTrace[traceIndex - 1] && stage.pipeline === latestTrace[traceIndex - 1].pipeline) note += (note ? ' ' : '') + '前の処理から ' + lineCount(stage.stdin) + ' 行を受け取りました。';
-    else if (!stage.stdin) note += (note ? ' ' : '') + '最初の処理です。必要な入力は、ファイルや引数から受け取ります。';
-    if (stage.cwdAfter && stage.cwdBefore !== stage.cwdAfter) note += (note ? ' ' : '') + '現在地: ' + stage.cwdBefore + ' → ' + stage.cwdAfter;
+    $('trace-output').textContent = stage.stdout || (stage.stderr ? stage.stderr : t('（表示する出力はありません）'));
+    let note = stage.stderr ? t('この処理でエラーが発生しました。エラー文と入力を確認してみよう。') : stage.code === 1 && stage.command === 'diff' ? t('終了状態 1 は「差分あり」を表します。diff では、違いが見つかると 1 を返します。') : stage.code === 1 && ['grep', 'rg'].includes(stage.command) ? t('終了状態 1 は「一致する行なし」を表します。検索語や大文字・小文字を確認してみよう。') : stage.code ? t('終了状態 ') + stage.code + t(' です。このコマンドの説明と結果を確認しましょう。') : '';
+    if (stage.redirections && stage.redirections.length) note += (note ? ' ' : '') + t('この欄は保存・リダイレクト前の実際の出力です。') + stage.redirections.map(redir => (redir.fd === 2 ? '2' : '') + redir.op + ' ' + redir.target).join(' / ');
+    if (Number(stage.index) > 0 && latestTrace[traceIndex - 1] && stage.pipeline === latestTrace[traceIndex - 1].pipeline) note += (note ? ' ' : '') + t('前の処理から ') + lineCount(stage.stdin) + t(' 行を受け取りました。');
+    else if (!stage.stdin) note += (note ? ' ' : '') + t('最初の処理です。必要な入力は、ファイルや引数から受け取ります。');
+    if (stage.cwdAfter && stage.cwdBefore !== stage.cwdAfter) note += (note ? ' ' : '') + t('現在地: ') + stage.cwdBefore + ' → ' + stage.cwdAfter;
     $('trace-note').textContent = note;
   }
 
@@ -3383,7 +4694,7 @@ SOFTWARE.
     let matches = [];
     try { matches = currentSession.shell.complete(before); } catch (_) { /* Completion is optional for incomplete quotes. */ }
     matches = Array.isArray(matches) ? matches.filter(item => typeof item === 'string') : [];
-    if (!matches.length) { $('run-feedback').textContent = '補完の候補がありません。ファイル名や現在地を確認してみよう。'; return; }
+    if (!matches.length) { $('run-feedback').textContent = t('補完の候補がありません。ファイル名や現在地を確認してみよう。'); return; }
     let prefix = matches[0];
     for (const match of matches) while (prefix && !match.startsWith(prefix)) prefix = prefix.slice(0, -1);
     const token = before.match(/[^\s|;]*$/);
@@ -3394,7 +4705,7 @@ SOFTWARE.
       input.setSelectionRange(completed.length, completed.length);
       laterSave();
     }
-    $('run-feedback').textContent = matches.length === 1 ? '補完しました。' : '候補: ' + matches.slice(0, 12).join('  ') + (matches.length > 12 ? ' …' : '');
+    $('run-feedback').textContent = matches.length === 1 ? t('補完しました。') : t('候補: ') + matches.slice(0, 12).join('  ') + (matches.length > 12 ? ' …' : '');
   }
 
   function inputKeys(event) {
@@ -3403,7 +4714,7 @@ SOFTWARE.
     if (event.ctrlKey && event.key.toLowerCase() === 'c') {
       event.preventDefault();
       input.value = '';
-      $('run-feedback').textContent = '入力中のコマンドを取り消しました。';
+      $('run-feedback').textContent = t('入力中のコマンドを取り消しました。');
       laterSave();
     } else if (event.ctrlKey && event.key.toLowerCase() === 'l') {
       event.preventDefault(); clearTerminal();
@@ -3434,8 +4745,8 @@ SOFTWARE.
     if (!currentSession || !currentSession.pagerOpen) return;
     Engine.closePager(currentSession);
     closeDialog($('pager-dialog'));
-    appendTranscript('q', { stdout: '', stderr: '', code: 0 }, '閲覧を終え、ターミナルに戻りました。');
-    $('run-feedback').textContent = '閲覧画面を閉じました。次のコマンドを入力できます。';
+    appendTranscript('q', { stdout: '', stderr: '', code: 0 }, t('閲覧を終え、ターミナルに戻りました。'));
+    $('run-feedback').textContent = t('閲覧画面を閉じました。次のコマンドを入力できます。');
     checkpoint();
     checkAnswer(false);
     $('command-input').focus();
@@ -3472,7 +4783,7 @@ SOFTWARE.
         const completed = progress.completed[lesson.id];
         const button = node('button', 'lesson-link' + (completed ? ' done' : '') + (progress.currentId === lesson.id ? ' current' : ''));
         button.dataset.lesson = lesson.id;
-        button.append(node('span', 'lesson-check', completed ? '✓' : String(selected.indexOf(lesson) + 1).padStart(2, '0')), node('span', 'lesson-link-title', lesson.title), node('span', 'muted', completed && completed.assisted ? 'ヒントあり' : lesson.minutes + ' 分'));
+        button.append(node('span', 'lesson-check', completed ? '✓' : String(selected.indexOf(lesson) + 1).padStart(2, '0')), node('span', 'lesson-link-title', lesson.title), node('span', 'muted', completed && completed.assisted ? t('ヒントあり') : lesson.minutes + t(' 分')));
         button.addEventListener('click', () => renderLesson(lesson.id));
         rows.append(button);
       });
@@ -3525,7 +4836,7 @@ SOFTWARE.
       const text = item.text || item.definition || item.description || item.meaning;
       if (term && text) items.push({ term, text, example: item.example || '' });
     });
-    return items;
+    return items.map(item => ({...item, term: t(item.term), text: t(item.text)}));
   }
 
   function renderReferences() {
@@ -3537,7 +4848,7 @@ SOFTWARE.
       if (item.example) section.append(node('code', '', typeof item.example === 'string' ? item.example : item.example.command || ''));
       return section;
     }));
-    if (!matches.length) $('reference-list').append(node('p', 'muted', '該当する項目がありません。短い言葉で探してみよう。'));
+    if (!matches.length) $('reference-list').append(node('p', 'muted', t('該当する項目がありません。短い言葉で探してみよう。')));
     const related = search ? lessons.filter(lesson => {
       if (taughtCommands.has(search)) return lessonCommands(lesson).includes(search);
       const corpus = [lesson.title, lesson.goal, ...(lesson.explanation || []), ...(lesson.concepts || []).map(item => item.term + ' ' + item.text), ...(lesson.solution || [])].join(' ').toLowerCase();
@@ -3545,14 +4856,14 @@ SOFTWARE.
     }) : [];
     $('reference-lessons').replaceChildren();
     if (related.length) {
-      $('reference-lessons').append(node('h3', '', 'この言葉を練習するレッスン'));
+      $('reference-lessons').append(node('h3', '', t('この言葉を練習するレッスン')));
       related.slice(0, 12).forEach(lesson => {
         const label = levelById.get(levelOf(lesson)).title + ' · ' + lesson.title;
         const button = node('button', 'reference-lesson-button', label + ' →');
         button.addEventListener('click', () => renderLesson(lesson.id, { focus: true }));
         $('reference-lessons').append(button);
       });
-      if (related.length > 12) $('reference-lessons').append(node('p', 'muted', 'ほか ' + (related.length - 12) + ' 件。言葉を追加すると、さらに絞り込めます。'));
+      if (related.length > 12) $('reference-lessons').append(node('p', 'muted', t('ほか ') + (related.length - 12) + t(' 件。言葉を追加すると、さらに絞り込めます。')));
     }
   }
 
@@ -3560,7 +4871,7 @@ SOFTWARE.
 
   function retryLesson() {
     if (!currentSession) return;
-    if (!window.confirm('この課題の操作・ファイル・入力を最初からやり直します。修了記録とヒントの記録は残ります。よろしいですか？')) return;
+    if (!window.confirm(t('この課題の操作・ファイル・入力を最初からやり直します。修了記録とヒントの記録は残ります。よろしいですか？'))) return;
     const id = currentSession.lessonId;
     currentSession = null;
     sessions.delete(id);
@@ -3569,7 +4880,7 @@ SOFTWARE.
     delete ui.transcripts[id];
     renderLesson(id, { skipCheckpoint: true, noScroll: true, focus: true });
     $('success-box').hidden = true;
-    toast('課題のファイルと現在地を初期状態に戻しました');
+    toast(t('課題のファイルと現在地を初期状態に戻しました'));
   }
 
   function exportProgress() {
@@ -3584,7 +4895,7 @@ SOFTWARE.
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    $('save-status').textContent = '進捗ファイルをダウンロードしました。個人情報を含むコマンドを入力した場合、その入力も保存されます。';
+    $('save-status').textContent = t('進捗ファイルをダウンロードしました。個人情報を含むコマンドを入力した場合、その入力も保存されます。');
   }
 
   function importWasPreserved(raw, restored) {
@@ -3629,33 +4940,66 @@ SOFTWARE.
     if (!file || importBusy) return;
     importBusy = true;
     try {
-      if (file.size > 12 * 1024 * 1024) throw new Error('ファイルが大きすぎます。Linuxroom で保存した進捗ファイルを選んでください。');
+      if (file.size > 12 * 1024 * 1024) throw new Error(t('ファイルが大きすぎます。Linuxroom で保存した進捗ファイルを選んでください。'));
       const text = typeof file.text === 'function' ? await file.text() : await new Promise((resolve, reject) => {
         const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsText(file);
       });
       const parsed = JSON.parse(text);
       const wrapped = parsed && parsed.format === 'linuxroom-export' && parsed.version === 1;
       const raw = wrapped ? parsed.progress : parsed;
-      if (!raw || typeof raw !== 'object' || raw.version !== 1 || !raw.completed || typeof raw.completed !== 'object' || Array.isArray(raw.completed) || !raw.sessions || typeof raw.sessions !== 'object' || Array.isArray(raw.sessions) || !validId(raw.currentId)) throw new Error('Linuxroom の進捗ファイルとして読み込めませんでした。');
-      if (JSON.stringify(raw).length > 8 * 1024 * 1024) throw new Error('進捗データが保存上限の 8 MiB を超えています。現在の進捗は変更していません。');
+      if (!raw || typeof raw !== 'object' || raw.version !== 1 || !raw.completed || typeof raw.completed !== 'object' || Array.isArray(raw.completed) || !raw.sessions || typeof raw.sessions !== 'object' || Array.isArray(raw.sessions) || !validId(raw.currentId)) throw new Error(t('Linuxroom の進捗ファイルとして読み込めませんでした。'));
+      if (JSON.stringify(raw).length > 8 * 1024 * 1024) throw new Error(t('進捗データが保存上限の 8 MiB を超えています。現在の進捗は変更していません。'));
       const nextProgress = Engine.hydrate(raw);
-      if (!importWasPreserved(raw, nextProgress)) throw new Error('未対応の課題や壊れた作業データが含まれるため、読み込みを中止しました。現在の進捗は変更していません。');
+      if (!importWasPreserved(raw, nextProgress)) throw new Error(t('未対応の課題や壊れた作業データが含まれるため、読み込みを中止しました。現在の進捗は変更していません。'));
       const nextUI = safeUI(wrapped ? parsed.ui : { started: true });
-      if (!window.confirm('このブラウザの進捗と課題の作業状態を、選んだファイルの内容に置き換えます。よろしいですか？')) return;
+      if (!window.confirm(t('このブラウザの進捗と課題の作業状態を、選んだファイルの内容に置き換えます。よろしいですか？'))) return;
       currentSession = null;
       sessions.clear();
       progress = nextProgress;
       ui = nextUI;
+      i18n.setLocale(ui.locale);
+      i18n.applyStatic(document);
       ui.started = true;
       reconcileUIProgress();
       renderLesson(progress.currentId, { skipCheckpoint: true });
-      toast('進捗を読み込みました。続きから学べます。');
+      toast(t('進捗を読み込みました。続きから学べます。'));
     } catch (error) {
-      $('save-status').textContent = error instanceof SyntaxError ? 'JSON の形式を読み取れませんでした。Linuxroom で保存したファイルを選んでください。' : error.message || 'ファイルを読み込めませんでした。';
+      $('save-status').textContent = error instanceof SyntaxError ? t('JSON の形式を読み取れませんでした。Linuxroom で保存したファイルを選んでください。') : error.message || t('ファイルを読み込めませんでした。');
     } finally { event.target.value = ''; importBusy = false; }
   }
 
   function bind() {
+    $('language-select').addEventListener('change', event => {
+      const value = event.target.value;
+      if (!i18n.languages.includes(value) || value === ui.locale) return;
+      checkpoint();
+      const wasHome = !$('welcome').hidden;
+      const openDialogs = [...document.querySelectorAll('dialog[open]')].map(dialog => dialog.id);
+      const selectedLevel = activeLevel;
+      const selectedTrace = traceIndex;
+      const exampleOpen = $('example-details').open;
+      const filesPanel = document.querySelector('.files-panel');
+      const filesOpen = filesPanel.open;
+      const scroll = {x: window.scrollX, y: window.scrollY};
+      ui.locale = i18n.setLocale(value);
+      i18n.applyStatic(document);
+      if (currentSession && !wasHome) {
+        renderLesson(currentSession.lessonId, {skipCheckpoint: true, noScroll: true});
+        traceIndex = Math.min(selectedTrace, Math.max(0, latestTrace.length - 1));
+        renderTrace();
+        $('example-details').open = exampleOpen;
+        filesPanel.open = filesOpen;
+      } else stats();
+      activeLevel = selectedLevel;
+      if (openDialogs.includes('map-dialog')) renderMapContents();
+      if (openDialogs.includes('reference-dialog')) renderReferences();
+      openDialogs.forEach(id => { if (!$(id).open) openDialog(id); });
+      if (!$('storage-warning').hidden) storageFailure();
+      $('toast').hidden = true;
+      checkpoint();
+      window.scrollTo(scroll.x, scroll.y);
+      $('language-select').focus({preventScroll: true});
+    });
     $('home-button').addEventListener('click', home);
     $('start-learning').addEventListener('click', () => renderLesson(ui.started && validId(progress.currentId) ? progress.currentId : lessons[0].id, { focus: true }));
     ['map-button', 'welcome-map-button'].forEach(id => $(id).addEventListener('click', renderMap));
@@ -3700,7 +5044,11 @@ SOFTWARE.
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') checkpoint(); });
   }
 
+  i18n.captureStatic(document);
   load();
+  ui.locale = i18n.setLocale(ui.locale);
+  i18n.applyStatic(document);
+  if (!$('storage-warning').hidden) storageFailure();
   bind();
   stats();
   if (ui.started) renderLesson(progress.currentId, { skipCheckpoint: true, noScroll: true });

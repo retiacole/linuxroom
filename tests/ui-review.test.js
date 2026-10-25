@@ -10,7 +10,7 @@ const UI_KEY = 'linuxroom.ui.v1';
 
 function sourceHTML() {
   let html = fs.readFileSync(path.join(root, 'src/ui.html'), 'utf8');
-  const files = {CSS: ['style.css'], SHELL: ['shell.js'], DATA: ['data.js', 'data-levels.js', 'data-applied.js', 'data-advanced.js'], ENGINE: ['engine.js'], APP: ['app.js']};
+  const files = {CSS: ['style.css'], SHELL: ['shell.js'], DATA: ['data.js', 'data-levels.js', 'data-applied.js', 'data-advanced.js', 'data-en.js', 'concepts-en.js', 'examples-en.js', 'hints-en.js'], I18N: ['i18n.js'], ENGINE: ['engine.js'], APP: ['app.js']};
   for (const [key, names] of Object.entries(files)) {
     const source = names.map(name => fs.readFileSync(path.join(root, 'src', name), 'utf8')).join('\n');
     html = html.replace('/*__' + key + '__*/', () => source.replace(/<\/script/gi, '<\\/script'));
