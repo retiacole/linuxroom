@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-Linuxroom v0.2. Virtual shell derived from Logroom.
+Linuxroom v0.3. Virtual shell derived from Logroom.
 MIT License
 
 Copyright (c) 2026 Logroom contributors
@@ -43,12 +43,19 @@ SOFTWARE.
 @media(max-width:1100px){.level-card{padding:20px}.level-cards{gap:12px}.level-card h3{font-size:21px}.level-subtitle{font-size:11px}.level-description{font-size:10px}}
 @media(max-width:800px){.course-levels{margin-top:55px}.levels-heading{align-items:flex-start}.levels-heading h2{font-size:24px}.level-cards{grid-template-columns:1fr}.level-card{padding:21px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 24px}.level-card-heading{grid-column:1/-1;margin-bottom:10px}.level-card h3{grid-column:1;font-size:21px}.level-subtitle{grid-column:1}.level-description{grid-column:1;grid-row:4/6;margin-bottom:0}.level-progress-label{grid-column:2;grid-row:2;align-self:end;min-width:150px}.level-card .progress-track{grid-column:2;grid-row:3;align-self:start;margin-top:10px}.level-card .button{grid-column:2;grid-row:4/6;align-self:end;margin-top:12px}.level-order-note{font-size:9px}.course-levels+.learning-road{margin-top:25px}}
 @media(max-width:560px){.levels-heading{flex-direction:column;gap:9px;margin-bottom:16px}.levels-heading h2{font-size:25px}.levels-heading>p{font-size:10px}.levels-heading>p br{display:none}.level-card{padding:19px;display:flex;gap:0}.level-card h3{font-size:22px}.level-card-heading{margin-bottom:12px}.level-subtitle{font-size:12px}.level-description{font-size:11px;margin-bottom:18px}.level-progress-label{align-self:stretch;min-width:0}.level-card .progress-track{align-self:stretch;margin-top:7px}.level-card .button{align-self:stretch;margin-top:15px}.level-order-note{font-size:9px}.map-progress-row{align-items:flex-start;flex-direction:column;gap:0}.map-progress-row .map-progress{padding:12px 0 5px}.map-overall{padding-bottom:17px}.map-levels{gap:6px}.map-level-button{padding:10px 6px}.map-level-button strong{font-size:11px}.map-level-description{font-size:10px}.key-guide dl{grid-template-columns:112px 1fr}}
+
+/* Keep the prompt readable without shrinking the command field on small screens. */
+.prompt-symbol{font-size:11px;line-height:1.8;max-width:45%;overflow-wrap:anywhere;flex-shrink:0}.terminal-command{display:block;white-space:pre-wrap;overflow-wrap:anywhere}.terminal-command .history-prompt{margin-right:9px}.key-guide>code{display:block;font-size:12px;color:var(--teal);margin-bottom:15px}.key-guide h3:not(:first-child){margin-top:24px}.sandbox-callout{margin-top:54px;padding:24px 28px;background:#edf3e9;border:1px solid #d4e3d5;border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:25px}.sandbox-callout .eyebrow{margin-bottom:6px}.sandbox-callout h2{font-size:22px;line-height:1.6;margin-bottom:8px}.sandbox-callout p:last-child{margin:0;font-size:12px;line-height:1.9;color:var(--muted)}.sandbox-callout .button{flex-shrink:0}.sandbox-callout+.course-levels{margin-top:42px}
+@media(max-width:1100px){#command-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1px 7px}.prompt-symbol{grid-column:1/-1;max-width:100%;font-size:10px}#command-input{width:100%}.sandbox-callout h2{font-size:19px}}
+@media(max-width:560px){.sandbox-callout{margin-top:45px;padding:21px;align-items:stretch;flex-direction:column;gap:18px}.sandbox-callout h2{font-size:18px}.sandbox-callout p:last-child{font-size:11px}.sandbox-callout .eyebrow{font-size:8px}.sandbox-callout+.course-levels{margin-top:35px}.terminal-command .history-prompt{font-size:9px}}
+
+.trace-input{margin-top:12px;border:1px solid #e0e8dc;border-radius:6px;background:#fafbf7}.trace-input summary{font-size:10px;color:var(--muted);padding:7px 10px;cursor:pointer}.trace-input summary span{font-size:9px;margin-left:6px;color:#839987}#trace-input{margin:0 10px 10px;max-height:160px;overflow:auto;font-size:10px;line-height:1.9;color:#5b7463}.trace-output-label{font-size:10px;color:var(--muted);margin:12px 0 0}.trace-output-label+#trace-output{margin-top:5px}
 </style>
 </head>
 <body>
   <a class="skip-link" href="#main">本文へ移動</a>
   <header class="site-header">
-    <button id="home-button" class="brand" aria-label="Linuxroom ホーム"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>linuxroom<span class="brand-version">STEP BY STEP / v0.2</span></span></button>
+    <button id="home-button" class="brand" aria-label="Linuxroom ホーム"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>linuxroom<span id="brand-version" class="brand-version">STEP BY STEP / v0.3</span></span></button>
     <nav class="header-actions" aria-label="メインメニュー">
       <button id="map-button" class="nav-button">学習マップ</button>
       <button id="reference-button" class="nav-button">コマンド帳</button>
@@ -76,8 +83,9 @@ SOFTWARE.
           <span class="hero-sticker">長いコマンドも、<br>小さな操作の積み重ね。</span>
         </div>
       </div>
+      <section class="sandbox-callout" aria-labelledby="sandbox-title"><div><p class="eyebrow">FREE PRACTICE / 自由練習</p><h2 id="sandbox-title">パイプの途中を、のぞいてみよう。</h2><p>好きなコマンドを試せるターミナル。<br>つないだ各段の「入力 → 処理 → 出力」を見比べられます。</p></div><button id="welcome-sandbox-button" class="button secondary">自由練習を開く <span aria-hidden="true">→</span></button></section>
       <section class="course-levels" aria-labelledby="levels-title">
-        <div class="levels-heading"><div><p id="course-summary" class="eyebrow">3 段階 · 全 108 レッスン</p><h2 id="levels-title">初級から、発展まで。</h2></div><p>一つの操作から、複数のコマンドへ。<br>どの段階からでも始められます。</p></div>
+        <div class="levels-heading"><div><p id="course-summary" class="eyebrow">3 段階のレッスン</p><h2 id="levels-title">初級から、発展まで。</h2></div><p>一つの操作から、複数のコマンドへ。<br>どの段階からでも始められます。</p></div>
         <div id="level-cards" class="level-cards"></div>
         <p class="level-order-note">初めてなら「初級編 → 応用編 → 発展編」の順がおすすめ。各段階の続きと作業内容は自動保存されます。</p>
       </section>
@@ -87,7 +95,7 @@ SOFTWARE.
         <div><span>03 / ANALYZE</span><strong>Logroom</strong><p>コマンドでログを分析する</p></div><span class="road-arrow" aria-hidden="true">→</span>
         <div><span>04 / INVESTIGATE</span><strong>SOCroom</strong><p>学んだことを、調査に生かす</p></div>
       </div>
-      <div class="welcome-bottom"><p>1レッスンは数分。ヒントを見ても大丈夫。<br>「なぜそうなる？」を、実際の出力で確かめます。</p><button id="welcome-map-button" class="text-button">学習内容を見てみる <span aria-hidden="true">↗</span></button><button id="welcome-sandbox-button" class="text-button">自由にコマンドを試す <span aria-hidden="true">↗</span></button></div>
+      <div class="welcome-bottom"><p>1レッスンは数分。ヒントを見ても大丈夫。<br>「なぜそうなる？」を、実際の出力で確かめます。</p><button id="welcome-map-button" class="text-button">学習内容を見てみる <span aria-hidden="true">↗</span></button></div>
     </section>
 
     <section id="workspace" class="workspace" hidden aria-label="学習スペース">
@@ -110,21 +118,21 @@ SOFTWARE.
           <section class="terminal" aria-label="学習用の仮想ターミナル">
             <div class="terminal-header"><span><span class="terminal-dot" aria-hidden="true"></span> 学習用の仮想ターミナル</span><button id="terminal-help" aria-label="ターミナルの操作方法">使い方 <span aria-hidden="true">?</span></button></div>
             <div id="terminal-output" class="terminal-output" role="log" aria-label="コマンドの実行結果" aria-live="polite" aria-relevant="additions"></div>
-            <div class="terminal-input-area"><div class="prompt-info"><span id="terminal-cwd"></span><span>Enter で実行</span></div><form id="command-form" autocomplete="off"><span class="prompt-symbol" aria-hidden="true">$</span><label class="sr-only" for="command-input">Linux コマンドを入力</label><input id="command-input" name="command" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" maxlength="8192" placeholder="ここにコマンドを入力"><button id="run-command" type="submit" aria-label="コマンドを実行">実行 <span aria-hidden="true">↵</span></button></form></div>
+            <div class="terminal-input-area"><div class="prompt-info"><span id="terminal-cwd"></span><span>Enter で実行</span></div><form id="command-form" autocomplete="off"><span id="terminal-prompt" class="prompt-symbol" aria-label="プロンプト">analyst@linuxroom:~$</span><label class="sr-only" for="command-input">プロンプトは入力せず、Linux コマンドだけを入力</label><input id="command-input" name="command" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" maxlength="8192" placeholder="ここにコマンドを入力"><button id="run-command" type="submit" aria-label="コマンドを実行">実行 <span aria-hidden="true">↵</span></button></form></div>
           </section>
           <div class="terminal-toolbar"><div><button id="starter-fill" class="text-button">前の段階を入力</button><button id="clear-terminal" class="text-button">表示をクリア</button><button id="jump-mission" class="text-button mobile-terminal-jump">課題に戻る ↑</button></div><button id="check-answer" class="button secondary">できたか確認する <span aria-hidden="true">✓</span></button></div>
           <div id="run-feedback" class="run-feedback" role="status"></div>
-          <section class="trace-panel" aria-labelledby="trace-heading"><div class="trace-heading"><div><p class="eyebrow">WATCH THE FLOW</p><h2 id="trace-heading">コマンドが、結果になるまで</h2></div><span id="trace-summary" class="muted"></span></div><div id="trace-empty" class="trace-empty"><span aria-hidden="true">入力 → 処理 → 出力</span><p>コマンドを実行すると、実際の処理と結果がここに表示されます。<br>パイプをつないだら、途中の結果ものぞいてみよう。</p></div><div id="trace-stages" class="trace-stages"></div><div id="trace-detail" class="trace-detail" hidden><div class="trace-detail-heading"><span id="trace-detail-title"></span><span id="trace-line-count"></span></div><pre id="trace-output"></pre><p id="trace-note" class="muted"></p></div></section>
+          <section class="trace-panel" aria-labelledby="trace-heading"><div class="trace-heading"><div><p class="eyebrow">WATCH THE FLOW</p><h2 id="trace-heading">コマンドが、結果になるまで</h2></div><span id="trace-summary" class="muted"></span></div><div id="trace-empty" class="trace-empty"><span aria-hidden="true">入力 → 処理 → 出力</span><p>コマンドを実行すると、実際の処理と結果がここに表示されます。<br>パイプをつないだら、途中の結果ものぞいてみよう。</p></div><div id="trace-stages" class="trace-stages"></div><div id="trace-detail" class="trace-detail" hidden><div class="trace-detail-heading"><span id="trace-detail-title"></span><span id="trace-line-count"></span></div><details id="trace-input-details" class="trace-input"><summary>標準入力 <span id="trace-input-count"></span></summary><pre id="trace-input"></pre></details><p class="trace-output-label">出力</p><pre id="trace-output"></pre><p id="trace-note" class="muted"></p></div></section>
           <details class="files-panel"><summary>この課題で使えるファイル <span id="file-count"></span></summary><p>ファイル名を選ぶと、入力中のコマンドの末尾に追加できます。</p><div id="file-list"></div></details>
           <p class="practice-note">この中の操作は学習用ファイルにだけ反映されます。実機の Linux とは使える機能が異なります。</p>
         </div>
       </div>
     </section>
   </main>
-  <footer class="site-footer"><span>LINUXROOM <span class="footer-dot">/</span> Small commands. Real understanding.</span><span>Offline learning lab · v0.2</span></footer>
+  <footer class="site-footer"><span>LINUXROOM <span class="footer-dot">/</span> Small commands. Real understanding.</span><span id="footer-version">Offline learning lab · v0.3</span></footer>
 
   <dialog id="map-dialog" class="app-dialog map-dialog" aria-labelledby="map-title"><div class="dialog-top"><div><p class="eyebrow">YOUR LEARNING PATH</p><h2 id="map-title">学習マップ</h2></div><button class="close-dialog icon-button" aria-label="学習マップを閉じる">×</button></div><p class="dialog-intro">初級 → 応用 → 発展の順に、操作を積み重ねます。どの段階・課題からでも選べます。</p><div id="map-levels" class="map-levels" role="group" aria-label="学習する段階を選ぶ"></div><p id="map-level-description" class="map-level-description"></p><div class="map-progress-row"><div id="map-progress" class="map-progress"></div><span id="map-overall" class="map-overall"></span></div><div id="chapter-list" class="chapter-list"></div><button id="sandbox-button" class="button secondary full-width">自由練習のターミナルを開く →</button><p class="muted">✓ は修了済み。ヒント・解答例を見た課題も、何度でも復習できます。</p></dialog>
-  <dialog id="reference-dialog" class="app-dialog reference-dialog" aria-labelledby="reference-title"><div class="dialog-top"><div><p class="eyebrow">KEEP IT HANDY</p><h2 id="reference-title">コマンド帳</h2></div><button class="close-dialog icon-button" aria-label="コマンド帳を閉じる">×</button></div><p class="dialog-intro">覚えていなくても大丈夫。必要なときに見ながら試そう。</p><label class="sr-only" for="reference-search">コマンドや用語を探す</label><input id="reference-search" class="search-input" placeholder="コマンドや用語を探す" type="search"><div id="reference-lessons" class="reference-lessons"></div><div id="reference-list" class="reference-list"></div><div class="key-guide"><h3>ターミナルの操作</h3><dl><dt>Enter</dt><dd>コマンドを実行</dd><dt>↑ / ↓</dt><dd>実行したコマンドを呼び出す</dd><dt>Tab</dt><dd>コマンド・ファイル名を補完</dd><dt>Ctrl + C</dt><dd>入力を消す / 閲覧画面を閉じる</dd><dt>Ctrl + L</dt><dd>ターミナルの表示を消す</dd><dt>less / more で q</dt><dd>閲覧を終えてターミナルへ戻る</dd></dl><p class="muted">help はこの教材のコマンド一覧・使い方を表示します。一般の Linux では man などで調べます。</p></div></dialog>
+  <dialog id="reference-dialog" class="app-dialog reference-dialog" aria-labelledby="reference-title"><div class="dialog-top"><div><p class="eyebrow">KEEP IT HANDY</p><h2 id="reference-title">コマンド帳</h2></div><button class="close-dialog icon-button" aria-label="コマンド帳を閉じる">×</button></div><p class="dialog-intro">覚えていなくても大丈夫。必要なときに見ながら試そう。</p><label class="sr-only" for="reference-search">コマンドや用語を探す</label><input id="reference-search" class="search-input" placeholder="コマンドや用語を探す" type="search"><div id="reference-lessons" class="reference-lessons"></div><div id="reference-list" class="reference-list"></div><div id="prompt-guide" class="key-guide"><h3>プロンプトの読み方</h3><code>analyst@linuxroom:~$</code><dl><dt>analyst</dt><dd>操作しているユーザー名</dd><dt>linuxroom</dt><dd>ホスト名（コンピューター名）</dd><dt>:~</dt><dd>: の後ろは現在地。~ は /home/analyst の省略。cd で移動すると ~/logs などに変わる</dd><dt>$ / #</dt><dd>一般ユーザー / 管理者の目印としてよく使われる。この教材は一般ユーザーの $</dd></dl><p class="muted">プロンプトの見た目は環境によって変わります。プロンプト自体は入力せず、その後ろにコマンドだけを打ちます。</p><h3>ターミナルの操作</h3><dl><dt>Enter</dt><dd>コマンドを実行</dd><dt>↑ / ↓</dt><dd>実行したコマンドを呼び出す</dd><dt>Tab</dt><dd>コマンド・ファイル名を補完</dd><dt>Ctrl + C</dt><dd>入力を消す / 閲覧画面を閉じる</dd><dt>Ctrl + L</dt><dd>ターミナルの表示を消す</dd><dt>less / more で q</dt><dd>閲覧を終えてターミナルへ戻る</dd></dl><p class="muted">実機では man grep などでマニュアルを調べます。この教材では man を help と同じ学習用の案内にしています。</p></div></dialog>
   <dialog id="save-dialog" class="app-dialog save-dialog" aria-labelledby="save-title"><div class="dialog-top"><div><p class="eyebrow">SAVE YOUR PLACE</p><h2 id="save-title">進捗の保存</h2></div><button class="close-dialog icon-button" aria-label="保存画面を閉じる">×</button></div><p>修了した課題と、各課題のファイル・現在地・入力途中のコマンドを、このブラウザに自動保存します。</p><p class="muted">別のブラウザや端末に移すときは、進捗ファイルをダウンロードしてください。</p><div class="save-actions"><button id="export-progress" class="button primary">進捗ファイルをダウンロード ↓</button><button id="import-progress" class="button secondary">進捗ファイルを読み込む ↑</button><input id="import-file" type="file" accept="application/json,.json" hidden></div><p id="save-status" role="status" class="muted"></p></dialog>
   <dialog id="pager-dialog" class="app-dialog pager-dialog" aria-labelledby="pager-title"><div class="dialog-top"><div><p id="pager-command-label" class="eyebrow">FILE VIEWER / less</p><h2 id="pager-title">ファイルを読む</h2></div><button id="pager-close" class="button secondary">q で閉じる</button></div><p class="muted">スクロールして読めます。q を押すとコマンド入力に戻ります。</p><pre id="pager-content" tabindex="0"></pre><div class="pager-bottom">(END) <span>q：終了 · Ctrl + C：終了</span></div></dialog>
   <div id="toast" class="toast" role="status" hidden></div>
@@ -135,7 +143,7 @@ SOFTWARE.
   const COMMANDS = ['help','pwd','cd','ls','cat','tac','less','more','grep','rg','sort','uniq','cut','tr','column','nl','diff','jq','base64','tee','head','tail','wc','sed','awk','find','echo','printf','paste','comm','join','xargs','rev','strings','basename','dirname','realpath','file','stat','du','date','clear','history','mkdir','touch','cp','mv','rm','rmdir'];
   const USAGE = {
     help: 'help [command]', pwd: 'pwd', cd: 'cd [directory|-]',
-    ls: 'ls [-alhdRSr] [path ...]', cat: 'cat [-n] [file ...]', tac: 'tac [file ...]',
+    ls: 'ls [-1alhdtRSr] [path ...]', cat: 'cat [-n] [file ...]', tac: 'tac [file ...]',
     less: 'less [file ...]  (read-only viewer; q closes)', more: 'more [file ...]  (read-only viewer; q closes)',
     grep: 'grep [-EFiwvncrRlhHLqxo] [-m N] [-A N|-B N|-C N] [-e pattern ...] [--include glob|--exclude glob|--exclude-dir glob] [--] pattern [file ...]',
     rg: 'rg [-FiwvnclHhqo] [-A N|-B N|-C N] [-e pattern] [-g glob] [--no-heading] [--count] [pattern] [path ...] | rg --files [-g glob] [path ...]',
@@ -154,7 +162,7 @@ SOFTWARE.
     xargs: 'xargs [-0r] [-d delimiter] [-n N] [-I token] [virtual-command [argument ...]]', rev: 'rev [file ...]',
     strings: 'strings [-a] [-n minimum] [-t d|o|x] [file ...]', basename: 'basename [-a] [-s suffix] path [suffix]',
     dirname: 'dirname path ...', realpath: 'realpath [-m|-e] path ...', file: 'file [-bi] path ...',
-    stat: 'stat [-c format] path ...', du: 'du [-ashb] [--max-depth N] [path ...]',
+    stat: 'stat [-c format] path ...', du: 'du [-acshb] [--max-depth N] [path ...]',
     date: 'date [-u] [-d ISO-date|@epoch] [+format]', mv: 'mv [-n] source destination', rmdir: 'rmdir [-p] directory ...',
     vi: 'vi [file]  (standalone only)', view: 'view [file]  (read-only editor; standalone only)',
     sl: 'sl  (steam locomotive; standalone only; wait until it passes)',
@@ -186,26 +194,28 @@ SOFTWARE.
     if (pattern.length > 512) fail('regular expression exceeds 512 characters');
     let source=posixClasses(extended ? pattern : basicRegex(pattern));
     if (/\(\?/.test(source)) fail('regular expression lookarounds and special groups are unsupported');
-    if (/\([^)]*[*+][^)]*\)[*+{]/.test(source)) fail('nested repeated groups are unsupported in this browser exercise');
+    if (/\([^)]*[*+][^)]*\)[*+{]/.test(source)) fail('nested repeated groups are unsupported in this browser exercise; for an IPv4-shaped token use [0-9]{1,3}(\\.[0-9]{1,3}){3} with grep -E (this does not validate octet ranges)');
     try { return new RegExp(source, insensitive ? 'i' : ''); }
     catch (e) { fail('invalid regular expression: ' + e.message); }
   }
   function lex(input) {
-    const tokens=[]; let value='', mask=[], started=false, quote=null,plain=true;
-    const add=(c,unquoted) => { value+=c; mask.push(Boolean(unquoted && (c==='*'||c==='?'))); started=true; };
-    const flush=()=>{ if(started) tokens.push({kind:'word',value,mask}); value=''; mask=[]; started=false;plain=true; };
+    const tokens=[]; let value='', mask=[], started=false, quote=null,plain=true,tilde=false,tildeEnd=false,statusOffsets=[];
+    const add=(c,unquoted) => { if(!started&&c==='~'&&unquoted)tilde=true;if(tilde&&c==='/'&&unquoted)tildeEnd=true;value+=c; mask.push(Boolean(unquoted && (c==='*'||c==='?'))); started=true; };
+    const flush=()=>{ if(started) tokens.push({kind:'word',value,mask,tilde,statusOffsets}); value=''; mask=[]; started=false;plain=true;tilde=false;tildeEnd=false;statusOffsets=[]; };
     for(let i=0;i<input.length;i++) {
       const c=input[i];
       if(quote) {
         if(c===quote) { quote=null; continue; }
         if(quote==='"' && c==='\\' && i+1<input.length && /["\\$`\n]/.test(input[i+1])) { add(input[++i],false); continue; }
         if(quote==='"' && (c==='`'||(c==='$'&&input[i+1]==='('))) fail('command substitution is unsupported');
+        if(quote==='"' && c==='$'&&input[i+1]==='?'){statusOffsets.push(value.length);add('$',false);add('?',false);i++;plain=false;continue;}
         if(quote==='"' && c==='$' && /[A-Za-z_?{0-9]/.test(input[i+1]||'')) fail('shell variable expansion is unsupported; use literal paths');
         add(c,false); continue;
       }
-      if(c==='\''||c==='"') { quote=c; started=true;plain=false; continue; }
-      if(c==='\\') { if(i+1===input.length) fail('unfinished escape');plain=false; add(input[++i],false); continue; }
+      if(c==='\''||c==='"') { if(!tildeEnd)tilde=false;quote=c; started=true;plain=false; continue; }
+      if(c==='\\') { if(i+1===input.length) fail('unfinished escape');if(!tildeEnd)tilde=false;plain=false; add(input[++i],false); continue; }
       if(c==='`'||(c==='$'&&input[i+1]==='(')) fail('command substitution is unsupported; quote awk programs with single quotes');
+      if(c==='$'&&input[i+1]==='?'){statusOffsets.push(value.length);add('$',false);add('?',false);i++;plain=false;continue;}
       if(c==='$' && /[A-Za-z_?{0-9]/.test(input[i+1]||'')) fail('shell variable expansion is unsupported; use literal paths');
       if(c==='\n'||c===';') { flush(); tokens.push({kind:'op',value:';'}); continue; }
       if(/\s/.test(c)) { flush(); continue; }
@@ -214,6 +224,7 @@ SOFTWARE.
         const ioNumber=started&&plain&&/^\d+$/.test(value)?value:null;
         flush(); let op=c;
         if(input[i+1]===c && (c==='|'||c==='&'||c==='>')) op+=input[++i];
+        else if(c==='>'&&input[i+1]==='&')op+=input[++i];
         if(op==='&') fail('background commands are unsupported');
         if(c==='<'&&input[i+1]==='<') fail('here documents are unsupported');
         tokens.push({kind:'op',value:op,ioNumber}); continue;
@@ -231,10 +242,13 @@ SOFTWARE.
       const token=tokens[i];
       if(token.kind==='word') { words.push(token); continue; }
       const op=token.value;
-      if(op==='>'||op==='>>'||op==='<') {
+      if(op==='>'||op==='>>'||op==='<'||op==='>&') {
         if(!tokens[i+1]||tokens[i+1].kind!=='word') fail('redirection requires a filename');
-        if(token.ioNumber!==null&&token.ioNumber!==undefined){words.pop();if(token.ioNumber!==(op==='<'?'0':'1'))fail(token.ioNumber==='2'?'stderr redirection is unsupported':'this file descriptor redirection is unsupported');}
-        redirs.push({op,target:tokens[++i]}); continue;
+        const fd=token.ioNumber===null||token.ioNumber===undefined?(op==='<'?0:1):Number(token.ioNumber);
+        if(token.ioNumber!==null&&token.ioNumber!==undefined)words.pop();
+        if(op==='<'?fd!==0:fd!==1&&fd!==2)fail('this file descriptor redirection is unsupported');
+        const target=tokens[++i];
+        redirs.push({op,fd,target}); continue;
       }
       if(op==='|') { finishCommand(); continue; }
       if(op===';'||op==='&&'||op==='||') {
@@ -272,10 +286,14 @@ SOFTWARE.
     return index=>ranges.some(([a,b])=>index>=a&&index<=b);
   }
   class LogLabShell {
-    constructor(files={}) {
+    constructor(files={},options={}) {
       this.files=Object.create(null); this.directories=new Set(['/','/home','/home/analyst','/tmp']);
+      this.snapshotTime=Number.isFinite(options.snapshotTime)?options.snapshotTime:Date.UTC(2026,9,25,9);
+      this.clock=typeof options.now==='function'?options.now:()=>options.now===undefined?Date.now():new Date(options.now).getTime();
+      this.metadata=Object.create(null);this.lastExitCode=Number.isInteger(options.lastExitCode)?options.lastExitCode:0;
       this.cwd='/home/analyst'; this.oldcwd=this.cwd; this.history=[]; this.supportedCommands=COMMANDS.slice();
-      for(const [path,content] of Object.entries(files)) { const p=this.resolve(path); this.files[p]=String(content); this.addParents(p); }
+      for(const [path,content] of Object.entries(files)) { const p=this.resolve(path); this.files[p]=String(content); this.addParents(p);this.metadata[p]={mtime:this.snapshotTime}; }
+      for(const [path,entry] of Object.entries(options.metadata||{})){const mtime=new Date(entry.mtime).getTime();if(Number.isFinite(mtime))this.metadata[this.resolve(path)]={mtime};}
     }
     resolve(path) {
       const parts=(String(path).startsWith('/')?String(path):this.cwd+'/'+String(path)).split('/'), out=[];
@@ -286,7 +304,10 @@ SOFTWARE.
     isFile(path) { return Object.prototype.hasOwnProperty.call(this.files,path); }
     isDir(path) { return this.directories.has(path) || Object.keys(this.files).some(p=>p.startsWith(path==='/'?'/':path+'/')); }
     allPaths() { for(const p of Object.keys(this.files)) this.addParents(p); return [...new Set([...this.directories,...Object.keys(this.files)])].sort(cmp); }
+    getMetadata(path) {const p=this.resolve(path);return this.metadata[p]||(this.metadata[p]={mtime:this.snapshotTime});}
     expand(token) {
+      if(token.statusOffsets?.length){if(this._traceVariables)this._traceVariables.add('?');let value=token.value,mask=token.mask.slice();for(const at of [...token.statusOffsets].reverse()){const status=String(this._expansionStatus===undefined?this.lastExitCode:this._expansionStatus);value=value.slice(0,at)+status+value.slice(at+2);mask.splice(at,2,...Array(status.length).fill(false));}token={...token,value,mask};}
+      if(token.tilde&&(token.value==='~'||token.value.startsWith('~/'))){const prefix='/home/analyst';token={...token,value:prefix+token.value.slice(1),mask:[...Array(prefix.length).fill(false),...token.mask.slice(1)]};}
       if(!token.mask.some(Boolean)) return [token.value];
       const segments=[]; let segment=[], offset=0;
       for(const part of token.value.split('/')) { const masks=token.mask.slice(offset,offset+part.length); offset+=part.length+1; if(!part||part==='.') continue; if(part==='..') segments.push({parent:true}); else segments.push({part,masks}); }
@@ -297,11 +318,12 @@ SOFTWARE.
       return found.length?found:[token.value];
     }
     relative(path) { const a=this.cwd.split('/').filter(Boolean),b=path.split('/').filter(Boolean); while(a.length&&b.length&&a[0]===b[0]) { a.shift();b.shift(); } return [...a.map(()=>'..'),...b].join('/')||'.'; }
-    read(path, cmd='read') { const p=this.resolve(path); if(this.isDir(p)) fail(cmd+': '+path+': is a directory',1); if(!this.isFile(p)) fail(cmd+': '+path+': no such file',1); if(this._traceReads)this._traceReads.push(p); return this.files[p]; }
+    read(path, cmd='read') { const p=this.resolve(path);if(p==='/dev/null'){if(this._traceReads)this._traceReads.push(p);return '';} if(this.isDir(p)) fail(cmd+': '+path+': Is a directory',1); if(!this.isFile(p)) fail(cmd+': '+path+': No such file or directory',1); if(this._traceReads)this._traceReads.push(p); return this.files[p]; }
     inputs(paths, stdin, cmd) { return paths.length?paths.map(name=>({name,text:name==='-'?stdin:this.read(name,cmd)})):[{name:'-',text:stdin}]; }
-    write(path,text,append=false) { const p=this.resolve(path); if(this.isDir(p)) fail('redirection: '+path+': is a directory',1); if(!this.isDir(dirname(p))) fail('redirection: '+path+': parent directory does not exist',1); const value=(append&&this.isFile(p)?this.files[p]:'')+text; if(value.length>MAX_FILE) fail('virtual file exceeds the 2 MiB text limit',1); this.files[p]=value; this.addParents(p); }
+    write(path,text,append=false,cmd='redirection') { const p=this.resolve(path);if(p==='/dev/null')return; if(this.isDir(p)) fail(cmd+': '+path+': Is a directory',1); if(!this.isDir(dirname(p))) fail(cmd+': '+path+': No such file or directory',1); const value=(append&&this.isFile(p)?this.files[p]:'')+text; if(value.length>MAX_FILE) fail(cmd+': '+path+': virtual file exceeds the 2 MiB text limit',1); this.files[p]=value;this.getMetadata(p).mtime=this.clock(); this.addParents(p); }
     getHelp(command) {
       if(command) {
+        if(command==='man')return 'man COMMAND — この教材では help COMMAND をページ表示します。実機では man でマニュアルを読みます。\n';
         if(!COMMANDS.includes(command)) fail('help: unknown command '+command,1);
         let extra='';
         if(command==='grep') extra='\nDefault grep uses basic regex: + ? | ( ) are literal unless escaped; -E enables extended regex.\n-F matches literal text. -r/-R recurse (virtual filesystem has no symlinks); -m limits selected lines per file.\n-L lists files without matching lines. Exit status still follows line matches: 0 match, 1 no match, 2 error.\nLong aliases: --recursive, --ignore-case, --invert-match, --line-number, --count, --regexp,\n--fixed-strings, --extended-regexp, --word-regexp, --line-regexp, --only-matching, --quiet,\n--files-with-matches, --files-without-match, --max-count, --after-context, --before-context, --context.\n--include/--exclude filter basenames; --exclude-dir filters directory names with * and ? globs.\nPCRE (-P), binary options, and color flags are unsupported.';
@@ -320,7 +342,7 @@ SOFTWARE.
         if(command==='uniq') extra='\nConsecutive equal lines only. -i ignores case, -f skips fields, -s skips characters for comparison.\nOriginal first lines are retained. Use sort before uniq to group scattered equal values.';
         if(command==='wc') extra='\n-l newline count, -w whitespace-separated words, -m Unicode characters, -c UTF-8 bytes.\n-L maximum display width with 8-column tab stops. Multiple-file totals use the maximum for -L.';
         if(command==='cut') extra='\nFields/ranges: 1,3-5,7-, -3. -s omits lines without a delimiter; otherwise those lines pass through.\n--complement reverses selection; --output-delimiter changes field separation (or gaps between character ranges).';
-        if(command==='ls') extra='\n-a includes dotfiles, -l shows virtual permissions/owner and text byte sizes, -h human sizes,\n-d lists directories themselves, -R recurses, -S sorts by size, -r reverses. No fabricated timestamps.\nDate ordering, symlinks, permissions changes, and other options are unsupported.';
+        if(command==='ls') extra='\n-a includes dotfiles, -l shows virtual permissions/owner and text byte sizes, -h human sizes,\n-d lists directories themselves, -R recurses, -S sorts by size, -t newest first, -r reverses.\nModification times are simulated fixture metadata in UTC, updated by touch/writes; not host filesystem times.\nThis text terminal always shows one item per line; -1 is also accepted. Symlinks and permission changes are unsupported.';
         if(command==='find') extra='\nOne starting path. Name/path predicates combine with AND; -iname/-ipath ignore case.\nQuoted * and ? globs are supported. The starting path has depth 0; no -exec or boolean expressions.';
         if(command==='printf') extra='\nFormats: %s %b %c %d %i %u %o %x %X %f %e %E %g %G and %%.\nSupports numeric width/precision, -/0 padding, standard backslash escapes, \\xHH and octal.\nFormat repeats for extra arguments. Safe JavaScript integers only; %q/%n and dynamic widths are unsupported.';
         if(command==='paste') extra='\nDefault joins corresponding lines with tabs; -s joins each file in sequence.\n-d cycles delimiter characters; standard backslash escapes and \\0 for an empty delimiter are supported.';
@@ -332,8 +354,8 @@ SOFTWARE.
         if(command==='dirname') extra='\nReturn the lexical parent of each path; paths need not exist.';
         if(command==='realpath') extra='\nNormalize virtual absolute paths and .. / .; there are no symlinks.\nDefault requires an existing parent; -e requires the path to exist; -m permits missing parents.';
         if(command==='file') extra='\nClassify virtual text using its contents: empty, ASCII, UTF-8, JSON/JSONL, or data.\n-b suppresses filenames; -i gives a basic MIME/charset description. No executable or archive inspection.';
-        if(command==='stat') extra='\nVirtual metadata only; no real owners, timestamps, inode allocation, or device numbers.\n-c formats: %n name, %s text bytes, %F type, %a octal virtual mode, %A mode letters, %%.';
-        if(command==='du') extra='\nVirtual logical text size, not physical disk allocation. Default units are rounded-up KiB.\n-b reports bytes, -h human sizes, -s summarizes, -a includes files; --max-depth limits display depth.';
+        if(command==='stat') extra='\nVirtual metadata only; no real owners, inode allocation, or device numbers.\n-c formats: %n name, %s text bytes, %F type, %a octal virtual mode, %A mode letters,\n%y simulated UTC modification time, %Y epoch modification seconds, %%.';
+        if(command==='du') extra='\nVirtual logical text size, not physical disk allocation. Default units are rounded-up KiB.\n-b reports bytes, -h human sizes, -s summarizes, -a includes files, -c adds a total.\nDirectory allocation is not modeled; real du -b includes the size of each directory.\nTo total only file contents, use du -cb bundle/*.log | tail -n 1. --max-depth limits display depth.';
         if(command==='date') extra='\nBrowser clock by default; -u formats UTC. -d accepts timezone-qualified ISO, YYYY-MM-DD (UTC), or @epoch.\nFormats: %Y %m %d %e %H %M %S %F %T %s %z %Z %a %A %b %B %u %w %j %n %t %%.\nRelative dates, setting the clock, locale modes, and nanoseconds are unsupported.';
         if(command==='mv') extra='\nMove one virtual file or directory; -n preserves an existing destination. No interactive mode or merging directories.';
         if(command==='rmdir') extra='\nRemove empty virtual directories; -p also removes empty parents. Current directory and its ancestors are protected.';
@@ -343,10 +365,10 @@ SOFTWARE.
       }
       return 'Linuxroom 学習用の仮想ターミナル — Linux コマンドの一部を再現\n'+
         'Commands: '+COMMANDS.join(', ')+'\n'+
-        'Syntax: single/double quotes, escapes, |, <, >, >>, ;, &&, ||, unquoted * and ? globs.\n'+
+        'Syntax: quotes, escapes, |, <, >, >>, 2>, 2>>, 2>&1, ;, &&, ||, unquoted ~ / * / ? and $? status.\n'+
         'Use help COMMAND for exact options. Files and redirects stay in virtual memory.\n'+
-        'No host OS, server execution, package installation, shell variables, scripts, or network.\n'+
-        'less/more open the viewer; q closes. help はこの教材専用のヘルプです。\n';
+        'No host OS, server execution, package installation, general shell variables, scripts, or network.\n'+
+        'less/more open the viewer; q closes. help は教材専用ヘルプ。実機では man COMMAND。man は教材ヘルプの別名です。\n';
     }
     complete(input) {
       const m=input.match(/(?:^|[\s|;])([^\s|;]*)$/); if(!m) return [];
@@ -379,71 +401,83 @@ SOFTWARE.
     }
     run(input) {
       input=String(input);
-      if(input.length>MAX_INPUT) return {stdout:'',stderr:'shell: input exceeds 8192 characters\n',code:2,trace:[]};
-      if(input.includes('\0')) return {stdout:'',stderr:'shell: NUL bytes are unsupported\n',code:2,trace:[]};
+      if(input.length>MAX_INPUT) {this.lastExitCode=2;return {stdout:'',stderr:'shell: input exceeds 8192 characters\n',code:2,trace:[],connectors:[],flow:[]};}
+      if(input.includes('\0')) {this.lastExitCode=2;return {stdout:'',stderr:'shell: NUL bytes are unsupported\n',code:2,trace:[],connectors:[],flow:[]};}
       if(input.trim()) this.history.push(input);
-      let stdout='',stderr='',code=0,clear=false,pager=false;
-      const trace=[];
+      let stdout='',stderr='',code=this.lastExitCode,clear=false,pager=false;
+      const trace=[],connectors=[],flow=[];
       try {
         const chains=parse(lex(input));
+        connectors.push(...chains.slice(1).map(chain=>chain.connector));
         for(let pipeline=0;pipeline<chains.length;pipeline++) {
-          const chain=chains[pipeline];
-          if(chain.connector==='&&'&&code!==0 || chain.connector==='||'&&code===0) continue;
+          const chain=chains[pipeline],executed=!(chain.connector==='&&'&&code!==0 || chain.connector==='||'&&code===0);
+          flow.push({connector:chain.connector,pipeline,codeBefore:code,executed});
+          if(!executed) continue;
+          // All stages expand against the previous pipeline status, as in Bash.
+          this._expansionStatus=code;
           let data='',last={stdout:'',stderr:'',code:0};
           for(let nodeIndex=0;nodeIndex<chain.pipeline.length;nodeIndex++) {
-            const node=chain.pipeline[nodeIndex];
-            let target=null,stdin=data,words=node.words.map(t=>t.value), redirections=[];
-            const cwdBefore=this.cwd,reads=[];
-            this._traceReads=reads;
+            const node=chain.pipeline[nodeIndex],pipeSink={kind:'stdout'},errorSink={kind:'stderr'},fds={1:pipeSink,2:errorSink},openedOutputs=new Set();
+            let stdin=data,words=node.words.map(t=>t.value),redirections=[],argumentVariables=[],emittedStderr=false;
+            const cwdBefore=this.cwd,reads=[],variables=new Set();
+            this._traceReads=reads;this._traceVariables=variables;
             try {
               words=node.words.flatMap(t=>this.expand(t));
+              argumentVariables=[...variables];
               for(const r of node.redirs) {
+                if(r.op==='>&'){const targets=this.expand(r.target);if(targets.length!==1||!/^[12]$/.test(targets[0]))fail('descriptor duplication supports only 1 and 2');redirections.push({op:r.op,fd:r.fd,target:targets[0]});fds[r.fd]=fds[Number(targets[0])];continue;}
                 const targets=this.expand(r.target);
                 if(targets.length!==1) fail('ambiguous '+(r.op==='<'?'input':'output')+' redirection');
-                redirections.push({op:r.op,target:this.resolve(targets[0])});
+                const path=this.resolve(targets[0]);redirections.push({op:r.op,fd:r.fd,target:path});
                 if(r.op==='<') stdin=this.read(targets[0],'redirection');
-                else { this.write(targets[0],'',r.op==='>>');target=targets[0]; }
+                else {if(path!=='/dev/null'&&openedOutputs.has(path))fail('independent redirects to the same file are unsupported; use > file 2>&1 to share one descriptor');openedOutputs.add(path);this.write(targets[0],'',r.op==='>>');fds[r.fd]={kind:'file',path:targets[0]};}
               }
               last=this.execute(words[0],words.slice(1),stdin,{hasStdin:nodeIndex>0||node.redirs.some(r=>r.op==='<')});
             } catch(e) {
               last={stdout:'',stderr:(e instanceof ShellError?e.message:'shell: internal error')+'\n',code:e instanceof ShellError?e.code:2};
-            } finally { this._traceReads=null; }
+            } finally { this._traceReads=null;this._traceVariables=null; }
             last.stdout=last.stdout||''; last.stderr=last.stderr||''; last.code=last.code||0;
-            if(last.stdout.length>MAX_OUTPUT) { last.stdout=last.stdout.slice(0,MAX_OUTPUT);last.stderr+='shell: output truncated at 512 KiB; filter the data or redirect a smaller result\n';last.code=1; }
-            data=last.stdout;
-            if(target!==null) {
-              try { this.write(target,data,true);data=''; }
-              catch(e) { last.stderr+=(e instanceof ShellError?e.message:'shell: internal error')+'\n';last.code=e instanceof ShellError?e.code:2;data=''; }
+            if(last.stdout.length>MAX_OUTPUT) { last.stdout=last.stdout.slice(0,MAX_OUTPUT);last.stderr+='shell: output truncated at 512 KiB; filter the data or redirect a smaller result\n';last.code=1;delete last.events; }
+            data='';
+            for(const [fd,chunk] of last.events||[[1,last.stdout],[2,last.stderr]]) {
+              const sink=fds[fd];if(!chunk)continue;
+              if(sink.kind==='stdout')data+=chunk;
+              else if(sink.kind==='stderr'){stderr+=chunk;emittedStderr=true;}
+              else try {this.write(sink.path,chunk,true);}
+              catch(e) {const message=(e instanceof ShellError?e.message:'shell: internal error')+'\n';stderr+=message;emittedStderr=true;last.stderr+=message;last.code=e instanceof ShellError?e.code:2;}
             }
-            stderr+=last.stderr;
-            trace.push({command:words[0]||'',args:words.slice(1),stdin,stdout:last.stdout,stderr:last.stderr,code:last.code,cwdBefore,cwdAfter:this.cwd,pipeline,index:nodeIndex,connector:chain.connector,redirections,reads:[...new Set(reads)]});
+            trace.push({command:words[0]||'',args:words.slice(1),stdin,stdout:last.stdout,stderr:last.stderr,code:last.code,cwdBefore,cwdAfter:this.cwd,pipeline,index:nodeIndex,connector:chain.connector,redirections,argumentVariables,variables:[...variables],stderrRedirected:fds[2].kind!=='stderr'&&!emittedStderr,reads:[...new Set(reads)]});
             if(last.clear) clear=true;
-            if(nodeIndex===chain.pipeline.length-1)pager=Boolean(last.pager&&target===null);
+            if(nodeIndex===chain.pipeline.length-1)pager=Boolean(last.pager&&fds[1]===pipeSink);
           }
           stdout+=data;code=last.code;
           if(stdout.length>MAX_OUTPUT) {stdout=stdout.slice(0,MAX_OUTPUT);stderr+='shell: total output truncated at 512 KiB\n';code=1;break;}
         }
       } catch(e) {stderr+=(e instanceof ShellError?e.message:'shell: internal error')+'\n';code=e instanceof ShellError?e.code:2;}
-      return {stdout,stderr,code,trace,...(clear?{clear:true}:{}),...(pager?{pager:true}:{})};
+      finally {delete this._expansionStatus;}
+      this.lastExitCode=code;
+      return {stdout,stderr,code,trace,connectors,flow,...(clear?{clear:true}:{}),...(pager?{pager:true}:{})};
     }
     execute(cmd,args,stdin,context={}) {
       if(['vi','view','sl'].includes(cmd)) fail(cmd+': Linuxroom では利用できません。ファイルを読むには cat または less を使ってください。',127);
-      if(!COMMANDS.includes(cmd)) fail(cmd+': command not found. Type help for the supported training commands.',127);
+      if(!COMMANDS.includes(cmd)&&cmd!=='man') fail(cmd+': command not found. Type help for the supported training commands.',127);
       const result=(stdout='',code=0,extra={})=>({stdout,stderr:'',code,...extra});
       if(args.includes('--help')&&(args.indexOf('--')<0||args.indexOf('--help')<args.indexOf('--'))) return result(this.getHelp(cmd));
       switch(cmd) {
+        case 'man': if(args.length!==1)fail('man: one command name is required',2);return result('Linuxroom 学習用ヘルプ — 実機の man マニュアルではありません。実機では man COMMAND で詳細を調べます。\n\n'+this.getHelp(args[0]),0,{pager:true});
         case 'help': if(args.length>1) usageError(cmd,'too many arguments'); return result(this.getHelp(args[0]));
         case 'pwd': if(args.length) usageError(cmd,'no options are supported'); return result(this.cwd+'\n');
         case 'clear': if(args.length) usageError(cmd,'no arguments are supported'); return result('',0,{clear:true});
         case 'sl': if(args.length)usageError(cmd,'no options or arguments are supported');return result('',0,{train:true});
         case 'history': if(args.length) usageError(cmd,'no arguments are supported'); return result(lineOutput(this.history.map((x,i)=>String(i+1).padStart(4)+'  '+x)));
-        case 'cd': { if(args.length>1) usageError(cmd,'too many arguments'); const dest=args[0]==='-'?this.oldcwd:this.resolve(args[0]||'/home/analyst'); if(!this.isDir(dest)) fail('cd: '+(args[0]||dest)+': no such directory',1); const old=this.cwd;this.cwd=dest;this.oldcwd=old;return result(args[0]==='-'?dest+'\n':''); }
+        case 'cd': { if(args.length>1) usageError(cmd,'too many arguments'); const dest=args[0]==='-'?this.oldcwd:this.resolve(args[0]||'/home/analyst'); if(!this.isDir(dest)) fail('cd: '+(args[0]||dest)+': '+(this.isFile(dest)?'Not a directory':'No such file or directory'),1); const old=this.cwd;this.cwd=dest;this.oldcwd=old;return result(args[0]==='-'?dest+'\n':''); }
         case 'echo': { let n=false; if(args[0]==='-n'){n=true;args=args.slice(1);} if(args[0]==='-e'||args[0]==='-E') usageError(cmd,'escape expansion options are unsupported'); return result(args.join(' ')+(n?'':'\n')); }
         case 'ls': return result(runLs(this,args));
-        case 'cat': { const {flags,rest}=simpleOptions(args,'n',cmd), text=this.inputs(rest,stdin,cmd).map(f=>f.text).join(''); if(!flags.has('n')) return result(text); return result(lineChunks(text).map((line,i)=>String(i+1).padStart(6)+'\t'+line).join('')); }
+        case 'cat': {const {flags,rest}=simpleOptions(args,'n',cmd);let text='',stderr='',code=0,lineNumber=0,lineStart=true;const events=[];for(const path of rest.length?rest:['-']){try{let chunk=path==='-'?stdin:this.read(path,cmd);if(flags.has('n'))chunk=lineChunks(chunk).map(line=>{const numbered=(lineStart?String(++lineNumber).padStart(6)+'\t':'')+line;lineStart=line.endsWith('\n');return numbered;}).join('');text+=chunk;events.push([1,chunk]);}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';events.push([2,e.message+'\n']);code=1;}}return {stdout:text,stderr,code,events};}
+        case 'zcat': case 'zgrep': case 'zless': {const decompression=this.decompressing;this.decompressing=true;try{if(cmd==='zgrep')return this.grep(args,stdin);const {rest}=simpleOptions(args,'',cmd);if(!rest.length||rest.includes('-'))usageError(cmd,'named gzip fixtures are required; binary standard input is unsupported');const texts=rest.map(path=>{const text=this.read(path,cmd);if(!this.getMetadata(path).compressed)fail(cmd+': '+path+': not in gzip format (use cat for plain text)',1);return text;});return result(texts.join(''),0,cmd==='zless'?{pager:true}:{});}finally{this.decompressing=decompression;}}
         case 'tac': {const {rest}=simpleOptions(args,'',cmd);return result(this.inputs(rest,stdin,cmd).map(f=>lineChunks(f.text).reverse().join('')).join(''));}
         case 'base64': return result(runBase64(this,args,stdin));
-        case 'tee': {const {flags,rest}=simpleOptions(args,'a',cmd);let stderr='',code=0;for(const path of rest){try{this.write(path,stdin,flags.has('a'));}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';code=1;}}return {stdout:stdin,stderr,code};}
+        case 'tee': {const {flags,rest}=simpleOptions(args,'a',cmd);let stderr='',code=0;for(const path of rest){try{this.write(path,stdin,flags.has('a'),cmd);}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';code=1;}}return {stdout:stdin,stderr,code};}
         case 'less': case 'more': { const {rest}=simpleOptions(args,'',cmd); return result(this.inputs(rest,stdin,cmd).map(f=>f.text).join(''),0,{pager:true}); }
         case 'grep': return this.grep(args,stdin);
         case 'rg': return this.rg(args,stdin,context.hasStdin);
@@ -471,17 +505,17 @@ SOFTWARE.
         case 'file': case 'stat': case 'du': return result(runMetadata(this,cmd,args));
         case 'date': return result(runDate(args));
         case 'mv': case 'rmdir': return result(runMove(this,cmd,args));
-        case 'vi': case 'view': {const {rest}=simpleOptions(args,'',cmd);if(rest.length>1)usageError(cmd,'only one file is supported');const path=this.resolve(rest[0]||'/home/analyst/untitled.txt');if(this.isDir(path))fail(cmd+': '+path+': is a directory',1);if(!this.isFile(path)){if(cmd==='view')fail('view: '+path+': no such file',1);if(!this.isDir(dirname(path)))fail('vi: parent directory does not exist',1);}return result('',0,{editor:{path,text:this.isFile(path)?this.files[path]:'',readonly:cmd==='view'}});}
-        case 'mkdir': { const {flags,rest}=simpleOptions(args,'p',cmd); if(!rest.length) usageError(cmd,'missing directory'); for(const name of rest) {const p=this.resolve(name);if(this.isFile(p)) fail('mkdir: '+name+': file exists',1);if(this.isDir(p)&&!flags.has('p')) fail('mkdir: '+name+': directory exists',1);if(!flags.has('p')&&!this.isDir(dirname(p)))fail('mkdir: '+name+': parent directory does not exist',1);this.directories.add(p);this.addParents(p);}return result(); }
-        case 'touch': { const {rest}=simpleOptions(args,'',cmd);if(!rest.length)usageError(cmd,'missing file');for(const name of rest){const p=this.resolve(name);if(!this.isFile(p)&&!this.isDir(p))this.write(name,'');}return result(); }
-        case 'cp': { const {rest}=simpleOptions(args,'',cmd);if(rest.length!==2)usageError(cmd,'exactly two paths are required');let to=this.resolve(rest[1]);if(this.isDir(to))to+=(to==='/'?'':'/')+basename(this.resolve(rest[0]));if(to===this.resolve(rest[0]))fail('cp: source and destination are the same file',1);this.write(to,this.read(rest[0],cmd));return result(); }
-        case 'rm': { const {flags,rest}=simpleOptions(args,'f',cmd);if(!rest.length&&!flags.has('f'))usageError(cmd,'missing file');for(const name of rest){const p=this.resolve(name);if(this.isDir(p))fail('rm: '+name+': directories cannot be removed by this training command',1);if(!this.isFile(p)&&!flags.has('f'))fail('rm: '+name+': no such file',1);delete this.files[p];}return result(); }
+        case 'vi': case 'view': {const {rest}=simpleOptions(args,'',cmd);if(rest.length>1)usageError(cmd,'only one file is supported');const path=this.resolve(rest[0]||'/home/analyst/untitled.txt');if(this.isDir(path))fail(cmd+': '+path+': Is a directory',1);if(!this.isFile(path)){if(cmd==='view')fail('view: '+path+': No such file or directory',1);if(!this.isDir(dirname(path)))fail('vi: No such file or directory',1);}return result('',0,{editor:{path,text:this.isFile(path)?this.files[path]:'',readonly:cmd==='view'}});}
+        case 'mkdir': { const {flags,rest}=simpleOptions(args,'p',cmd); if(!rest.length) usageError(cmd,'missing directory'); for(const name of rest) {const p=this.resolve(name);if(this.isFile(p)) fail('mkdir: '+name+': File exists',1);if(this.isDir(p)&&!flags.has('p')) fail('mkdir: '+name+': File exists',1);if(!flags.has('p')&&!this.isDir(dirname(p)))fail('mkdir: '+name+': No such file or directory',1);this.directories.add(p);this.addParents(p);}return result(); }
+        case 'touch': { const {rest}=simpleOptions(args,'',cmd);if(!rest.length)usageError(cmd,'missing file');for(const name of rest){const p=this.resolve(name);if(!this.isFile(p)&&!this.isDir(p))this.write(name,'',false,cmd);this.getMetadata(p).mtime=this.clock();}return result(); }
+        case 'cp': { const {rest}=simpleOptions(args,'',cmd);if(rest.length!==2)usageError(cmd,'exactly two paths are required');let to=this.resolve(rest[1]);if(this.isDir(to))to+=(to==='/'?'':'/')+basename(this.resolve(rest[0]));if(to===this.resolve(rest[0]))fail('cp: source and destination are the same file',1);this.write(to,this.read(rest[0],cmd),false,cmd);return result(); }
+        case 'rm': { const {flags,rest}=simpleOptions(args,'f',cmd);if(!rest.length&&!flags.has('f'))usageError(cmd,'missing file');for(const name of rest){const p=this.resolve(name);if(this.isDir(p))fail('rm: '+name+': Is a directory',1);if(!this.isFile(p)&&!flags.has('f'))fail('rm: '+name+': No such file or directory',1);delete this.files[p];delete this.metadata[p];}return result(); }
       }
     }
     ls(args) {
       const {flags,rest}=simpleOptions(args,'alh','ls'), paths=rest.length?rest:['.'], sections=[];
       const format=(p,name)=>{ if(!flags.has('l'))return name;const dir=this.isDir(p),size=dir?0:bytes(this.files[p]);let shown=String(size);if(flags.has('h')&&size>=1024)shown=(size/1024).toFixed(size<10240?1:0)+'K';return (dir?'drwxr-xr-x':'-rw-r--r--')+' 1 analyst analyst '+shown.padStart(7)+' '+name; };
-      for(const name of paths){const p=this.resolve(name);if(this.isFile(p)){sections.push(format(p,name));continue;}if(!this.isDir(p))fail('ls: '+name+': no such file or directory',1);let children=this.allPaths().filter(x=>x!==p&&dirname(x)===p).filter(x=>flags.has('a')||!basename(x).startsWith('.'));let rows=children.map(x=>format(x,basename(x)));if(flags.has('a'))rows=[format(p,'.'),format(dirname(p),'..'),...rows];sections.push((paths.length>1?name+':\n':'')+rows.join('\n'));}
+      for(const name of paths){const p=this.resolve(name);if(this.isFile(p)){sections.push(format(p,name));continue;}if(!this.isDir(p))fail('ls: '+name+': No such file or directory',1);let children=this.allPaths().filter(x=>x!==p&&dirname(x)===p).filter(x=>flags.has('a')||!basename(x).startsWith('.'));let rows=children.map(x=>format(x,basename(x)));if(flags.has('a'))rows=[format(p,'.'),format(dirname(p),'..'),...rows];sections.push((paths.length>1?name+':\n':'')+rows.join('\n'));}
       return sections.join('\n\n')+(sections.some(Boolean)?'\n':'');
     }
     rg(args,stdin,hasStdin) {
@@ -499,17 +533,17 @@ SOFTWARE.
       if(filesMode&&patterns.length)usageError('rg','--files does not accept a search pattern');
       const fromStdin=!filesMode&&!paths.length&&hasStdin;
       const finish=result=>{if(passed.includes('-c')&&!passed.includes('-q'))result.stdout=lineOutput(asLines(result.stdout).filter(line=>line!=='0'&&!/:0$/.test(line)));return result;};
-      if(fromStdin){if(globs.length)usageError('rg','-g requires filesystem input');return finish(this.grep([...(!fixed?['-E']:[]),...passed,...patterns.flatMap(p=>['-e',p])],stdin));}
+      if(fromStdin){if(globs.length)usageError('rg','-g requires filesystem input');return finish(this.grep([...(!fixed?['-E']:[]),...passed,...patterns.flatMap(p=>['-e',p])],stdin,{allowDigitEscapes:true}));}
       let recurse=false;const candidates=[];
-      for(const path of paths.length?paths:['.']){const p=this.resolve(path);if(this.isDir(p)){recurse=true;for(const file of Object.keys(this.files).filter(f=>f.startsWith(p==='/'?'/':p+'/')).sort(cmp))candidates.push({p:file,name:path.startsWith('/')?file:this.relative(file)});}else{if(!this.isFile(p))fail('rg: '+path+': no such file',2);candidates.push({p,name:path});}}
+      for(const path of paths.length?paths:['.']){const p=this.resolve(path);if(this.isDir(p)){recurse=true;for(const file of Object.keys(this.files).filter(f=>f.startsWith(p==='/'?'/':p+'/')).sort(cmp))candidates.push({p:file,name:path.startsWith('/')?file:this.relative(file)});}else{if(!this.isFile(p))fail('rg: '+path+': No such file or directory',2);candidates.push({p,name:path});}}
       const matchGlob=(pattern,path)=>{const target=pattern.includes('/')?path:basename(path);let s='';for(let i=0;i<pattern.length;i++){const c=pattern[i];if(c==='*'&&pattern[i+1]==='*'){i++;if(pattern[i+1]==='/'){i++;s+='(?:.*/)?';}else s+='.*';}else s+=c==='*'?'[^/]*':c==='?'?'[^/]':escRE(c);}return new RegExp('^'+s+'$').test(target)||new RegExp('^'+s+'$').test(path.replace(/^\//,''));};
       const includes=globs.filter(g=>!g.startsWith('!')),excludes=globs.filter(g=>g.startsWith('!')).map(g=>g.slice(1));
       const seen=new Set(),selected=candidates.filter(f=>{if(seen.has(f.p))return false;seen.add(f.p);return (hidden||!this.relative(f.p).split('/').some(seg=>seg.startsWith('.')&&seg!=='.'&&seg!=='..'))&&(!includes.length||includes.some(g=>matchGlob(g,f.name)))&&!excludes.some(g=>matchGlob(g,f.name));});
       if(filesMode)return {stdout:lineOutput(selected.map(f=>f.name)),stderr:'',code:selected.length?0:1};
       if(!selected.length)return {stdout:'',stderr:'',code:1};
-      return finish(this.grep([...(!fixed?['-E']:[]),...(recurse?['-H']:[]),...passed,...patterns.flatMap(p=>['-e',p]),'--',...selected.map(f=>f.name)],stdin));
+      return finish(this.grep([...(!fixed?['-E']:[]),...(recurse?['-H']:[]),...passed,...patterns.flatMap(p=>['-e',p]),'--',...selected.map(f=>f.name)],stdin,{allowDigitEscapes:true}));
     }
-    grep(args,stdin) {
+    grep(args,stdin,options={}) {
       args=longOptions(args,{'--recursive':'r','--dereference-recursive':'R','--ignore-case':'i','--invert-match':'v','--line-number':'n','--count':'c','--files-with-matches':'l','--files-without-match':'L','--only-matching':'o','--quiet':'q','--word-regexp':'w','--line-regexp':'x','--fixed-strings':'F','--extended-regexp':'E','--no-filename':'h','--with-filename':'H'},{'--regexp':'e','--max-count':'m','--after-context':'A','--before-context':'B','--context':'C','--include':'--include','--exclude':'--exclude','--exclude-dir':'--exclude-dir'},'grep');
       const flags=new Set(), patterns=[],paths=[],includes=[],excludes=[],excludedDirs=[];let after=false,A=0,B=0,maxCount=Infinity;
       for(let i=0;i<args.length;i++){
@@ -527,6 +561,7 @@ SOFTWARE.
       if(flags.has('E')&&flags.has('F'))usageError('grep','-E and -F cannot be combined');
       const matchers=patterns.flatMap(p=>p.split('\n')).map(p=>{
         if(flags.has('F'))return {fixed:flags.has('i')?p.toLowerCase():p};
+        if(!options.allowDigitEscapes){for(let i=0;i<p.length;i++)if(p[i]==='\\'){if(/[dD]/.test(p[i+1]||''))usageError('grep','\\d/\\D are not supported by BRE/ERE grep; use [0-9] or [[:digit:]] (negate with [^0-9]); PCRE -P is unavailable');i++;}}
         return {re:regex(p,flags.has('E'),flags.has('i'))};
       });
       const isWord=c=>Boolean(c&&/[A-Za-z0-9_]/.test(c));
@@ -544,9 +579,8 @@ SOFTWARE.
       if(flags.has('r')||flags.has('R')){expanded=[];for(const name of paths.length?paths:['.']){const p=this.resolve(name);if(this.isDir(p)){recursiveDirectory=true;expanded.push(...Object.keys(this.files).filter(x=>x.startsWith(p==='/'?'/':p+'/')).sort(cmp).map(x=>name.startsWith('/')?x:name.replace(/\/$/,'')+'/'+x.slice(p.length+1)));}else expanded.push(name);}}
       expanded=expanded.filter(path=>path==='-'||(!includes.length||includes.some(g=>globMatch(g,basename(path))))&&!excludes.some(g=>globMatch(g,basename(path)))&&!excludedDirs.some(g=>dirname(this.resolve(path)).split('/').some(d=>globMatch(g,d))));
       if(!expanded.length&&paths.length)return {stdout:'',stderr:'',code:1};
-      let inputs;try{inputs=this.inputs(expanded,stdin,'grep');}catch(e){if(e instanceof ShellError)e.code=2;throw e;}
-      const withName=flags.has('H')||(!flags.has('h')&&(inputs.length>1||recursiveDirectory));let any=false,out=[];
-      for(const file of inputs){const lines=asLines(file.text),chosen=[],hits=[];for(let i=0;i<lines.length;i++){hits[i]=matches(lines[i]);if(chosen.length<maxCount&&(flags.has('v')?!hits[i].length:hits[i].length)){chosen.push(i);any=true;}}
+      const inputs=expanded.length?expanded.map(name=>({name})):[{name:'-',text:stdin}],withName=flags.has('H')||(!flags.has('h')&&(inputs.length>1||recursiveDirectory));let any=false,out=[],stderr='';
+      for(const file of inputs){try{file.text=file.name==='-'?stdin:this.read(file.name,'grep');}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';continue;}const lines=asLines(file.text),chosen=[],hits=[];for(let i=0;i<lines.length;i++){hits[i]=matches(lines[i]);if(chosen.length<maxCount&&(flags.has('v')?!hits[i].length:hits[i].length)){chosen.push(i);any=true;}}
         if(flags.has('q'))continue;
         const prefix=withName?(file.name==='-'?'(standard input)':file.name)+':':'';
         if(flags.has('l')){if(chosen.length)out.push(file.name==='-'?'(standard input)':file.name);continue;}
@@ -556,7 +590,7 @@ SOFTWARE.
         const selected=new Set(chosen),visible=new Set();for(const n of chosen)for(let i=Math.max(0,n-B);i<=Math.min(lines.length-1,n+A);i++)visible.add(i);
         let previous=-2;for(const i of [...visible].sort((a,b)=>a-b)){if((A||B)&&previous>=0&&i>previous+1)out.push('--');const sep=selected.has(i)?':':'-';out.push((withName?(file.name==='-'?'(standard input)':file.name)+sep:'')+(flags.has('n')?(i+1)+sep:'')+lines[i]);previous=i;}
       }
-      return {stdout:lineOutput(out),stderr:'',code:any?0:1};
+      return {stdout:lineOutput(out),stderr,code:flags.has('q')&&any?0:stderr?2:any?0:1};
     }
     sort(args,stdin) {
       const flags=new Set(),paths=[];let key=null,delim=null,after=false,keyNumeric=false,keyReverse=false;
@@ -600,7 +634,7 @@ SOFTWARE.
     find(args) {
       let path='.',type=null,name=null,i=0;if(args[0]&&!args[0].startsWith('-'))path=args[i++];
       for(;i<args.length;i++){if(args[i]==='-type'){type=args[++i];if(type!=='f'&&type!=='d')usageError('find','-type supports f or d');}else if(args[i]==='-name'){name=args[++i];if(name===undefined)usageError('find','-name requires a quoted pattern');}else usageError('find','unsupported predicate '+args[i]);}
-      const start=this.resolve(path);if(!this.isFile(start)&&!this.isDir(start))fail('find: '+path+': no such file or directory',1);const matcher=name===null?null:new RegExp('^'+Array.from(name).map(c=>c==='*'?'.*':c==='?'?'.':escRE(c)).join('')+'$');
+      const start=this.resolve(path);if(!this.isFile(start)&&!this.isDir(start))fail('find: '+path+': No such file or directory',1);const matcher=name===null?null:new RegExp('^'+Array.from(name).map(c=>c==='*'?'.*':c==='?'?'.':escRE(c)).join('')+'$');
       return lineOutput(this.allPaths().filter(p=>(p===start||p.startsWith(start==='/'?'/':start+'/'))&&(!type||(type==='f'?this.isFile(p):this.isDir(p)))&&(!matcher||matcher.test(basename(p)))).map(p=>path.startsWith('/')?p:path==='.'?(p===this.cwd?'.':'./'+this.relative(p)):path.replace(/\/$/,'')+p.slice(start.length)));
     }
     awk(args,stdin) { return runAwk(this,args,stdin); }
@@ -617,13 +651,18 @@ SOFTWARE.
     for(let i=0;i<args.length;i++){const arg=args[i];if(!after&&arg==='--'){after=true;continue;}if(!after&&arg.startsWith('-')&&arg!=='-'){for(let j=1;j<arg.length;j++){const f=arg[j];if(valued.includes(f)){const t=takeValue(args,i,arg.slice(j+1),cmd,'-'+f);i=t.next;values[f]=t.value;break;}if(!allowed.includes(f))usageError(cmd,'unsupported option -'+f);flags.add(f);}}else rest.push(arg);}return {flags,values,rest};
   }
   function positive(value,cmd,name,zero=false) {if(!/^\d+$/.test(value)||+value<(zero?0:1)||+value>1000000)usageError(cmd,name+' must be '+(zero?'nonnegative':'positive')+' and at most 1000000');return +value;}
+  function lsTimestamp(time) {const date=new Date(time),months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return months[date.getUTCMonth()]+' '+String(date.getUTCDate()).padStart(2)+' '+String(date.getUTCHours()).padStart(2,'0')+':'+String(date.getUTCMinutes()).padStart(2,'0');}
   function humanSize(n) {if(n<1024)return String(n);const units=['K','M','G'];let i=-1;do{n/=1024;i++;}while(n>=1024&&i<units.length-1);return n.toFixed(n<10?1:0)+units[i];}
   function runLs(shell,args) {
-    args=longOptions(args,{'--all':'a','--directory':'d','--recursive':'R','--reverse':'r','--human-readable':'h'},{},'ls');
-    const {flags,rest}=simpleOptions(args,'alhdRSr','ls'),paths=rest.length?rest:['.'],sections=[];
-    const format=(p,name)=>{if(!flags.has('l'))return name;const dir=shell.isDir(p),size=dir?0:bytes(shell.files[p]);return (dir?'drwxr-xr-x':'-rw-r--r--')+' 1 analyst analyst '+(flags.has('h')?humanSize(size):String(size)).padStart(7)+' '+name;};
-    const visit=(p,label,heading)=>{let children=shell.allPaths().filter(x=>x!==p&&dirname(x)===p).filter(x=>flags.has('a')||!basename(x).startsWith('.'));children.sort((a,b)=>(flags.has('S')?(shell.isDir(b)?0:bytes(shell.files[b]))-(shell.isDir(a)?0:bytes(shell.files[a])):0)||cmp(basename(a),basename(b)));if(flags.has('r'))children.reverse();const rows=children.map(x=>format(x,basename(x)));if(flags.has('a'))rows.unshift(format(p,'.'),format(dirname(p),'..'));sections.push((heading?label+':\n':'')+rows.join('\n'));if(flags.has('R'))for(const child of children)if(shell.isDir(child))visit(child,label.replace(/\/$/,'')+'/'+basename(child),true);};
-    for(const name of paths){const p=shell.resolve(name);if(shell.isFile(p)||flags.has('d')&&shell.isDir(p))sections.push(format(p,name));else if(shell.isDir(p))visit(p,name,paths.length>1||flags.has('R'));else fail('ls: '+name+': no such file or directory',1);}
+    let sort='name',after=false;const cleaned=[];for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--'){after=true;cleaned.push(arg);continue;}if(!after&&(arg==='--sort'||arg.startsWith('--sort='))){sort=arg==='--sort'?args[++i]:arg.slice(7);if(!['time','size','name'].includes(sort))usageError('ls','--sort supports time, size, or name');}else{if(!after&&/^-[^-]/.test(arg))for(const f of arg.slice(1))if(f==='t'||f==='S')sort=f==='t'?'time':'size';cleaned.push(arg);}}
+    args=longOptions(cleaned,{'--all':'a','--directory':'d','--recursive':'R','--reverse':'r','--human-readable':'h'},{},'ls');
+    const {flags,rest}=simpleOptions(args,'1alhdtRSr','ls'),paths=rest.length?rest:['.'],sections=[],fileRows=[];
+    const format=(p,name)=>{if(!flags.has('l'))return name;const dir=shell.isDir(p),size=dir?0:bytes(shell.files[p]),meta=shell.getMetadata(p);return (dir?'drwxr-xr-x':'-rw-r--r--')+' 1 analyst analyst '+(flags.has('h')?humanSize(size):String(size)).padStart(7)+' '+lsTimestamp(meta.mtime)+' '+name;};
+    const compare=(a,b)=>(sort==='time'?shell.getMetadata(b).mtime-shell.getMetadata(a).mtime:sort==='size'?(shell.isDir(b)?0:bytes(shell.files[b]))-(shell.isDir(a)?0:bytes(shell.files[a])):0)||cmp(basename(a),basename(b));
+    const visit=(p,label,heading)=>{let children=shell.allPaths().filter(x=>x!==p&&dirname(x)===p).filter(x=>flags.has('a')||!basename(x).startsWith('.'));children.sort(compare);if(flags.has('r'))children.reverse();const rows=children.map(x=>format(x,basename(x)));if(flags.has('a'))rows.unshift(format(p,'.'),format(dirname(p),'..'));sections.push((heading?label+':\n':'')+rows.join('\n'));if(flags.has('R'))for(const child of children)if(shell.isDir(child))visit(child,label.replace(/\/$/,'')+'/'+basename(child),true);};
+    for(const name of paths){const p=shell.resolve(name);if(shell.isFile(p)||flags.has('d')&&shell.isDir(p))fileRows.push({p,name});else if(!shell.isDir(p))fail('ls: '+name+': No such file or directory',1);}
+    fileRows.sort((a,b)=>compare(a.p,b.p));if(flags.has('r'))fileRows.reverse();if(fileRows.length)sections.push(fileRows.map(f=>format(f.p,f.name)).join('\n'));
+    for(const name of paths){const p=shell.resolve(name);if(!flags.has('d')&&shell.isDir(p))visit(p,name,paths.length>1||flags.has('R'));}
     return sections.join('\n\n')+(sections.some(Boolean)?'\n':'');
   }
   function runSort(shell,args,stdin) {
@@ -662,7 +701,7 @@ SOFTWARE.
   function runFind(shell,args) {
     let path='.',type=null,min=0,max=Infinity,i=0;const predicates=[];if(args[0]&&!args[0].startsWith('-'))path=args[i++];
     for(;i<args.length;i++){const flag=args[i],value=args[++i];if(value===undefined)usageError('find',flag+' requires a value');if(flag==='-type'){if(value!=='f'&&value!=='d')usageError('find','-type supports f or d');type=value;}else if(flag==='-maxdepth')max=positive(value,'find','maximum depth',true);else if(flag==='-mindepth')min=positive(value,'find','minimum depth',true);else if(['-name','-iname','-path','-ipath'].includes(flag))predicates.push({flag,value});else usageError('find','unsupported predicate '+flag);}
-    const start=shell.resolve(path);if(!shell.isFile(start)&&!shell.isDir(start))fail('find: '+path+': no such file or directory',1);const label=p=>path.startsWith('/')?p:path==='.'?(p===shell.cwd?'.':'./'+shell.relative(p)):path.replace(/\/$/,'')+p.slice(start.length);
+    const start=shell.resolve(path);if(!shell.isFile(start)&&!shell.isDir(start))fail('find: '+path+': No such file or directory',1);const label=p=>path.startsWith('/')?p:path==='.'?(p===shell.cwd?'.':'./'+shell.relative(p)):path.replace(/\/$/,'')+p.slice(start.length);
     return lineOutput(shell.allPaths().filter(p=>{if(p!==start&&!p.startsWith(start==='/'?'/':start+'/'))return false;const depth=p===start?0:p.slice(start==='/'?1:start.length+1).split('/').length;return depth>=min&&depth<=max&&(!type||(type==='f'?shell.isFile(p):shell.isDir(p)))&&predicates.every(pred=>globMatch(pred.value,pred.flag.includes('path')?label(p):basename(p),pred.flag.startsWith('-i')));}).map(label));
   }
   function sedScripts(source) {
@@ -689,7 +728,7 @@ SOFTWARE.
           if(command.action==='p')out.push(line+ending);else if(command.action==='d'){deleted=true;break;}else{const s=command.substitute,changed=s.base.test(line);line=line.replace(s.re,(...a)=>{const full=a[0],groups=a.slice(1,-2);return s.replacement.replace(/\\([1-9&\\])|&/g,(m,g)=>g?g==='&'?'&':g==='\\'?'\\':groups[+g-1]||'':full);});if(changed&&s.print)out.push(line+ending);}}
         if(!quiet&&!deleted)out.push(line+ending);
       }return out.join('');};
-    const inputs=shell.inputs(paths,stdin,'sed');if(inplace){for(const input of inputs){const output=apply(input.text);if(suffix)shell.write(input.name+suffix,input.text);shell.write(input.name,output);}return '';}return apply('',inputs.flatMap(f=>lineChunks(f.text)));
+    const inputs=shell.inputs(paths,stdin,'sed');if(inplace){for(const input of inputs){const output=apply(input.text);if(suffix)shell.write(input.name+suffix,input.text,false,'sed');shell.write(input.name,output,false,'sed');}return '';}return apply('',inputs.flatMap(f=>lineChunks(f.text)));
   }
   function decodeTextEscapes(source,cmd) {
     let out='';for(let i=0;i<source.length;i++){if(source[i]!=='\\'){out+=source[i];continue;}const c=source[++i];if(c===undefined)usageError(cmd,'unfinished backslash escape');const map={n:'\n',r:'\r',t:'\t',a:'\x07',b:'\b',f:'\f',v:'\v','\\':'\\'};if(Object.prototype.hasOwnProperty.call(map,c)){out+=map[c];continue;}if(c==='x'){const m=source.slice(i+1).match(/^[0-9a-fA-F]{1,2}/);if(!m)usageError(cmd,'\\x requires hexadecimal digits');out+=String.fromCharCode(parseInt(m[0],16));i+=m[0].length;continue;}if(/[0-7]/.test(c)){const m=source.slice(i).match(/^[0-7]{1,3}/);out+=String.fromCharCode(parseInt(m[0],8));i+=m[0].length-1;continue;}usageError(cmd,'unsupported escape \\'+c);}return out;
@@ -735,13 +774,13 @@ SOFTWARE.
   function runPaths(shell,cmd,args) {
     if(cmd==='basename'){const {flags,values,rest}=parseValued(args,'a','s',cmd);if(!rest.length)usageError(cmd,'missing path');let suffix=values.s,names=rest;if(!flags.has('a')&&values.s===undefined){if(rest.length>2)usageError(cmd,'too many operands; use -a for multiple paths');names=[rest[0]];suffix=rest[1];}return lineOutput(names.map(path=>{let name=pathBase(path);if(suffix&&name!==suffix&&name.endsWith(suffix))name=name.slice(0,-suffix.length);return name;}));}
     if(cmd==='dirname'){const {rest}=simpleOptions(args,'',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(pathDir));}
-    const {flags,rest}=simpleOptions(args,'me',cmd);if(!rest.length)usageError(cmd,'missing path');if(flags.has('m')&&flags.has('e'))usageError(cmd,'choose -m or -e');return lineOutput(rest.map(path=>{const p=shell.resolve(path);if(flags.has('e')&&!shell.isFile(p)&&!shell.isDir(p)||!flags.has('m')&&!shell.isDir(dirname(p)))fail('realpath: '+path+': no such file or directory',1);return p;}));
+    const {flags,rest}=simpleOptions(args,'me',cmd);if(!rest.length)usageError(cmd,'missing path');if(flags.has('m')&&flags.has('e'))usageError(cmd,'choose -m or -e');return lineOutput(rest.map(path=>{const p=shell.resolve(path);if(flags.has('e')&&!shell.isFile(p)&&!shell.isDir(p)||!flags.has('m')&&!shell.isDir(dirname(p)))fail('realpath: '+path+': No such file or directory',1);return p;}));
   }
   function runMetadata(shell,cmd,args) {
-    if(cmd==='file'){const {flags,rest}=simpleOptions(args,'bi',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(path=>{const p=shell.resolve(path);let description;if(shell.isDir(p))description=flags.has('i')?'inode/directory; charset=binary':'directory';else if(!shell.isFile(p))fail('file: '+path+': no such file',1);else{const text=shell.files[p],ascii=/^[\x00-\x7f]*$/.test(text),binary=/[\x00-\x08\x0e-\x1f]/.test(text);if(flags.has('i'))description=(binary?'application/octet-stream':text.trim()&&(()=>{try{JSON.parse(text);return true;}catch(_){return false;}})()?'application/json':'text/plain')+'; charset='+(binary?'binary':ascii?'us-ascii':'utf-8');else if(!text)description='empty';else if(binary)description='data';else{let json=false,jsonl=false;try{JSON.parse(text);json=true;}catch(_){try{const rows=asLines(text).filter(s=>s.trim());if(rows.length>1){rows.forEach(s=>JSON.parse(s));jsonl=true;}}catch(_){}}description=json?'JSON text data':jsonl?'JSON Lines text data':ascii?'ASCII text':'UTF-8 Unicode text';}}return (flags.has('b')?'':path+': ')+description;}));}
-    if(cmd==='stat'){const {values,rest}=parseValued(args,'','c',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(path=>{const p=shell.resolve(path),dir=shell.isDir(p);if(!dir&&!shell.isFile(p))fail('stat: '+path+': no such file',1);const data={n:path,s:String(dir?0:bytes(shell.files[p])),F:dir?'directory':'regular file',a:dir?'755':'644',A:dir?'drwxr-xr-x':'-rw-r--r--'};if(values.c!==undefined)return values.c.replace(/%(%|[A-Za-z])/g,(_,key)=>{if(key==='%')return '%';if(!Object.prototype.hasOwnProperty.call(data,key))usageError(cmd,'unsupported format %'+key);return data[key];});return '  File: '+path+'\n  Size: '+data.s+' bytes\n  Type: '+data.F+'\n  Mode: '+data.a+' ('+data.A+', virtual)';}));}
-    let depth=Infinity;const cleaned=[];let after=false;for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--'){after=true;cleaned.push(arg);continue;}if(!after&&(arg==='--max-depth'||arg.startsWith('--max-depth='))){const value=arg.includes('=')?arg.slice(arg.indexOf('=')+1):args[++i];depth=positive(value,'du','maximum depth',true);}else cleaned.push(arg);}const {flags,rest}=simpleOptions(cleaned,'ashb',cmd),paths=rest.length?rest:['.'],out=[];if(flags.has('b')&&flags.has('h'))usageError(cmd,'choose -b or -h');const logical=p=>shell.isFile(p)?bytes(shell.files[p]):Object.entries(shell.files).reduce((n,[file,text])=>n+(file.startsWith(p==='/'?'/':p+'/')?bytes(text):0),0),show=n=>flags.has('b')?String(n):flags.has('h')?humanSize(n):String(Math.ceil(n/1024));
-    for(const path of paths){const start=shell.resolve(path);if(!shell.isFile(start)&&!shell.isDir(start))fail('du: '+path+': no such file or directory',1);if(flags.has('s')||shell.isFile(start)){out.push(show(logical(start))+'\t'+path);continue;}const all=shell.allPaths().filter(p=>p===start||p.startsWith(start==='/'?'/':start+'/')).filter(p=>flags.has('a')||shell.isDir(p)).filter(p=>(p===start?0:p.slice(start==='/'?1:start.length+1).split('/').length)<=depth).sort((a,b)=>b.split('/').length-a.split('/').length||cmp(a,b));for(const p of all)out.push(show(logical(p))+'\t'+(p===start?path:path.replace(/\/$/,'')+p.slice(start.length)));}return lineOutput(out);
+    if(cmd==='file'){const {flags,rest}=simpleOptions(args,'bi',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(path=>{const p=shell.resolve(path);let description;if(shell.isDir(p))description=flags.has('i')?'inode/directory; charset=binary':'directory';else if(!shell.isFile(p))fail('file: '+path+': No such file or directory',1);else{const text=shell.files[p],ascii=/^[\x00-\x7f]*$/.test(text),binary=/[\x00-\x08\x0e-\x1f]/.test(text);if(flags.has('i'))description=(binary?'application/octet-stream':text.trim()&&(()=>{try{JSON.parse(text);return true;}catch(_){return false;}})()?'application/json':'text/plain')+'; charset='+(binary?'binary':ascii?'us-ascii':'utf-8');else if(!text)description='empty';else if(binary)description='data';else{let json=false,jsonl=false;try{JSON.parse(text);json=true;}catch(_){try{const rows=asLines(text).filter(s=>s.trim());if(rows.length>1){rows.forEach(s=>JSON.parse(s));jsonl=true;}}catch(_){}}description=json?'JSON text data':jsonl?'JSON Lines text data':ascii?'ASCII text':'UTF-8 Unicode text';}}return (flags.has('b')?'':path+': ')+description;}));}
+    if(cmd==='stat'){const {values,rest}=parseValued(args,'','c',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(path=>{const p=shell.resolve(path),dir=shell.isDir(p);if(!dir&&!shell.isFile(p))fail('stat: '+path+': No such file or directory',1);const meta=shell.getMetadata(p),data={y:new Date(meta.mtime).toISOString().replace('T',' ').replace('Z',' +0000'),Y:String(Math.floor(meta.mtime/1000)),n:path,s:String(dir?0:bytes(shell.files[p])),F:dir?'directory':'regular file',a:dir?'755':'644',A:dir?'drwxr-xr-x':'-rw-r--r--'};if(values.c!==undefined)return values.c.replace(/%(%|[A-Za-z])/g,(_,key)=>{if(key==='%')return '%';if(!Object.prototype.hasOwnProperty.call(data,key))usageError(cmd,'unsupported format %'+key);return data[key];});return '  File: '+path+'\n  Size: '+data.s+' bytes\n  Type: '+data.F+'\n  Mode: '+data.a+' ('+data.A+', virtual)';}));}
+    let depth=Infinity;const cleaned=[];let after=false;for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--'){after=true;cleaned.push(arg);continue;}if(!after&&(arg==='--max-depth'||arg.startsWith('--max-depth='))){const value=arg.includes('=')?arg.slice(arg.indexOf('=')+1):args[++i];depth=positive(value,'du','maximum depth',true);}else cleaned.push(arg);}const {flags,rest}=simpleOptions(cleaned,'ashbc',cmd),paths=rest.length?rest:['.'],out=[];let total=0;const counted=new Set();if(flags.has('b')&&flags.has('h'))usageError(cmd,'choose -b or -h');const logical=p=>shell.isFile(p)?bytes(shell.files[p]):Object.entries(shell.files).reduce((n,[file,text])=>n+(file.startsWith(p==='/'?'/':p+'/')?bytes(text):0),0),show=n=>flags.has('b')?String(n):flags.has('h')?humanSize(n):String(Math.ceil(n/1024));
+    for(const path of paths){const start=shell.resolve(path);if(!shell.isFile(start)&&!shell.isDir(start))fail('du: '+path+': No such file or directory',1);if(!counted.has(start)){total+=logical(start);counted.add(start);}if(flags.has('s')||shell.isFile(start)){out.push(show(logical(start))+'\t'+path);continue;}const all=shell.allPaths().filter(p=>p===start||p.startsWith(start==='/'?'/':start+'/')).filter(p=>flags.has('a')||shell.isDir(p)).filter(p=>(p===start?0:p.slice(start==='/'?1:start.length+1).split('/').length)<=depth).sort((a,b)=>b.split('/').length-a.split('/').length||cmp(a,b));for(const p of all)out.push(show(logical(p))+'\t'+(p===start?path:path.replace(/\/$/,'')+p.slice(start.length)));}if(flags.has('c'))out.push(show(total)+'\ttotal');return lineOutput(out);
   }
   function runDate(args) {
     args=longOptions(args,{'--utc':'u','--universal':'u'},{'--date':'d'},'date');const {flags,values,rest}=parseValued(args,'u','d','date');if(rest.length>1||rest.length&&rest[0][0]!=='+')usageError('date','use one +format operand');let date=new Date();if(values.d!==undefined){const value=values.d;if(/^@-?\d+(?:\.\d+)?$/.test(value))date=new Date(+value.slice(1)*1000);else{let normalized=value.replace(/ UTC$/,'Z').replace(' ','T');if(/^\d{4}-\d{2}-\d{2}$/.test(normalized))normalized+='T00:00:00Z';if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:?\d{2})$/.test(normalized))usageError('date','-d accepts an ISO date with timezone, YYYY-MM-DD, or @epoch; relative dates are unsupported');const y=+normalized.slice(0,4),m=+normalized.slice(5,7),d=+normalized.slice(8,10);if(m<1||m>12||d<1||d>new Date(Date.UTC(y,m,0)).getUTCDate())usageError('date','invalid calendar date');date=new Date(normalized);}if(!Number.isFinite(date.getTime()))usageError('date','invalid date');}
@@ -749,8 +788,8 @@ SOFTWARE.
     const formats={Y:String(year),m:pad(month+1),d:pad(day),e:String(day).padStart(2),H:pad(hour),M:pad(minute),S:pad(second),F:year+'-'+pad(month+1)+'-'+pad(day),T:pad(hour)+':'+pad(minute)+':'+pad(second),s:String(Math.floor(date.getTime()/1000)),z:zone,Z:utc?'UTC':Intl.DateTimeFormat('en',{timeZoneName:'short'}).formatToParts(date).find(p=>p.type==='timeZoneName').value,a:shortDays[week],A:longDays[week],b:shortMonths[month],B:longMonths[month],u:String(week||7),w:String(week),j:pad(Math.floor((Date.UTC(year,month,day)-Date.UTC(year,0,1))/86400000)+1,3),n:'\n',t:'\t','%':'%'};const format=rest.length?rest[0].slice(1):'%a %b %e %T %Z %Y';return format.replace(/%(.|$)/g,(_,key)=>{if(!Object.prototype.hasOwnProperty.call(formats,key))usageError('date','unsupported format %'+key);return formats[key];})+'\n';
   }
   function runMove(shell,cmd,args) {
-    const {flags,rest}=simpleOptions(args,cmd==='mv'?'n':'p',cmd);if(cmd==='rmdir'){if(!rest.length)usageError(cmd,'missing directory');for(const path of rest){let p=shell.resolve(path);while(true){if(!shell.isDir(p))fail('rmdir: '+p+': no such directory',1);if(shell.cwd===p||shell.cwd.startsWith(p==='/'?'/':p+'/'))fail('rmdir: cannot remove the current directory or an ancestor',1);if(shell.allPaths().some(x=>x!==p&&dirname(x)===p))fail('rmdir: '+p+': directory not empty',1);shell.directories.delete(p);if(!flags.has('p')||dirname(p)==='/')break;p=dirname(p);}}return '';}
-    if(rest.length!==2)usageError(cmd,'exactly two paths are required');const source=shell.resolve(rest[0]);if(!shell.isFile(source)&&!shell.isDir(source))fail('mv: '+rest[0]+': no such file or directory',1);let destination=shell.resolve(rest[1]);if(shell.isDir(destination))destination+=(destination==='/'?'':'/')+basename(source);if(source===destination)return '';if(destination.startsWith(source+'/'))fail('mv: cannot move a directory inside itself',1);if(!shell.isDir(dirname(destination)))fail('mv: destination parent does not exist',1);if(flags.has('n')&&(shell.isFile(destination)||shell.isDir(destination)))return '';if(shell.isDir(source)){if(shell.isFile(destination)||shell.isDir(destination))fail('mv: destination already exists',1);const files=Object.entries(shell.files).filter(([p])=>p.startsWith(source+'/')),dirs=[...shell.directories].filter(p=>p===source||p.startsWith(source+'/'));for(const [p,text] of files){shell.files[destination+p.slice(source.length)]=text;delete shell.files[p];}for(const p of dirs){shell.directories.delete(p);shell.directories.add(destination+p.slice(source.length));}if(shell.cwd===source||shell.cwd.startsWith(source+'/'))shell.cwd=destination+shell.cwd.slice(source.length);if(shell.oldcwd===source||shell.oldcwd.startsWith(source+'/'))shell.oldcwd=destination+shell.oldcwd.slice(source.length);shell.addParents(destination);}else{shell.write(destination,shell.files[source]);delete shell.files[source];}return '';
+    const {flags,rest}=simpleOptions(args,cmd==='mv'?'n':'p',cmd);if(cmd==='rmdir'){if(!rest.length)usageError(cmd,'missing directory');for(const path of rest){let p=shell.resolve(path);while(true){if(!shell.isDir(p))fail('rmdir: '+p+': No such file or directory',1);if(shell.cwd===p||shell.cwd.startsWith(p==='/'?'/':p+'/'))fail('rmdir: cannot remove the current directory or an ancestor',1);if(shell.allPaths().some(x=>x!==p&&dirname(x)===p))fail('rmdir: '+p+': Directory not empty',1);shell.directories.delete(p);delete shell.metadata[p];if(!flags.has('p')||dirname(p)==='/')break;p=dirname(p);}}return '';}
+    if(rest.length!==2)usageError(cmd,'exactly two paths are required');const source=shell.resolve(rest[0]);if(!shell.isFile(source)&&!shell.isDir(source))fail('mv: '+rest[0]+': No such file or directory',1);let destination=shell.resolve(rest[1]);if(shell.isDir(destination))destination+=(destination==='/'?'':'/')+basename(source);if(source===destination)return '';if(destination.startsWith(source+'/'))fail('mv: cannot move a directory inside itself',1);if(!shell.isDir(dirname(destination)))fail('mv: '+rest[1]+': No such file or directory',1);if(flags.has('n')&&(shell.isFile(destination)||shell.isDir(destination)))return '';if(shell.isDir(source)){if(shell.isFile(destination)||shell.isDir(destination))fail('mv: destination already exists',1);const files=Object.entries(shell.files).filter(([p])=>p.startsWith(source+'/')),dirs=[...shell.directories].filter(p=>p===source||p.startsWith(source+'/'));for(const [p,text] of files){const next=destination+p.slice(source.length);shell.files[next]=text;shell.metadata[next]={...shell.getMetadata(p)};delete shell.files[p];delete shell.metadata[p];}for(const p of dirs){const next=destination+p.slice(source.length);shell.metadata[next]={...shell.getMetadata(p)};delete shell.metadata[p];shell.directories.delete(p);shell.directories.add(next);}if(shell.cwd===source||shell.cwd.startsWith(source+'/'))shell.cwd=destination+shell.cwd.slice(source.length);if(shell.oldcwd===source||shell.oldcwd.startsWith(source+'/'))shell.oldcwd=destination+shell.oldcwd.slice(source.length);shell.addParents(destination);}else{const meta={...shell.getMetadata(source)};shell.write(destination,shell.files[source],false,cmd);shell.metadata[destination]=meta;delete shell.files[source];delete shell.metadata[source];}return '';
   }
 
   function trSet(source) {
@@ -937,7 +976,8 @@ SOFTWARE.
     const render=v=>v instanceof RegExp?+v.test(env.line):String(v);
     const emit=printers=>out.push(printers.map(p=>render(p.value(env))).join(String(env.vars.OFS))+String(env.vars.ORS));
     for(const begin of begins)for(const statement of awkStatements(begin.action)){const assignment=statement.match(/^([A-Za-z_]\w*)\s*=\s*([\s\S]+)$/);if(assignment){if(['NR','NF','FNR'].includes(assignment[1]))usageError('awk','assigning record counters is unsupported');env.vars[assignment[1]]=awkExpr(assignment[2]).value(env);}else emit(compilePrint(statement));}
-    const fs=env.vars.FS===' '?null:env.vars.FS===''?'':regex(String(env.vars.FS));
+    // AWK treats a one-character FS literally (except the special space value).
+    const fieldSeparator=String(env.vars.FS),fs=fieldSeparator===' '?null:fieldSeparator.length<=1?fieldSeparator:regex(fieldSeparator);
     for(const input of shell.inputs(paths,stdin,'awk')){env.FNR=0;for(const line of asLines(input.text)){env.line=line;env.fields=fs===''?Array.from(line):fs?line.split(fs):line.trim()?line.trim().split(/\s+/):[];env.NR++;env.FNR++;if(!main||filter&&!filter.test(env))continue;if(printers)emit(printers);if(counter)env.vars[counter]=(Number(env.vars[counter])||0)+1;if(sum)env.vars[sum.name]=(Number(env.vars[sum.name])||0)+(Number(sum.value.value(env))||0);if(aggregate){const key=String(aggregate.key.value(env));aggregate.values.set(key,(aggregate.values.get(key)||0)+1);}}}
     if(endPrinters)emit(endPrinters);if(aggregate&&aggregateOrder)for(const [key,count] of aggregate.values)out.push((aggregateOrder==='count'?count+String(env.vars.OFS)+key:key+String(env.vars.OFS)+count)+String(env.vars.ORS));return out.join('');
   }
@@ -1035,8 +1075,8 @@ SOFTWARE.
 
   lesson({ id: '01-echo', chapter: 'start', title: '最初のコマンドを打つ', mode: 'guide', fixture: 'basics',
     goal: '文字を入力して、Enterで実行できる。',
-    explanation: ['ターミナルは、文字で操作をお願いする場所です。入力欄にコマンドを打ち、Enterで実行します。', 'echoは、後ろに書いた文字を表示します。画面の「$」は入力待ちの印です。$を含めず、echoから入力してください。'],
-    concepts: [{ term: 'コマンド', text: '実行したい操作の名前。ここではechoです。' }, { term: '引数', text: 'コマンドに渡す情報。ここでは表示したい文字です。' }],
+    explanation: ['ターミナルは、文字で操作をお願いする場所です。入力欄にコマンドを打ち、Enterで実行します。', 'echoは、後ろに書いた文字を表示します。analyst@linuxroom:~$ は入力待ちのプロンプトです。analystはユーザー名、linuxroomはホスト名、~は自分のホームです。プロンプトを写さずechoから入力してください。'],
+    concepts: [{ term: 'プロンプトの$と#', text: '多くのLinuxでは$は一般ユーザー、#は管理者rootの目印です。表示は環境で変えられます。この教材は一般ユーザーの$を使います。' }, { term: 'コマンド', text: '実行したい操作の名前。ここではechoです。' }, { term: '引数', text: 'コマンドに渡す情報。ここでは表示したい文字です。' }],
     example: { command: 'echo hello', note: 'helloと表示されます。コマンドと引数の間には半角スペースを入れます。' },
     task: 'echoを使って、ready と表示してください。',
     hints: ['コマンドの名前はechoです。', 'echoのあとに、半角スペースと表示したい文字を書きます。', 'echo ready を入力してEnterを押します。'],
@@ -1055,7 +1095,7 @@ SOFTWARE.
   });
   lesson({ id: '03-pwd', chapter: 'browse', title: '現在地を確かめる', mode: 'guide', fixture: 'basics',
     goal: 'pwdで今いるディレクトリを確認できる。',
-    explanation: ['ディレクトリは、ファイルをまとめるフォルダのことです。コマンドを実行するときにも「今いる場所」があります。', 'pwdは、現在地を/から始まる道順で表示します。この道順をパスと呼びます。'],
+    explanation: ['ディレクトリは、ファイルをまとめるフォルダのことです。コマンドを実行するときにも「今いる場所」があります。', 'pwdは、現在地を/から始まる道順で表示します。この道順をパスと呼びます。プロンプトの~は/home/analystの省略です。cdで移動するとプロンプトの現在地も変わります。'],
     concepts: [{ term: '現在のディレクトリ', text: '相対パスの出発点になる場所です。' }, { term: 'パス', text: 'ディレクトリやファイルの場所を示す文字列です。/は区切りです。' }],
     example: { command: 'pwd', note: 'pwdには、今回は引数を付けません。' },
     task: 'pwdを実行し、現在地を表示してください。',
@@ -1065,10 +1105,10 @@ SOFTWARE.
   });
   lesson({ id: '04-ls', chapter: 'browse', title: 'あるものを一覧にする', fixture: 'basics',
     goal: 'lsでディレクトリの中身を確認できる。',
-    explanation: ['lsは、ファイルやディレクトリの名前を一覧にします。引数を省略すると、現在地の中身を表示します。', 'この教材では、名前を1行ずつ表示します。実際のLinuxでは画面幅や設定により、複数列に並ぶこともあります。'],
+    explanation: ['lsは、ファイルやディレクトリの名前を一覧にします。引数を省略すると、現在地の中身を表示します。', '実機の端末ではinbox  logs  notesのように横に並ぶことがあります。ls -1（数字の1）は必ず1行1項目にする指定です。この教材は途中結果を比べやすいよう、lsだけでも1列で表示します。パイプに渡す実機のlsも通常は1列になります。'],
     concepts: [{ term: 'ls', text: '名前を一覧にするコマンド。ファイルの本文を読むコマンドではありません。' }],
     example: { command: 'ls notes', note: '現在地にあるnotesディレクトリの中を表示します。' },
-    task: '引数を付けずにlsを実行し、現在地の中身を表示してください。',
+    task: 'lsを実行し、現在地の中身を表示してください。ls .や、1行1項目を明示するls -1でも構いません。',
     hints: ['現在地を確認するなら、lsの後ろにパスは不要です。', '一覧にはinbox、logs、notes、welcome.txtがあります。', 'ls と入力します。'],
     solution: ['ls'], success: 'logsは記録ファイルの置き場、welcome.txtは本文を持つファイルです。', bridge: '次はlogsへ移動します。',
     validation: { all: [used('ls'), out('inbox\nlogs\nnotes\nwelcome.txt')] }
@@ -1196,7 +1236,7 @@ SOFTWARE.
   });
   lesson({ id: '17-awk', chapter: 'columns', title: '空白で区切られた列を選ぶ', mode: 'guide', minutes: 4,
     goal: 'awkで番号を指定し、必要な列を取り出せる。',
-    explanation: ['awkは、行を列に分けて処理できます。今回のような空白区切りでは、左から$1、$2、$3…と列を指定します。', "'{print $3}'は「3列目を表示する」という処理です。中の$をそのまま渡すため、全体を半角のシングルクォートで囲みます。"],
+    explanation: ['awkは、行を列に分けて処理できます。今回のような空白区切りでは、左から$1、$2、$3…と列を指定します。', "'{print $3}'は「3列目を表示する」という処理です。中の$をそのまま渡すため、全体を半角のシングルクォートで囲みます。", "このファイルならcut -d ' ' -f 3でも同じ結果です。ただし空白が連続するとcutは空の列も数えます。awkの標準の空白区切りは連続する空白をまとめて扱うので、その場合は差が出ます。"],
     concepts: [{ term: '列・フィールド', text: '1行を区切った中の項目です。app.logでは時刻が$1、種類が$2、名前が$3、操作が$4です。' }, { term: 'print', text: 'awkの中で、指定した値を表示する命令です。' }],
     example: { command: "awk '{print $2}' app.log", note: '2列目のINFOやERRORだけが表示されます。' },
     task: 'app.logの全10行から、3列目の名前だけを表示してください。',
@@ -1248,7 +1288,7 @@ SOFTWARE.
     goal: 'grep → awkの後ろへ、sortを一段だけ追加できる。',
     explanation: ['ここから、同じコマンドを一段ずつ伸ばします。まず「ERRORの行を選ぶ → 名前を取る」の結果にsortを加えます。', '各段階の表示で、6行の記録が6個の名前になり、名前順になる変化を確かめてください。'],
     concepts: [{ term: 'パイプライン', text: '複数のコマンドをパイプでつないだものです。一段ずつ目的を説明できれば、長くても読み解けます。' }],
-    example: { command: 'cat names.txt | sort', note: '受け取った名前を並べ替える形です。sortにファイル名は要りません。' },
+    example: { command: 'sort names.txt', note: 'sortはファイル名を直接指定できます。前の処理結果を並べ替えるときに、パイプでsortへ渡します。' },
     starter: selectNames, newPart: '| sort', task: 'ERRORの行から名前を取り出すコマンドの後ろにsortを追加し、名前順に表示してください。',
     hints: ['前の段階を入力すると、grepとawkまでのコマンドを使えます。', 'その後ろに | sort を追加します。', groupNames + ' と入力します。'],
     solution: [groupNames], success: '3段の処理になりました。選ぶ → 取り出す → 並べる、の順です。', bridge: '今度は、並べた名前を数える段階を追加します。',
@@ -1387,12 +1427,12 @@ SOFTWARE.
   });
   lesson({ id: '36-final-ranking', chapter: 'final', title: '卒業実習② 集計を完成させる', mode: 'challenge', fixture: 'basics', minutes: 7,
     goal: '新しい記録の抽出・集計・保存を自分で組み立てられる。',
-    explanation: ['最後の練習は/home/analystから始まります。reportsはまだないので、必要な置き場を作ってください。', '何段に分けても構いません。途中結果を確かめ、目的を満たすコマンドを組み立てましょう。モデル解答と同じ書き方である必要はありません。'],
+    explanation: ['最後の練習は/home/analystから始まります。reportsはまだないので、必要な置き場を作ってください。mkdir -p reportsなら、やり直し時に既に存在してもエラーにせず続けられます。', '何段に分けても構いません。途中結果を確かめ、目的を満たすコマンドを組み立てましょう。モデル解答と同じ書き方である必要はありません。'],
     concepts: [{ term: '今回の完成形', text: 'ERRORだけを選ぶ → 名前を取る → 同じ名前を並べる → 数える → 多い順にする → 保存する。' }],
     example: { command: 'cat inbox/shift.log', note: 'まず元の記録を確認できます。列番号や選ぶ条件を確かめましょう。' },
     task: 'inbox/shift.logの大文字のERRORについて、名前別の件数を多い順に表示してください。同じ結果を/home/analyst/reports/ranking.txtに保存してください。',
-    hints: ['名前は3列目です。まずgrepとawkをつなぎ、名前だけ取り出せるか確かめます。', 'sort → uniq -c → sort -nrで集計できます。mkdirでreportsを作り、最後にteeで保存できます。', "mkdir reports を実行し、grep 'ERROR' inbox/shift.log | awk '{print $3}' | sort | uniq -c | sort -nr | tee reports/ranking.txt と入力します。"],
-    solution: ['mkdir reports', "grep 'ERROR' inbox/shift.log | awk '{print $3}' | sort | uniq -c | sort -nr | tee reports/ranking.txt"],
+    hints: ['名前は3列目です。まずgrepとawkをつなぎ、名前だけ取り出せるか確かめます。', 'sort → uniq -c → sort -nrで集計できます。mkdir -pでreportsを作り、最後にteeで保存できます。', "mkdir -p reports を実行し、grep 'ERROR' inbox/shift.log | awk '{print $3}' | sort | uniq -c | sort -nr | tee reports/ranking.txt と入力します。"],
+    solution: ['mkdir -p reports', "grep 'ERROR' inbox/shift.log | awk '{print $3}' | sort | uniq -c | sort -nr | tee reports/ranking.txt"],
     success: '卒業です。新しい記録からsora 3件、yui 2件、naoki 1件を求めて保存できました。長いコマンドも、役割のある小さな操作の組み合わせです。',
     bridge: '次はSOCroom-easyでログの意味や読み方を学び、その後Logroomでコマンドを使ったログ分析に進みましょう。',
     validation: { all: [{ type: 'source', path: home + '/inbox/shift.log' }, { type: 'directory', path: home + '/reports' }, out(finalRanking, 'lines'), saved(home + '/reports/ranking.txt', finalRanking, 'lines')] }
@@ -1400,7 +1440,7 @@ SOFTWARE.
 
   const glossary = [
     { term: 'コマンド', text: '文字で指定する操作の名前。後ろに引数やオプションを付けます。', example: "grep 'ERROR' app.log" },
-    { term: 'プロンプト', text: '入力待ちを示す印です。画面にある$は入力しません。', example: 'echo ready' },
+    { term: 'プロンプト', text: 'analyst@linuxroom:~$はユーザー名・ホスト名・現在地・入力待ちの印。~はホーム、$は通常のユーザー、#はよく管理者に使われる表示です。プロンプトは入力しません。', example: 'echo ready' },
     { term: '引数', text: 'コマンドに渡す情報。検索語やファイル名などです。', example: 'cat app.log' },
     { term: 'オプション', text: 'コマンドの動きを調整する指定。同じ文字でもコマンドによって意味が異なります。', example: 'head -n 3 app.log' },
     { term: '引用符', text: '空白や記号を含む文字列をひとまとまりにします。awkの処理には半角のシングルクォートを使います。', example: "awk '{print $3}' app.log" },
@@ -1409,7 +1449,7 @@ SOFTWARE.
     { term: '絶対パス', text: '/から始まり、場所を全部指定した道順です。', example: 'cd /home/analyst/logs' },
     { term: '相対パス', text: '現在地からたどる道順。..は一つ上、.は現在地です。', example: 'cat ../welcome.txt' },
     { term: 'パイプ |', text: '左の標準出力を、右の標準入力に渡します。右側に元ファイルを指定すると、届いた結果を使わない場合があります。', example: "grep 'ERROR' app.log | wc -l" },
-    { term: '標準入力・標準出力', text: 'コマンドが文字を受け取る入口と、結果を出す出口。パイプでつなげられます。', example: 'cat names.txt | sort' },
+    { term: '標準入力・標準出力', text: 'コマンドが文字を受け取る入口と、結果を出す出口。パイプでつなげられます。', example: 'sort < names.txt' },
     { term: 'grep', text: '条件に合う行を選びます。-nは行番号、-iは大文字小文字を区別しない、-vは除外、-Fは検索語を正規表現でなく文字列として扱います。', example: "grep -n 'ERROR' app.log" },
     { term: '一致しない検索', text: 'grepで見つからないと、出力は空になります。見つからないことを示す終了コード1は、構文エラーとは違います。', example: "grep 'NOT_FOUND' app.log" },
     { term: '列・フィールド', text: '行を区切った項目。awkでは通常、空白区切りの左から$1、$2…です。$0は行全体、$NFは最後の列です。', example: "awk '{print $3}' app.log" },
@@ -1421,7 +1461,7 @@ SOFTWARE.
     { term: 'JSONとJSON Lines', text: 'JSONはキーと値を持つデータ形式。JSON Linesは1行に一つずつJSONを置く形式です。', example: "jq -r '.user' events.jsonl" },
     { term: 'jqのselect', text: 'JSONのキーの値を条件に、入力を選びます。引用符内の|はjqのフィルターをつなぎます。', example: "jq -r 'select(.level == \"ERROR\") | .user' events.jsonl" },
     { term: '操作の補助', text: '↑・↓で入力履歴、Tabで名前の補完、Ctrl+Lで表示を整理できます。lessはqで閉じます。', example: 'less app.log' },
-    { term: 'この教材のhelp', text: '学習用シェルが対応するコマンドを案内します。一般のLinuxの外部コマンドを調べるmanとは別の、この教材の機能です。', example: 'help grep' }
+    { term: 'この教材のhelp', text: '学習用シェルが対応するコマンドを案内します。この教材のmanもhelpへつながる簡易案内です。実機のmanはより詳しいマニュアルを開きます。', example: 'help grep' }
   ];
   root.LINUXROOM_DATA = { version: 1, chapters, datasets, lessons, glossary };
 })(typeof globalThis !== 'undefined' ? globalThis : window);
@@ -1430,12 +1470,28 @@ SOFTWARE.
 (function (root) {
   'use strict';
   const D = root.LINUXROOM_DATA;
-  D.release = '0.2';
+  D.release = '0.3';
   D.levels = [
     {id:'beginner', title:'初級編', subtitle:'一つずつ、つなげる', description:'現在地とファイル操作から、検索・列の抽出・集計・保存まで。短いコマンドを一段ずつ組み立てます。'},
     {id:'applied', title:'応用編', subtitle:'条件を選んで、整える', description:'正規表現、複数ファイル検索、文字の整形、条件付き集計。必要な記録を狙って取り出します。'},
     {id:'advanced', title:'発展編', subtitle:'比較して、組み合わせる', description:'差分・照合、JSONの集約、日時・ファイルの確認を組み合わせ、調査用の結果を作ります。'}
   ];
+  // Practice hints retain a blank so revealing the last hint still asks the learner to recall a step.
+  D.practiceHint = lesson => {
+    if (lesson.mode === 'guide' || lesson.hints[2].includes('穴埋め')) return lesson;
+    const command = lesson.solution.at(-1);
+    const segment = lesson.newPart && command.includes(lesson.newPart) ? lesson.newPart : command.match(/^\S+/)?.[0];
+    const puzzle = segment ? command.replace(segment, '___') : command;
+    lesson.hints[2] = '穴埋め：' + puzzle + '。___に、ここまでで学んだ操作や指定を補ってください。';
+    return lesson;
+  };
+  D.glossary.push(
+    {term:'入力リダイレクト <',text:'ファイルの本文を標準入力へ渡します。名前を引数として渡す操作との違いを意識しましょう。',example:'wc -l < names.txt'},
+    {term:'標準エラー 2>',text:'エラーの説明は標準エラー2に出ます。2>/dev/nullはその表示を捨てますが、終了コードは変えません。',example:'cat missing.log 2>/dev/null'},
+    {term:'終了コード $?',text:'直前のコマンドの終了コードです。0以外の意味はコマンドによって異なります。',example:'grep NOT_PRESENT session.log; echo $?'},
+    {term:'接続 && と ;',text:'&&は左が成功したときだけ次を実行し、;は結果に関係なく次を実行します。本文を渡すパイプとは用途が異なります。',example:'mkdir -p reports && echo ready'}
+  );
+  D.lessons.forEach(D.practiceHint);
   D.lessons.forEach(lesson => {lesson.level = 'beginner';});
   D.chapters.forEach(chapter => {chapter.level = 'beginner';});
 })(globalThis);
@@ -1505,11 +1561,34 @@ SOFTWARE.
     [base + '/trash/final.txt']: '残す完成版\n'
   };
   D.datasets['ap-workbench'] = { cwd: base, files };
+  // A separate 400-line fixture makes read/limit/count tools useful without inflating every exercise.
+  const volumeBase = base + '/volume';
+  const volumeRows = Array.from({length:400}, (_, index) => {
+    const n = index + 1, minute = String(Math.floor(index / 60)).padStart(2,'0'), second = String(index % 60).padStart(2,'0');
+    return '2026-10-25T00:' + minute + ':' + second + 'Z ' + (n % 40 === 0 ? 'ERROR' : 'INFO') + ' gateway event=' + String(n).padStart(4,'0');
+  });
+  D.datasets['ap-volume'] = {cwd:volumeBase, files:{
+    [volumeBase+'/server.log']:lines(volumeRows),
+    [volumeBase+'/header.txt']:'LINUXROOM\nformat=text\n',
+    [volumeBase+'/metrics.csv']:'time,level,count\n00:00,INFO,3\n00:01,ERROR,2\n00:02,INFO,4\n'
+  }};
+  D.datasets['ap-more'] = {cwd:base,files:{...files,[base+'/server.log']:lines(volumeRows)}};
+  D.datasets['ap-fileinfo'] = {cwd:base, now:'2026-10-25T10:00:00Z', files:{
+    [base+'/samples/payload.log']:'x'.repeat(2047)+'\n',
+    [base+'/snapshots/a-old.log']:'INFO old\n',
+    [base+'/snapshots/m-middle.log']:'WARN mid\n',
+    [base+'/snapshots/z-new.log']:'INFO new\n'
+  }, metadata:{
+    [base+'/samples/payload.log']:{mtime:1792918800000},
+    [base+'/snapshots/a-old.log']:{mtime:1792915200000},
+    [base+'/snapshots/m-middle.log']:{mtime:1792918800000},
+    [base+'/snapshots/z-new.log']:{mtime:1792920600000}
+  }};
   const chapters = [
     ['ap-orient', '調べながら操作する', 'ヘルプ・履歴・画面の整理'],
     ['ap-read', '読み方を選ぶ', '逆順・閲覧・行番号'],
     ['ap-search', '検索条件を育てる', '固定文字 → 正規表現 → 前後の文脈'],
-    ['ap-locate', '複数ファイルを探す', '本文検索とファイル名検索'],
+    ['ap-locate', '複数ファイルを探す', '本文検索・名前検索と順序の固定'],
     ['ap-fields', '列で選び、並べる', '条件・区切り・数値の順序'],
     ['ap-normalize', '表記をそろえる', '文字の変換 → 重複確認 → 表示'],
     ['ap-edit', '必要な部分を整える', 'sedで行の選択・置換・除外'],
@@ -1529,7 +1608,7 @@ SOFTWARE.
 
   lesson({ id: 'ap-01-help', chapter: 'ap-orient', title: '対応するオプションを調べる', mode: 'guide', commands: ['help'],
     goal: 'ヘルプで検索コマンドの指定方法を確かめられる。',
-    explanation: ['応用編では、覚えているコマンドに条件を少しずつ加えます。暗記できなくても、調べながら使えれば大丈夫です。', 'help コマンド名で、この教材が対応している書き方を表示できます。これはLinuxroom・Logroomの独自案内です。一般のLinuxではmanや各コマンドの--helpなどを使います。'],
+    explanation: ['応用編では、覚えているコマンドに条件を少しずつ加えます。暗記できなくても、調べながら使えれば大丈夫です。', 'help コマンド名で、この教材が対応している書き方を表示できます。これはLinuxroom・Logroomの独自案内です。一般のLinuxではmanや各コマンドの--helpなどを使います。この教材ではman grepもhelp grepと同じ簡易案内を表示しますが、実機のmanはマニュアル閲覧用です。'],
     concepts: [{ term: '対応構文', text: 'この学習用シェルで使える引数・オプションの組み合わせです。外部マニュアルの全機能があるわけではありません。' }],
     example: { command: 'help head', note: '-nで行数、-cでバイト数を指定できることが確認できます。' },
     task: 'helpを使ってgrepの対応構文を表示し、-Fと-Eの説明を見つけてください。',
@@ -1568,15 +1647,15 @@ SOFTWARE.
     solution: ['tac session.log | head -n 3'], success: '並び順を変えてから、読む量を制限できました。', bridge: '次は別の閲覧コマンドで、読む画面から戻る練習です。',
     validation: { all: [used('tac'), used('head'), pipe(2), out('10:07 INFO api-2 session=end user=REN\n10:06 WARN api-2 retry user=REN\n10:05 ERROR api-2 failed user=REN')] }
   });
-  lesson({ id: 'ap-05-more', chapter: 'ap-read', title: 'moreで開いて終了する', commands: ['more'],
+  lesson({ id: 'ap-05-more', chapter: 'ap-read', title: 'moreで開いて終了する', commands: ['more'], fixture:'ap-more', fixtureRevision:2, fixtureAdditions:[base+'/server.log'],
     goal: 'moreを使い、qでコマンド入力へ戻れる。',
-    explanation: ['moreも長い本文を閲覧するためのコマンドです。実際のLinuxではlessと機能が異なりますが、この教材では両方ともスクロールできる閲覧画面を開きます。', '本文を確認したらqで閉じます。開いている間は通常のコマンドを実行する状態ではありません。'],
+    explanation: ['moreも長い本文を閲覧するためのコマンドです。実際のLinuxではlessと機能が異なりますが、この教材では両方ともスクロールできる閲覧画面を開きます。', 'server.logは400行の記録です。catで全体を出すと先頭が流れてしまいます。moreなら画面をスクロールしながら読み、本文を確認したらqで閉じます。開いている間は通常のコマンドを実行する状態ではありません。'],
     concepts: [{ term: 'more', text: '文章を少しずつ読むためのページャーです。この教材ではqで閉じる操作を練習します。' }],
-    example: { command: 'more notes.txt', note: '短いメモを開く例です。qで閉じてから課題へ進みます。' },
-    task: 'moreでsession.logを開き、確認後にqで閉じてください。',
-    hints: ['moreの引数にsession.logを指定します。', '開いただけで終わらず、qで戻ります。', 'more session.log を実行し、qで閉じます。'],
-    solution: ['more session.log', 'q'], success: '別の閲覧コマンドでも、開く・読む・戻るを実行できました。', bridge: '次は、引用するときに便利な行番号を付けます。',
-    validation: { all: [used('more', { scope: 'any' }), { type: 'pagerClosed' }, out(session)] }
+    example: { command: 'cat /home/analyst/applied/server.log', note: '400行を一度に表示すると先頭が流れます。本文全体を読むときはmoreで開いてみましょう。' },
+    task: 'moreで/home/analyst/applied/server.logを開き、確認後にqで閉じてください。',
+    hints: ['moreの引数に/home/analyst/applied/server.logを指定します。', '開いただけで終わらず、qで戻ります。', 'more server.log を実行し、qで閉じます。'],
+    solution: ['more /home/analyst/applied/server.log', 'q'], success: '別の閲覧コマンドでも、開く・読む・戻るを実行できました。', bridge: '次は、引用するときに便利な行番号を付けます。',
+    validation: { all: [used('more', { scope: 'any' }), { type: 'pagerClosed' }, out(lines(volumeRows))] }
   });
   lesson({ id: 'ap-06-nl', chapter: 'ap-read', title: '空行にも行番号を付ける', commands: ['nl'],
     goal: 'nlで行番号の付け方を指定できる。',
@@ -1640,15 +1719,16 @@ SOFTWARE.
     validation: { all: [used('grep', { flags: 'nC' }), out('2-10:01 WARN api-1 retry user=AKI\n3:10:02 ERROR api-1 failed user=AKI\n4-10:03 INFO api-1 session=end user=AKI')] }
   });
 
-  lesson({ id: 'ap-12-grep-recursive', chapter: 'ap-locate', title: '条件に合うファイル名を集める', commands: ['grep'],
+  lesson({ id: 'ap-12-grep-recursive', chapter: 'ap-locate', title: '条件に合うファイル名を集める', commands: ['grep', 'sort'],
     goal: 'grepの再帰検索と対象ファイル指定を組み合わせられる。',
-    explanation: ['-rはディレクトリの下までたどる再帰検索、-lは一致する行があるファイルの名前だけを表示する指定です。', "--include '*.log'は、末尾が.logのファイルに対象を絞ります。引用符で囲むと、*をgrepへそのまま渡せます。引用符がないとシェルが先に現在地の名前へ展開する場合があります。"],
+    explanation: ['-rはディレクトリの下までたどる再帰検索、-lは一致する行があるファイルの名前だけを表示する指定です。実機の探索順は名前順とは限りません。最後に| sortで表示順を固定します。', "--include '*.log'は、末尾が.logのファイルに対象を絞ります。引用符で囲むと、*をgrepへそのまま渡せます。引用符がないとシェルが先に現在地の名前へ展開する場合があります。"],
+    // Directory traversal order varies on real systems; explicitly sort the displayed result.
     concepts: [{ term: 'グロブ', text: '*.logのようなファイル名のパターン。*は任意の文字列です。正規表現とは書き方や用途が異なります。' }],
     example: { command: "grep -rl --include '*.txt' 'ERROR' archive", note: '説明文にERRORを含むreadme.txtだけが対象になります。' },
-    task: 'archive以下を再帰的に調べ、ERRORを含む.logファイルの名前だけを表示してください。',
-    hints: ['本文ではなく名前を表示する-lと、下まで探す-rを組み合わせます。', "--include '*.log'で対象を絞ります。", "grep -rl --include '*.log' 'ERROR' archive と入力します。"],
-    solution: ["grep -rl --include '*.log' 'ERROR' archive"], success: '内容とファイル名の両方の条件で、対象を探せました。', bridge: '同じ探索に使えるrgの基本を試します。',
-    validation: { all: [used('grep', { flags: 'rl' }), out('archive/day1/app.log\narchive/day2/proxy.log')] }
+    task: '最後にsortで名前順にそろえてください。archive以下を再帰的に調べ、ERRORを含む.logファイルの名前だけを表示してください。',
+    hints: ['本文ではなく名前を表示する-lと、下まで探す-rを組み合わせます。', "--include '*.log'で対象を絞ります。", "grep -rl --include '*.log' 'ERROR' archive | sort と入力します。"],
+    solution: ["grep -rl --include '*.log' 'ERROR' archive | sort"], success: '内容とファイル名の両方の条件で、対象を探せました。', bridge: '同じ探索に使えるrgの基本を試します。',
+    validation: { all: [used('sort'), used('grep', { flags: 'rl' }), out('archive/day1/app.log\narchive/day2/proxy.log')] }
   });
   lesson({ id: 'ap-13-rg', chapter: 'ap-locate', title: 'rgで行番号付きの検索をする', commands: ['rg'],
     goal: 'rgの検索語・対象・行番号指定を使える。',
@@ -1660,25 +1740,27 @@ SOFTWARE.
     solution: ["rg -n 'ERROR' archive/day1/app.log"], success: 'rgの基本形で、一致する行と位置を表示できました。', bridge: '次はrgの対象をディレクトリへ広げます。',
     validation: { all: [used('rg', { flags: 'n' }), out('2:08:01 ERROR upload')] }
   });
-  lesson({ id: 'ap-14-rg-glob', chapter: 'ap-locate', title: 'rgで対象ファイルを絞る', commands: ['rg'],
+  lesson({ id: 'ap-14-rg-glob', chapter: 'ap-locate', title: 'rgで対象ファイルを絞る', commands: ['rg', 'sort'],
     goal: 'rgの-gでファイル名の条件を付けて再帰検索できる。',
-    explanation: ['rgにディレクトリを渡すと、その下も検索します。-gでファイル名のグロブを指定できます。', "-g '*.log'なら.logだけを検索します。このデータにはERRORという語を説明する.txtもあるため、対象を絞ると本文の記録だけを取り出せます。"],
+    explanation: ['rgにディレクトリを渡すと、その下も検索します。-gでファイル名のグロブを指定できます。複数ファイルの探索順に依存しないよう、今回は最後にsortでそろえます。', "-g '*.log'なら.logだけを検索します。このデータにはERRORという語を説明する.txtもあるため、対象を絞ると本文の記録だけを取り出せます。"],
+    // Directory traversal order varies on real systems; explicitly sort the displayed result.
     concepts: [{ term: '-g', text: '検索対象をファイル名などのパターンで制限します。パターンは引用符で囲んでrgへ渡します。' }],
     example: { command: "rg -g '*.txt' 'ERROR' archive", note: 'readme.txtの説明文だけが見つかります。' },
     starter: "rg -n 'ERROR' archive/day1/app.log", newPart: "-g '*.log' archive", task: 'archive以下の.logファイルだけをrgで調べ、ERRORの行をファイル名付きで表示してください。行番号は不要です。',
-    hints: ['対象をファイルからarchiveディレクトリへ変えます。', "-g '*.log'を加えます。", "rg -g '*.log' 'ERROR' archive と入力します。"],
-    solution: ["rg -g '*.log' 'ERROR' archive"], success: '複数の記録から、出所が分かる形で行を集められました。', bridge: '次は本文ではなく、ファイルの存在そのものを調べます。',
-    validation: { all: [used('rg', { args: ['-g', '*.log'] }), out('archive/day1/app.log:08:01 ERROR upload\narchive/day2/proxy.log:09:01 ERROR timeout')] }
+    hints: ['対象をファイルからarchiveディレクトリへ変えます。', "-g '*.log'を加えます。", "rg -g '*.log' 'ERROR' archive | sort と入力します。"],
+    solution: ["rg -g '*.log' 'ERROR' archive | sort"], success: '複数の記録から、出所が分かる形で行を集められました。', bridge: '次は本文ではなく、ファイルの存在そのものを調べます。',
+    validation: { all: [used('sort'), used('rg', { args: ['-g', '*.log'] }), out('archive/day1/app.log:08:01 ERROR upload\narchive/day2/proxy.log:09:01 ERROR timeout')] }
   });
-  lesson({ id: 'ap-15-find', chapter: 'ap-locate', title: '本文を読まずにファイルを探す', commands: ['find'],
+  lesson({ id: 'ap-15-find', chapter: 'ap-locate', title: '本文を読まずにファイルを探す', commands: ['find', 'sort'],
     goal: 'findで種類と名前を条件にしてファイルを探せる。',
-    explanation: ['findはパスをたどり、名前や種類などの条件でファイルを探します。grepやrgと異なり、今回の条件では本文を読みません。', "-type fは通常のファイル、-name '*.log'は.logで終わる名前を指定します。*はfindに判断させるので引用符で囲みます。"],
+    explanation: ['findはパスをたどり、名前や種類などの条件でファイルを探します。grepやrgと異なり、今回の条件では本文を読みません。実機の走査順は保証されないので、比較・提出用の一覧は| sortで順序を固定します。', "-type fは通常のファイル、-name '*.log'は.logで終わる名前を指定します。*はfindに判断させるので引用符で囲みます。"],
+    // Directory traversal order varies on real systems; explicitly sort the displayed result.
     concepts: [{ term: '-type f', text: 'ディレクトリではなくファイルを対象にする指定です。-type dならディレクトリです。' }],
     example: { command: "find archive -type f -name '*.txt'", note: '本文の内容に関係なく、.txtファイルのパスを表示します。' },
-    task: 'findでarchive以下の.logファイルをすべて表示してください。ERRORがないファイルも含めます。',
-    hints: ['探し始める場所はarchiveです。', "-type fと-name '*.log'を付けます。", "find archive -type f -name '*.log' と入力します。"],
-    solution: ["find archive -type f -name '*.log'"], success: '検索で一致しなかったファイルも含めて、対象一覧を作れました。', bridge: '次は見つけた記録を、列の値で絞ります。',
-    validation: { all: [used('find'), out('archive/day1/app.log\narchive/day2/app.log\narchive/day2/proxy.log')] }
+    task: '最後にsortで名前順にそろえてください。findでarchive以下の.logファイルをすべて表示してください。ERRORがないファイルも含めます。',
+    hints: ['探し始める場所はarchiveです。', "-type fと-name '*.log'を付けます。", "find archive -type f -name '*.log' | sort と入力します。"],
+    solution: ["find archive -type f -name '*.log' | sort"], success: '検索で一致しなかったファイルも含めて、対象一覧を作れました。', bridge: '次は見つけた記録を、列の値で絞ります。',
+    validation: { all: [used('sort'), used('find'), out('archive/day1/app.log\narchive/day2/app.log\narchive/day2/proxy.log')] }
   });
 
   lesson({ id: 'ap-16-awk-condition', chapter: 'ap-fields', title: '列が一致した行から値を取る', commands: ['awk'],
@@ -1724,23 +1806,23 @@ SOFTWARE.
 
   lesson({ id: 'ap-20-tr-case', chapter: 'ap-normalize', title: '利用者名の大小文字をそろえる', commands: ['tr'],
     goal: '標準入力をtrへ渡して文字を変換できる。',
-    explanation: ['trは標準入力の文字を変換します。ファイル名を引数に渡す形ではなく、catや前の処理の出力をパイプで渡します。', "'[:upper:]'は大文字の集合、'[:lower:]'は小文字の集合です。ここでは利用者名の大小文字を同じ人として扱うという、このデータのルールに従って正規化します。"],
+    explanation: ['trは標準入力の文字を変換します。ファイルの本文は< names.txtで標準入力へ渡せます。cat names.txt | tr ...も同じ入力になります。trにファイル名を通常の引数として渡す書き方ではありません。', "'[:upper:]'は大文字の集合、'[:lower:]'は小文字の集合です。ここでは利用者名の大小文字を同じ人として扱うという、このデータのルールに従って正規化します。"],
     concepts: [{ term: '正規化', text: '比較や集計のために表記をそろえることです。大文字小文字が別の意味を持つデータには、同じ変換を無条件で使いません。' }],
     example: { command: "echo 'Aki REN' | tr '[:lower:]' '[:upper:]'", note: '反対向きの変換例です。AKI RENになります。' },
     task: 'names.txtをtrへ渡し、利用者名をすべて小文字にしてください。元ファイルは変更しません。',
-    hints: ['cat names.txtの出力をtrへ渡します。', "大文字の集合から小文字の集合へ変換します。", "cat names.txt | tr '[:upper:]' '[:lower:]' と入力します。"],
-    solution: ["cat names.txt | tr '[:upper:]' '[:lower:]'"], success: 'RENとren、Akiとakiを同じ表記にそろえられました。', bridge: '次は余分な空白を整えます。',
-    validation: { all: [used('tr'), pipe(2), source('names.txt'), out('ren\naki\naki\nmei\nren\nren')] }
+    hints: ['trに< names.txtで本文を渡します。catからパイプで渡しても構いません。', "大文字の集合から小文字の集合へ変換します。", "cat names.txt | tr '[:upper:]' '[:lower:]' と入力します。"],
+    solution: ["tr '[:upper:]' '[:lower:]' < names.txt"], success: 'RENとren、Akiとakiを同じ表記にそろえられました。', bridge: '次は余分な空白を整えます。',
+    validation: { all: [used('tr'), source('names.txt'), out('ren\naki\naki\nmei\nren\nren')] }
   });
   lesson({ id: 'ap-21-tr-squeeze', chapter: 'ap-normalize', title: '連続する空白を一つにする', commands: ['tr', 'cut'],
     goal: 'tr -sで連続する文字をまとめ、次の処理へ渡せる。',
     explanation: ['spaces.txtは「時刻 種類 利用者」ですが、列の間の半角スペースの数が不ぞろいです。cut -dで指定する区切りは1文字なので、そのままでは空の列が数えられます。', "tr -s ' 'は、連続する半角スペースを一つにまとめます。整えた後ならcut -d ' ' -f 3で利用者名を取り出せます。"],
     concepts: [{ term: '-s', text: 'squeeze。指定した文字が連続しているとき、一つへまとめます。ここでは改行は変えません。' }],
     example: { command: "echo 'one    two' | tr -s ' '", note: 'oneとtwoの間が1個のスペースになります。' },
-    task: 'spaces.txtの連続する半角スペースをtr -sでまとめ、cutで3列目の利用者名を表示してください。',
-    hints: ['まずcat spaces.txtをtr -sへつなぎます。', "最後にcut -d ' ' -f 3を追加します。", "cat spaces.txt | tr -s ' ' | cut -d ' ' -f 3 と入力します。"],
-    solution: ["cat spaces.txt | tr -s ' ' | cut -d ' ' -f 3"], success: '次のコマンドが扱いやすい形へ、入力を整えられました。', bridge: 'そろえた値で、繰り返し現れる名前を探します。',
-    validation: { all: [used('tr', { flags: 's' }), used('cut'), pipe(3), out('aki\nren\nmei')] }
+    task: 'spaces.txtの連続する半角スペースをtr -sでまとめ、3列目の利用者名を表示してください。列の抽出はcutやawkでできます。',
+    hints: ['tr -sへ< spaces.txtでファイルを入力します。catからのパイプでも構いません。', "最後にcut -d ' ' -f 3を追加します。", "cat spaces.txt | tr -s ' ' | cut -d ' ' -f 3 と入力します。"],
+    solution: ["tr -s ' ' < spaces.txt | cut -d ' ' -f 3"], success: '次のコマンドが扱いやすい形へ、入力を整えられました。', bridge: 'そろえた値で、繰り返し現れる名前を探します。',
+    validation: { all: [used('tr', { flags: 's' }), source('spaces.txt'), out('aki\nren\nmei')] }
   });
   lesson({ id: 'ap-22-uniq-duplicates', chapter: 'ap-normalize', title: '繰り返し出る値だけを残す', commands: ['sort', 'uniq'],
     goal: 'sortとuniq -dで、複数回現れる値を一覧にできる。',
@@ -1806,7 +1888,7 @@ SOFTWARE.
   });
   lesson({ id: 'ap-28-touch', chapter: 'ap-workspace', title: '空のファイルを用意する', commands: ['touch'],
     goal: 'touchで新しい空ファイルを作れる。',
-    explanation: ['touchは、まだない名前なら空のファイルを作れます。親ディレクトリは先に存在している必要があります。今回はreportsが用意されています。', '実際のLinuxでは既存ファイルの時刻を更新する用途もあります。この教材は時刻更新を扱いませんが、既存ファイルの本文を消さない点は同じです。'],
+    explanation: ['touchは、まだない名前なら空のファイルを作れます。親ディレクトリは先に存在している必要があります。今回はreportsが用意されています。', '実際のLinuxでは既存ファイルの時刻を更新する用途もあります。この教材でも既存ファイルの更新時刻が変わり、本文はそのまま残ります。'],
     concepts: [{ term: '空ファイル', text: '名前はありますが、本文の文字数が0のファイルです。ディレクトリとは別のものです。' }],
     example: { command: 'touch reports/example.txt', note: '例用の空ファイルを作ります。既存のreports/existing.txtには触れません。' },
     task: 'touchでreports/check.txtという空ファイルを作成してください。',
@@ -1902,6 +1984,122 @@ SOFTWARE.
   });
 
   if (lessons.length !== 36) throw new Error('応用編は36問で構成します');
+
+  // New IDs are inserted beside the related skill; existing saved lesson IDs remain valid.
+  lesson({id:'ap-37-input-redirection',chapter:'ap-normalize',title:'ファイルを標準入力へ渡す',commands:['wc'],
+    goal:'入力リダイレクト<でファイル本文をコマンドへ渡せる。',
+    explanation:['<はファイルの本文を標準入力へつなぐ記号です。wc -l names.txtは行数とファイル名を表示しますが、wc -l < names.txtならwc自身は名前を引数として受け取らず、行数だけを表示します。','cat names.txt | wc -lも同じ内容を渡せます。ファイル一つを入力するだけなら<で直接渡せます。>は出力先、<は入力元なので向きを確かめましょう。'],
+    concepts:[{term:'入力リダイレクト <',text:'シェルが指定ファイルを開き、その内容を標準入力としてコマンドへ渡します。元ファイルは変更しません。'}],
+    example:{command:'wc -l notes.txt',note:'行数4の後ろにnotes.txtも表示されます。入力を<へ変えると表示は行数だけになります。'},
+    starter:'wc -l names.txt',newPart:'<',task:'wc -lに< names.txtで本文を渡し、名前を付けずに行数6だけを表示してください。',
+    hints:['ファイル名はそのままにし、名前の前へ<を入れます。','この問題では<を実際に使います。catからのパイプは次のtrでも試せます。','穴埋め：wc -l ___ names.txt。本文を入力する向きの記号を入れます。'],
+    solution:['wc -l < names.txt'],success:'引数と標準入力の違いを使い分けられました。',bridge:'次は標準入力だけを読むtrへ、同じ方法で渡します。',
+    validation:{all:[used('wc',{flags:'l'}),source('names.txt'),{type:'redirect',op:'<',path:base+'/names.txt'},out('6')]}});
+  lesson({id:'ap-38-ls-human',chapter:'ap-read',title:'大きさを読みやすい単位で見る',fixture:'ap-fileinfo',commands:['ls'],
+    goal:'ls -lhでファイルの詳細と大きさを確認できる。',
+    explanation:['ls -lは種類・権限・所有者・サイズ・更新日時・名前を詳しく表示します。-hを加えると1024バイト単位をKやMで読みやすく表示します。','この教材の所有者・権限・更新日時は練習用の固定情報で、日時はUTCです。実機では地域設定などで表示が変わります。まずサイズと名前を対応させて読みましょう。'],
+    concepts:[{term:'-lh',text:'-lで詳細表示、-hで人が読みやすいサイズ表示にします。2.0Kはこの例では2048バイトです。'}],
+    example:{command:'ls -l samples/payload.log',note:'サイズの2048を確認します。-hを足すと2.0Kになります。'},
+    starter:'ls -l samples/payload.log',newPart:'h',task:'ls -lhでsamples/payload.logの情報を表示し、サイズが2.0Kであることを確認してください。',
+    hints:['-lと-hは-lhにまとめられます。','対象はsamples/payload.logです。','穴埋め：ls -l___ samples/payload.log。読みやすい単位にするオプションを補います。'],
+    solution:['ls -lh samples/payload.log'],success:'長い記録を開く前に、ファイルの大きさをつかめました。',bridge:'次は新しいファイルから見るために、順序を変えます。',
+    validation:{all:[used('ls',{flags:'lh',args:['samples/payload.log']}),out('2.0K','contains'),out('samples/payload.log','contains')]}});
+  lesson({id:'ap-39-ls-time',chapter:'ap-read',title:'新しいファイルから一覧にする',fixture:'ap-fileinfo',commands:['ls'],
+    goal:'ls -ltで更新日時の新しい順に対象を確認できる。',
+    explanation:['ls -tは更新日時の新しい順に並べます。-lも付けると、その順序の根拠となる日時を一緒に読めます。名前順と日時順は別です。','snapshots/*.logには08:00、09:00、09:30 UTCの三つの記録を用意しました。ファイルの更新日時と本文内の出来事の時刻は同じとは限りません。'],
+    concepts:[{term:'更新日時',text:'ファイルが更新された時刻です。-tで新しい順、-trなら古い順にできます。'}],
+    example:{command:'ls -l snapshots/*.log',note:'名前順ではa-old、m-middle、z-newですが、調査では新しいファイルから見たい場合があります。'},
+    starter:'ls -l snapshots/*.log',newPart:'t',task:'ls -ltでsnapshots/*.logの詳細を、新しいz-new、m-middle、a-oldの順に表示してください。',
+    hints:['並べ方を時刻へ変える指定は-tです。','-lと-tを合わせ、日時と名前を読みます。','穴埋め：ls -l___ snapshots/*.log。新しい順にするオプションを補います。'],
+    solution:['ls -lt snapshots/*.log'],success:'更新の新しい記録を、名前順に惑わされず見つけられました。',bridge:'記録が長いときは、読む範囲も選びましょう。',
+    validation:{all:[used('ls',{flags:'lt'}),out('-rw-r--r-- 1 analyst analyst 9 Oct 25 09:30 snapshots/z-new.log\n-rw-r--r-- 1 analyst analyst 9 Oct 25 09:00 snapshots/m-middle.log\n-rw-r--r-- 1 analyst analyst 9 Oct 25 08:00 snapshots/a-old.log','lines')]}});
+  lesson({id:'ap-40-large-head',chapter:'ap-read',title:'400行の記録の先頭で形式を知る',fixture:'ap-volume',commands:['head'],
+    goal:'長い記録の最初だけを読み、形式を確かめられる。',
+    explanation:['server.logは400行あり、catでは画面から先頭が流れます。形式だけを知りたいならheadで数行に絞れます。','各行は「UTC時刻 種類 ホスト 出来事の番号」です。すべてを読む前に、先頭の数行で列の役割を確認する練習です。'],
+    concepts:[{term:'先頭の確認',text:'head -nで量を制限し、区切りや項目を先に調べます。先頭が全体を代表しているとは限りません。'}],
+    example:{command:'cat server.log',note:'400行が一度に流れます。先頭の形式を見たい場面では、読む範囲を絞ってみましょう。'},
+    task:'headを使い、server.logの先頭3行だけを表示してください。',
+    hints:['headに-nで行数を指定します。','対象はserver.log、読む量は3行です。','穴埋め：head -n ___ server.log。先頭3行に絞ります。'],
+    solution:['head -n 3 server.log'],success:'長い記録でも、まず形式を確かめる量だけ読めました。',bridge:'次は最も後に書かれた記録を見ます。',
+    validation:{all:[used('head'),{type:'source',path:volumeBase+'/server.log'},out(lines(volumeRows.slice(0,3)))]}});
+  lesson({id:'ap-41-large-tail',chapter:'ap-read',title:'400行の記録の末尾を確認する',fixture:'ap-volume',commands:['tail'],
+    goal:'長い記録の最後だけを取り出せる。',
+    explanation:['調査の入口が直近の出来事なら、末尾だけをtailで読みます。このファイルは時刻順なので、末尾が最も後の時刻です。','tail -n 3は最後の3行を、ファイルに並んだ順序のまま表示します。tacのように逆順にはしません。'],
+    concepts:[{term:'末尾の確認',text:'全体を表示してスクロールする代わりに、必要な最後の数行を直接取り出します。'}],
+    example:{command:'head -n 3 server.log',note:'先頭はevent=0001からです。末尾の確認にはtailへ切り替えます。'},
+    starter:'head -n 3 server.log',newPart:'tail',task:'tailでserver.logの最後の3行だけを表示してください。',
+    hints:['行数の-n 3はそのまま使えます。','先頭を読むheadから末尾を読むコマンドへ変えます。','穴埋め：___ -n 3 server.log。末尾を読むコマンド名を入れます。'],
+    solution:['tail -n 3 server.log'],success:'最後のERRORを含む範囲へ、直接たどり着けました。',bridge:'全体を読みたいときはページャー、件数だけなら集計を使います。',
+    validation:{all:[used('tail'),{type:'source',path:volumeBase+'/server.log'},out(lines(volumeRows.slice(-3)))]}});
+  lesson({id:'ap-42-large-count',chapter:'ap-read',title:'400行から件数だけを確かめる',fixture:'ap-volume',commands:['grep'],
+    goal:'grep -cで必要な種類の件数を調べられる。',
+    explanation:['400行からERRORを一つずつ目で数える代わりに、grep -cで一致した行数を出します。記録の全体量と注目する行数を分けて捉えられます。','-cが数えるのは語の出現回数ではなく、一致した行の数です。同じ行にERRORが二つあっても1行と数えます。'],
+    concepts:[{term:'-c',text:'一致した本文の代わりに、その行数を表示します。'}],
+    example:{command:'wc -l server.log',note:'全体は400行です。次に、そのうちERRORの行だけを数えます。'},
+    task:'grep -cでserver.logのERRORを含む行数だけを表示してください。',
+    hints:['検索語はERRORです。','本文を表示するgrepへ-cを足します。',"穴埋め：grep ___ 'ERROR' server.log。一致行数を出すオプションを入れます。"],
+    solution:["grep -c 'ERROR' server.log"],success:'長い本文を目で数えず、注目する行が10件だと確認できました。',bridge:'目的に応じて、行数以外の量で読む方法もあります。',
+    validation:{all:[used('grep',{flags:'c'}),{type:'source',path:volumeBase+'/server.log'},out('10')]}});
+  lesson({id:'ap-43-tail-header',chapter:'ap-fields',title:'見出しを除いて2行目から読む',fixture:'ap-volume',commands:['tail'],
+    goal:'tail -n +2の開始行指定を使える。',
+    explanation:['tail -n 2は末尾の2行ですが、tail -n +2は先頭から数えて2行目以降です。+が付くと「何行残すか」から「何行目からか」に意味が変わります。','metrics.csvの1行目は見出しです。集計の前に見出しだけを除くときに使えます。この課題のCSVは引用符内の改行を含みません。'],
+    concepts:[{term:'-n +2',text:'1行目を除いて、2行目から末尾まで表示します。'}],
+    example:{command:'tail -n 2 metrics.csv',note:'最後の2行だけで、最初のデータ行も落ちます。見出しだけを除く指定と比べましょう。'},
+    starter:'tail -n 2 metrics.csv',newPart:'+2',task:'tailでmetrics.csvの見出しだけを除き、データ3行をすべて表示してください。',
+    hints:['数の前の+が開始位置の指定になります。','開始位置は先頭から数えて2行目です。','穴埋め：tail -n ___ metrics.csv。2行目からを表す指定を入れます。'],
+    solution:['tail -n +2 metrics.csv'],success:'末尾の件数と、開始行の指定を使い分けられました。',bridge:'列を選ぶ処理に渡す前に、対象行を整理できます。',
+    validation:{all:[used('tail'),{type:'source',path:volumeBase+'/metrics.csv'},out('00:00,INFO,3\n00:01,ERROR,2\n00:02,INFO,4')]}});
+  lesson({id:'ap-44-head-bytes',chapter:'ap-read',title:'先頭をバイト数で取り出す',fixture:'ap-volume',commands:['head'],
+    goal:'head -cで先頭から指定したバイト数を読める。',
+    explanation:['head -nは行数、head -cはバイト数です。長い1行の記録や形式の先頭だけを調べたいときに、読む量をバイトで制限できます。','header.txtの先頭はASCIIのLINUXROOMです。ASCIIは1文字1バイトですが、日本語などのUTF-8文字は複数バイトになるので、文字の途中で切れる場合があります。'],
+    concepts:[{term:'-c',text:'ここでは文字数ではなくバイト数です。コマンドが違うと同じ-cでも意味が変わります。'}],
+    example:{command:'head -n 1 header.txt',note:'1行目の改行まで読みます。今回は改行を含めず先頭9バイトだけを読みます。'},
+    task:'head -cを使い、header.txtの先頭9バイトLINUXROOMだけを表示してください。改行は含めません。',
+    hints:['行数の-nではなくバイト数の-cです。','LINUXROOMはASCIIの9文字です。','穴埋め：head -c ___ header.txt。改行を含めないバイト数を指定します。'],
+    solution:['head -c 9 header.txt'],success:'行単位とバイト単位を目的に合わせて選べました。',bridge:'次は位置を共有するときに便利な行番号へ進みます。',
+    validation:{all:[used('head',{flags:'c'}),{type:'source',path:volumeBase+'/header.txt'},out('LINUXROOM','exact')]}});
+  lesson({id:'ap-45-and-sequence',chapter:'ap-workspace',title:'成功したときだけ続ける',commands:['grep','echo'],
+    goal:'&&と;の実行条件の違いを使い分けられる。',
+    explanation:['A && BはAの終了コードが0のときだけBを実行します。A ; BはAの結果に関係なくBへ進みます。パイプのように本文を渡す記号ではありません。','grepは一致ありで0、一致なしで1です。session.logにNOT_PRESENTはありません。今回は一致なしを意図した観察なので、終了コード1を正しい結果として扱います。'],
+    concepts:[{term:'&&と;',text:'&&は左が成功した場合だけ右へ進みます。;は結果に関係なく次を実行します。awkの引用符内に書く&&とは別に、シェルの接続として使います。'}],
+    example:{command:"grep 'INFO' session.log && echo found",note:'INFOが見つかるため、その後にfoundが表示されます。'},
+    task:'grepでNOT_PRESENTを探し、一致したときだけecho unexpectedを実行するよう&&でつなぎます。その後は;でecho checkedを実行してください。表示はcheckedだけになります。',
+    hints:['検索とecho unexpectedの間を&&でつなぎます。','最後のecho checkedへは;でつなぎ、検索結果に関係なく進めます。',"穴埋め：grep 'NOT_PRESENT' session.log ___ echo unexpected ; echo checked。成功時だけ進む記号を入れます。"],
+    solution:["grep 'NOT_PRESENT' session.log && echo unexpected; echo checked"],success:'一致がなければ&&の右を飛ばし、;の右へ進むことを確認できました。',bridge:'エラーの本文にも標準出力とは別の出口があります。',
+    validation:{all:[used('grep'),used('echo',{args:['checked']}),source('session.log'),{type:'status',command:'grep',code:1},{type:'connector',value:'&&',afterCommand:'grep',skipped:true},{type:'connector',value:';'},out('checked')]}});
+  lesson({id:'ap-46-stderr',chapter:'ap-workspace',title:'エラーの出力先を分ける',commands:['cat'],
+    goal:'2>/dev/nullが標準エラーだけを捨てることを理解する。',
+    explanation:['通常の結果は標準出力1、エラーの説明は標準エラー2に出ます。2>でエラーの出力先を変え、/dev/nullへ送ると表示を捨てられます。','エラー表示を消しても、失敗した事実や終了コードは変わりません。原因を確認したうえで不要な診断を抑える操作です。今回は存在しないmissing.logを教材として指定します。'],
+    concepts:[{term:'2>/dev/null',text:'標準エラーの出力だけを捨てます。通常の結果は画面へ出たままです。'}],
+    example:{command:'cat notes.txt 2>/dev/null',note:'notes.txtは存在するので本文は普通に表示されます。2>は標準出力を消しません。'},
+    task:'cat missing.logの標準エラーを2>/dev/nullで抑え、;で続けてcat notes.txtを実行してください。メモ本文だけを表示します。',
+    hints:['エラーの番号は2です。>の直前に空白を入れず2>と書きます。','失敗後もメモを読むため、&&ではなく;でつなぎます。','穴埋め：cat missing.log ___/dev/null; cat notes.txt。標準エラーの出力先を変える記号を入れます。'],
+    solution:['cat missing.log 2>/dev/null; cat notes.txt'],success:'エラー表示と通常の結果を分けられました。最初のcatは失敗のままである点も確認しましょう。',bridge:'次は直前の終了コードを数字で読みます。',
+    validation:{all:[used('cat',{args:['missing.log']}),source('notes.txt'),{type:'status',command:'cat',code:1,stderrRedirected:true},{type:'redirect',op:'>',fd:2,path:'/dev/null'},out(notes)]}});
+  lesson({id:'ap-47-exit-status',chapter:'ap-workspace',title:'直前の終了コードを読む',commands:['grep','echo'],
+    goal:'$?で直前のコマンドの終了コードを確認できる。',
+    explanation:['$?には直前に終わったコマンドの終了コードが入ります。echo $?で表示できます。0は成功を表し、0以外の意味はコマンドごとに違います。grepの1は一致なし、diffの1は差ありです。','別のコマンドを実行すると$?も更新されます。確認したい操作の直後に読みます。シングルクォートで\'$?\'と囲むと、展開せず文字そのものを表示します。'],
+    concepts:[{term:'$?',text:'直前の終了コードへ展開されるシェルの特別な変数です。プロンプト末尾の$とは役割が異なります。'}],
+    example:{command:'head -n 1 notes.txt; echo $?',note:'headは成功するので、本文に続けて0が表示されます。'},
+    task:'grepでsession.logからNOT_PRESENTを探し、直後にecho $?で終了コードを表示してください。一致なしの1だけが表示されます。',
+    hints:['grepに一致がないため、通常の本文出力は空です。','検索の直後へ; echo $?を続けます。',"穴埋め：grep 'NOT_PRESENT' session.log; echo ___。直前の終了コードを表す変数を入れます。"],
+    solution:["grep 'NOT_PRESENT' session.log; echo $?"],success:'画面に本文が出ない理由を、終了コードからも確かめられました。',bridge:'ここまでの読み方・入力・接続を、最後の集計実習で使いましょう。',
+    validation:{all:[used('grep'),used('echo'),source('session.log'),{type:'status',command:'grep',code:1},{type:'variable',name:'?',command:'echo',context:'arguments',afterCommand:'grep'},out('1')]}});
+
+  const additionsBefore = {
+    'ap-04-tac':['ap-38-ls-human','ap-39-ls-time'],
+    'ap-05-more':['ap-40-large-head','ap-41-large-tail'],
+    'ap-06-nl':['ap-42-large-count','ap-44-head-bytes'],
+    'ap-18-awk-combined':['ap-43-tail-header'],
+    'ap-20-tr-case':['ap-37-input-redirection'],
+    'ap-31-flow-filter':['ap-45-and-sequence','ap-46-stderr','ap-47-exit-status']
+  };
+  const addedIds = new Set(Object.values(additionsBefore).flat());
+  const original = lessons.filter(item=>!addedIds.has(item.id));
+  const byId = new Map(lessons.map(item=>[item.id,item]));
+  lessons.splice(0,lessons.length,...original.flatMap(item=>[...(additionsBefore[item.id]||[]).map(id=>byId.get(id)),item]));
+
+  lessons.forEach(D.practiceHint);
   D.lessons.push(...lessons);
   D.glossary.push(
     { term: '固定文字列検索', text: 'grep -Fやrg -Fで、記号も文字どおりに検索する方法です。' },
@@ -2040,7 +2238,7 @@ SOFTWARE.
 
   add({id:'ad-04-file',chapter:'ad-inspect',title:'内容の形式を確かめる',
     goal:'fileで内容の種類を確認してから読む道具を選べる。',
-    explanation:['拡張子は名前の一部です。fileは内容から種類を推測します。読み方を決める前に、テキストなのかJSONなのかを確認します。','この教材の判定は簡略版です。audit.jsonlは1行に一つのJSONが並ぶ形式で、普通の文章とは違う構造があります。'],
+    explanation:['拡張子は名前の一部です。fileは内容から種類を推測します。読み方を決める前に、テキストなのかJSONなのかを確認します。','この教材の判定は簡略版です。audit.jsonlは1行に一つのJSONが並ぶ形式です。実機ではfileの版や判定規則によりJSON Lines text data、JSON text data、ASCII textなど表記が変わることがあります。'],
     concepts:[{term:'JSON Lines',text:'各行が独立したJSONの記録。後半ではjqで項目を取り出します。'}],
     example:{command:'file ready.txt',note:'ready.txt: ASCII textと表示されます。ASCIIは英数字などの基本的な文字です。'},
     task:'fileを使ってaudit.jsonlの種類を表示してください。',
@@ -2059,14 +2257,14 @@ SOFTWARE.
     validation:{all:[used('stat'),out('ready.txt 6')]}});
 
   add({id:'ad-06-du',chapter:'ad-inspect',title:'まとめた記録の大きさを調べる',
-    goal:'du -sbでディレクトリ内の合計サイズを確認できる。',
-    explanation:['duは指定した場所の大きさを集計します。-sは全体の合計だけ、-bはバイト単位の指定です。','この教材では仮想ファイル本文だけを合算します。bundle/a.logは10バイト、b.logは11バイトです。実Linuxのduにはディスク割当やディレクトリ自体の大きさも関係するため、同じ数になるとは限りません。'],
-    concepts:[{term:'du -sb',text:'合計をバイト単位で表示します。この教材では本文の論理サイズを学ぶための実装です。'}],
+    goal:'du -cbで選んだファイル本文の合計サイズを確認できる。',
+    explanation:['du -bは見かけのサイズをバイト単位で表示し、-cは最後に総計を加えます。bundle/*.logで対象をログファイルそのものに絞り、tail -n 1で総計の行を取り出します。','a.logは10バイト、b.logは11バイトで、本文は合計21バイトです。ディレクトリをdu -sb bundleで測ると、実機ではディレクトリ自身のサイズも含まれます。本文だけを知りたいときは今回のようにファイルを指定します。'],
+    concepts:[{term:'du -cb ファイル',text:'-cは総計、-bは見かけのサイズをバイト単位にします。*.logは該当するファイル名へ展開されます。'}],
     example:{command:'du -b ready.txt',note:'6とready.txtが表示されます。ファイル一つにも使えます。'},
-    task:'duでbundleディレクトリをまとめて調べ、合計21バイトを表示してください。',
-    hints:['個々のファイルの一覧ではなく、合計だけを出す-sを使います。','-sと-bは-sbとまとめて書けます。','du -sb bundle と入力します。'],
-    solution:['du -sb bundle'],success:'調査対象をまとめた大きさを確認できました。',bridge:'ファイル情報に続き、時刻の表し方をそろえます。',
-    validation:{all:[used('du'),out('21\tbundle','lines')]}});
+    task:'du -cbでbundle/*.logの本文サイズを集計し、tailで総計の21 totalの行だけを表示してください。',
+    hints:['duに-cbを付け、対象をbundle/*.logにします。','総計は最後の行なのでtail -n 1へ渡します。','穴埋め：du -cb bundle/*.log | tail -n ___。最後の1行だけを表示します。'],
+    solution:['du -cb bundle/*.log | tail -n 1'],success:'調査対象をまとめた大きさを確認できました。',bridge:'ファイル情報に続き、時刻の表し方をそろえます。',
+    validation:{all:[used('du'),used('tail'),out('21\ttotal','lines')]}});
 
   add({id:'ad-07-date-utc',chapter:'ad-transform',title:'タイムゾーンをUTCにそろえる',mode:'guide',
     goal:'オフセット付きの時刻をUTCで表示できる。',
@@ -2105,22 +2303,22 @@ SOFTWARE.
     example:{command:'base64 -d sample.b64',note:'readyと改行が復元されます。payload.b64も同じ操作で本文を確認できます。'},
     starter:'base64 -d payload.b64',newPart:"| jq -r '.request_id'",task:'payload.b64をデコードし、jqでrequest_idの値req-02だけを表示してください。',
     hints:['まずbase64 -d payload.b64でJSONが見えるか確認します。','その右にjq -rをつなぎ、.request_idを指定します。',"base64 -d payload.b64 | jq -r '.request_id' と入力します。"],
-    solution:["base64 -d payload.b64 | jq -r '.request_id'"],success:'表現を戻す処理から、構造を読む処理へつなげられました。',bridge:'文字の向きを変える小さな道具も、抽出の助けになります。',
+    solution:["base64 -d payload.b64 | jq -r '.request_id'"],success:'表現を戻す処理から、構造を読む処理へつなげられました。',bridge:'次は、区切りの数に依存せず末尾の項目を取り出します。',
     validation:{all:[used('base64'),used('jq'),pipe(2),out('req-02')]}});
 
   add({id:'ad-11-rev',chapter:'ad-transform',title:'末尾の区切りから取り出す',
-    goal:'revとcutを組み合わせて最後の拡張子を取り出せる。',
-    explanation:['revは各行の文字を逆順にします。tacが行の順を逆にするのとは異なります。','object-names.txtにはgateway.access.logなど、ピリオドが複数ある名前が並びます。文字を逆順にすると末尾の拡張子が先頭になります。cutで最初の区切りまでを選び、もう一度revで向きを戻します。'],
-    concepts:[{term:'rev → cut → rev',text:'右端の区切りを左端へ移し、取り出してから元の向きに戻す組み合わせです。'}],
-    example:{command:"echo 'gateway.access.log' | rev | cut -d '.' -f 1",note:'途中結果はgolです。ここへrevを足すとlogへ戻せます。'},
-    starter:"rev object-names.txt | cut -d '.' -f 1",newPart:'| rev',task:'object-names.txtから最後の拡張子を取り出し、log、json、logの順に表示してください。',
-    hints:['各行をrevで逆にしてから、cutの1列目を選びます。','区切りはピリオドです。最後にもう一度revします。',"rev object-names.txt | cut -d '.' -f 1 | rev と入力します。"],
-    solution:["rev object-names.txt | cut -d '.' -f 1 | rev"],success:'小さな道具を3段つなぎ、末尾の項目を取り出せました。',bridge:'次は、二つの記録の違いを調べます。',
-    validation:{all:[used('rev'),used('cut'),pipe(3),out('log\njson\nlog')]}});
+    goal:'awkの区切りとNFで、最後の拡張子を取り出せる。',
+    explanation:['object-names.txtにはgateway.access.logなど、ピリオドが複数ある名前が並びます。awk -F.でピリオド区切りにし、$NFで最後の列を選ぶと拡張子を取り出せます。','参考として、revで各行の文字を逆にし、cutで先頭の項目を取り、再度revで戻す方法もあります。revは文字の逆順、tacは行の逆順です。今回は短く書けるawkを本線にします。'],
+    concepts:[{term:'$NF',text:'その行の最後のフィールドです。区切りの数が行ごとに違っても末尾を選べます。'}],
+    example:{command:"rev object-names.txt | cut -d '.' -f 1 | rev",note:'revを使う別解です。同じ結果をawk -F.と$NFなら一つのコマンドで取り出せます。'},
+    starter:"awk -F. '{print $1}' object-names.txt",newPart:'$NF',task:'object-names.txtから最後の拡張子を取り出し、log、json、logの順に表示してください。awkでもrevを使う別解でも構いません。',
+    hints:['区切りはピリオドです。awkの-F.で指定します。','最後のフィールドの番号はNFです。値として読むときは$NFにします。',"穴埋め：awk -F. '{print ___}' object-names.txt。最後のフィールドを指定します。"],
+    solution:["awk -F. '{print $NF}' object-names.txt"],success:'行ごとに区切りの数が違っても、末尾の項目を取り出せました。',bridge:'次は、二つの記録の違いを調べます。',
+    validation:{all:[source('object-names.txt','last'),out('log\njson\nlog')]}});
 
   add({id:'ad-12-diff',chapter:'ad-compare',title:'基準と現在の差を見る',mode:'guide',
     goal:'diff -uの追加・削除の記号と、差がある終了コード1を理解する。',
-    explanation:['baseline.confは基準、current.confは現在の設定です。retentionは保存日数、formatは出力形式です。diff -uは2ファイルの違いと周辺の行を表示します。','---は比較元、+++は比較先の見出しです。本文の-は元にだけある行、+は先にだけある行、空白は共通行です。@@は比較した行の範囲です。diffの終了コードは0が同じ、1が差あり、2以上がエラーです。この課題では差ありの1が正しい結果です。'],
+    explanation:['baseline.confは基準、current.confは現在の設定です。retentionは保存日数、formatは出力形式です。diff -uは2ファイルの違いと周辺の行を表示します。','---は比較元、+++は比較先の見出しです。実機ではファイル名に更新日時も付きますが、この教材では日時を省略します。本文の-は元にだけある行、+は先にだけある行、空白は共通行です。@@は比較した行の範囲です。diffの終了コードは0が同じ、1が差あり、2以上がエラーです。この課題では差ありの1が正しい結果です。'],
     concepts:[{term:'統一形式の差分',text:'変わった行を-と+で示し、周囲の共通行も載せる形式です。差があるだけでは異常と断定できません。'}],
     example:{command:'diff -u baseline.conf baseline.conf',note:'同じものを比較するので出力は空、終了コードは0です。'},
     task:'diff -uでbaseline.confからcurrent.confへの違いを表示してください。保存日数が7から14へ変わっています。',
@@ -2190,23 +2388,23 @@ SOFTWARE.
 
   add({id:'ad-19-xargs-info',chapter:'ad-link',title:'ファイル名を引数として渡す',
     goal:'標準入力の文字をxargsでコマンドの引数に変換できる。',
-    explanation:['selected-files.txtにはbundle/a.logとbundle/b.logのパスが1行ずつあります。fileはパスを引数として受け取るため、catからの標準入力をそのまま渡しても目的の形になりません。','xargsは入力の文字を引数に変えます。-n 1は1引数ずつコマンドを呼び出す指定です。ここでは空白を含まない教材用パスを使います。一般の任意の名前には区切り方の設計が必要です。'],
+    explanation:['selected-files.txtにはbundle/a.logとbundle/b.logのパスが1行ずつあります。fileはパスを引数として受け取るため、一覧の本文を標準入力としてそのまま渡しても目的の形になりません。','xargsは標準入力の文字を引数に変えます。< selected-files.txtで一覧を読み込め、cat selected-files.txt | xargs ...でも同じです。-n 1は1引数ずつコマンドを呼び出す指定です。ここでは空白を含まない教材用パスを使います。一般の任意の名前には区切り方の設計が必要です。'],
     concepts:[{term:'標準入力と引数',text:'パイプは文字データを渡します。xargsは、その文字を後ろのコマンドの引数にする橋渡しです。'}],
-    example:{command:'cat selected-files.txt | xargs -n 1 basename',note:'各パスにbasenameが呼ばれ、a.log、b.logが表示されます。'},
-    starter:'cat selected-files.txt',newPart:'| xargs -n 1 file',task:'selected-files.txtを読み、xargsからfileを1ファイルずつ呼び出して、両方の形式を表示してください。',
-    hints:['一覧を読み込むcatの後ろにxargsを置きます。','呼び出すコマンドはfile、1回の引数は-n 1です。','cat selected-files.txt | xargs -n 1 file と入力します。'],
-    solution:['cat selected-files.txt | xargs -n 1 file'],success:'一覧の文字を、コマンドへの引数として使えました。',bridge:'次は、一覧に載ったファイルの中身を連続して読みます。',
-    validation:{all:[used('xargs'),source('selected-files.txt','last'),pipe(2),out('bundle/a.log: ASCII text\nbundle/b.log: ASCII text')]}});
+    example:{command:'xargs -n 1 basename < selected-files.txt',note:'各パスにbasenameが呼ばれ、a.log、b.logが表示されます。'},
+    starter:'xargs -n 1 basename < selected-files.txt',newPart:'file',task:'selected-files.txtを読み、xargsからfileを1ファイルずつ呼び出して、両方の形式を表示してください。',
+    hints:['xargsへ< selected-files.txtで一覧を入力します。catからパイプで渡しても構いません。','呼び出すコマンドはfile、1回の引数は-n 1です。','cat selected-files.txt | xargs -n 1 file と入力します。'],
+    solution:['xargs -n 1 file < selected-files.txt'],success:'一覧の文字を、コマンドへの引数として使えました。',bridge:'次は、一覧に載ったファイルの中身を連続して読みます。',
+    validation:{all:[used('xargs'),source('selected-files.txt','last'),out('bundle/a.log: ASCII text\nbundle/b.log: ASCII text')]}});
 
   add({id:'ad-20-xargs-read',chapter:'ad-link',title:'対象一覧から本文を集めて絞る',
     goal:'一覧→引数→本文→抽出を一つのパイプにできる。',
     explanation:['xargsの後ろのコマンドをcatにすると、一覧に載った各ファイルの本文を読みます。その後にgrepをつなげれば、集めた本文を絞れます。','bundle/a.logはINFO boot、b.logはWARN retryの記録です。ここでは出所のファイル名を付けず、本文のWARN行だけを取り出します。出所を残したい場面では応用編のgrep -Hなどを選びます。'],
-    concepts:[{term:'一覧から本文へ',text:'最初のcatが読むのはパス一覧、xargsが呼ぶcatが読むのは各ログの本文です。'}],
-    example:{command:'cat selected-files.txt | xargs cat',note:'INFO bootとWARN retryが順番に表示されます。'},
-    starter:'cat selected-files.txt | xargs cat',newPart:"| grep 'WARN'",task:'対象一覧から両方の本文を読み、WARNを含む行だけを表示してください。',
+    concepts:[{term:'一覧から本文へ',text:'<で読むのはパス一覧、xargsが呼ぶcatが読むのは各ログの本文です。'}],
+    example:{command:'xargs cat < selected-files.txt',note:'INFO bootとWARN retryが順番に表示されます。'},
+    starter:'xargs cat < selected-files.txt',newPart:"| grep 'WARN'",task:'対象一覧から両方の本文を読み、WARNを含む行だけを表示してください。',
     hints:['前の段階で本文が集まっているため、最後は普通のgrepです。','grep側にファイル名を追加せず、標準入力を検索します。',"cat selected-files.txt | xargs cat | grep 'WARN' と入力します。"],
-    solution:["cat selected-files.txt | xargs cat | grep 'WARN'"],success:'対象の一覧を出発点にして本文の抽出までつながりました。',bridge:'次は、ログの列数や数値を使った集計に取り組みます。',
-    validation:{all:[used('xargs'),used('grep'),source('selected-files.txt','last'),pipe(3),out('WARN retry')]}});
+    solution:["xargs cat < selected-files.txt | grep 'WARN'"],success:'対象の一覧を出発点にして本文の抽出までつながりました。',bridge:'次は、ログの列数や数値を使った集計に取り組みます。',
+    validation:{all:[used('xargs'),used('grep'),source('selected-files.txt','last'),out('WARN retry')]}});
 
   add({id:'ad-21-awk-nf',chapter:'ad-awk',title:'末尾から列の位置を数える',mode:'guide',minutes:5,
     goal:'行の長さが違うログから、NFを使って共通の項目を抽出できる。',
@@ -2383,6 +2581,7 @@ SOFTWARE.
     bridge:'次はSOCroom-easyで記録の意味を学び、LogroomでLinuxコマンドを使った調査へ進みましょう。既に読解を学んだ方はLogroomで実践できます。',
     validation:{all:[source('final/audit.jsonl'),source('final/access.log'),{type:'directory',path:base+'/final/reports'},saved('final/reports/failed.txt','job-02 yui 503 90\njob-03 sora 500 60\njob-04 sora 503 150','lines'),saved('final/reports/ranking.txt','2 sora\n1 yui','lines'),saved('final/reports/bytes.txt','300'),out('300')]}});
 
+  lessons.forEach(D.practiceHint);
   D.lessons.push(...lessons);
   D.glossary.push(
     {term:'パスを加工する道具',text:'basenameは末尾の名前、dirnameは親の場所、realpathは整理した絶対パスを表示します。ファイルの改名や移動はしません。',example:'realpath -e bundle/../access.log'},
@@ -2403,7 +2602,7 @@ SOFTWARE.
 (function (root) {
   'use strict';
   const VERSION = 1, MAX_SAVE = 8 * 1024 * 1024, MAX_TEXT = 524288;
-  const META = new Set(['help', 'history', 'clear']);
+  const META = new Set(['help', 'man', 'history', 'clear']);
   const data = () => root.LINUXROOM_DATA;
   const lessons = () => data().lessons;
   const lessonFor = id => lessons().find(lesson => lesson.id === id);
@@ -2412,8 +2611,9 @@ SOFTWARE.
   const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
   const safeText = (value, max = MAX_TEXT) => typeof value === 'string' && value.length <= max;
   const canonical = path => safeText(path, 1024) && path.startsWith('/') && !path.includes('\0') && !path.split('/').some(x => x === '..' || x === '.');
-  const stageAccepted = (stage, lesson) => Boolean(stage && !stage.stderr && (stage.code === 0 ||
-    (lesson?.validation?.all || []).some(rule => rule.type === 'status' && rule.command === stage.command && rule.code === stage.code)));
+  const stageAccepted = (stage, lesson) => Boolean(stage && ((stage.code === 0 && !stage.stderr) ||
+    (lesson?.validation?.all || []).some(rule => rule.type === 'status' && rule.command === stage.command && rule.code === stage.code &&
+      (!stage.stderr || (rule.stderrRedirected === true && stage.stderrRedirected === true)))));
   const isSuccess = (result, lesson) => Boolean(result && !result.stderr &&
     (result.code === 0 || (result.trace.length && result.trace.at(-1).code === result.code && stageAccepted(result.trace.at(-1), lesson))) &&
     result.trace.every(stage => stageAccepted(stage, lesson)));
@@ -2424,7 +2624,7 @@ SOFTWARE.
     const selected = lessonFor(lessonId);
     const fixture = selected ? data().datasets[selected.fixture] : Object.values(data().datasets)[0];
     if (!fixture) throw new Error('Lesson fixture is missing');
-    const shell = new root.LogLabShell(fixture.files);
+    const shell = new root.LogLabShell(fixture.files, {metadata: fixture.metadata, now: fixture.now});
     shell.cwd = shell.resolve(selected && selected.cwd || fixture.cwd || '/home/analyst');
     shell.oldcwd = shell.cwd;
     shell.directories.add(shell.cwd); shell.addParents(shell.cwd + '/.placeholder');
@@ -2436,7 +2636,8 @@ SOFTWARE.
     const error = result.stderr || result.trace.find(stage => stage.stderr)?.stderr;
     let feedback = '';
     if (error) {
-      if (/no such file|no such directory/.test(error)) feedback = '指定した場所が見つかりません。pwd で現在地、ls でファイル名を確認できます。';
+      if (/no such file|no such directory/i.test(error)) feedback = '指定した場所が見つかりません。pwd で現在地、ls でファイル名を確認できます。';
+      else if (/is a directory/i.test(error)) feedback = '指定した名前はディレクトリです。ls で中のファイルを確認しましょう。';
       else if (/quote/.test(error)) feedback = '引用符が閉じていない可能性があります。開始と終わりの引用符を確認しましょう。';
       else if (/unsupported|command not found|利用できません/.test(error)) feedback = 'この学習用ターミナルが扱うコマンドには範囲があります。help で対応内容を確認できます。';
       else feedback = 'エラーの行を確認して、コマンド・引数・オプションを見直しましょう。';
@@ -2491,6 +2692,20 @@ SOFTWARE.
     return actual.trim() === expected.trim();
   }
 
+  function outputDifference(actual, expected, mode) {
+    const tidy = value => mode === 'exact' ? String(value) : String(value).trim();
+    const lines = value => tidy(value).split('\n').map(line => mode === 'lines' ? line.trim().replace(/\s+/g, ' ') : line);
+    const shown = value => value.length > 70 ? value.slice(0, 67) + '…' : value;
+    if (mode === 'contains') return '必要な文字列「' + shown(String(expected).trim()) + '」が見つかりません。';
+    const got = lines(actual), wanted = lines(expected);
+    const remaining = got.slice();
+    const missing = [];
+    for (const line of wanted) { const at = remaining.indexOf(line); if (at >= 0) remaining.splice(at, 1); else missing.push(line); }
+    if (!missing.length && !remaining.length) return '行の順序が異なります。並べ方を確認しましょう。';
+    if (mode === 'exact' && String(actual).trimEnd() === String(expected).trimEnd()) return '末尾の改行または空白が異なります。';
+    return [missing.length ? '足りない行:「' + shown(missing[0]) + '」' : '', remaining.length ? '余分な行:「' + shown(remaining[0]) + '」' : ''].filter(Boolean).join(' / ');
+  }
+
   // These are parsed argument tokens from real executions, never a regex on input.
   function flagsFor(stage) {
     const found = new Set();
@@ -2520,13 +2735,23 @@ SOFTWARE.
       let passed = false, message = '';
       const stages = condition.scope === 'any' ? session.evidence : result.trace;
       switch (condition.type) {
-        case 'output': passed = matches(result.stdout, condition.value, condition.match); message = '表示された結果がミッションの条件に合っている'; break;
+        case 'output': passed = matches(result.stdout, condition.value, condition.match); message = passed ? '表示された結果がミッションの条件に合っている' : outputDifference(result.stdout, condition.value, condition.match); break;
         case 'cwd': passed = session.shell.cwd === condition.value; message = '指定されたディレクトリへ移動している'; break;
         case 'directory': passed = session.shell.isDir(session.shell.resolve(condition.path)); message = '指定されたディレクトリを用意している'; break;
         case 'absent': {const path = session.shell.resolve(condition.path); passed = !session.shell.isFile(path) && !session.shell.isDir(path); message = '指定された作業用ファイル・ディレクトリを削除している'; break;}
         case 'file': { const path = session.shell.resolve(condition.path); passed = session.shell.isFile(path) && matches(session.shell.files[path], condition.value, condition.match); message = '保存したファイルの内容が条件に合っている'; break; }
         case 'used': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && (!condition.args || condition.args.every(arg => stage.args.includes(arg))) && (!condition.flags || [...condition.flags].every(flag => flagsFor(stage).has(flag)))); message = condition.command + ' を使って今回の操作を実行している'; break;
-        case 'status': passed = stages.some(stage => !stage.stderr && stage.command === condition.command && stage.code === condition.code); message = condition.command + ' の終了コード ' + condition.code + ' を確認している'; break;
+        case 'status': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && stage.code === condition.code && (!condition.stderrRedirected || stage.stderrRedirected === true)); message = condition.command + ' の終了コード ' + condition.code + ' を確認している'; break;
+        case 'redirect': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.redirections.some(r => r.op === condition.op && r.target === condition.path && (condition.fd === undefined || r.fd === condition.fd))); message = condition.op + ' で指定された入力・出力の向きを設定している'; break;
+        case 'connector': passed = condition.afterCommand || condition.skipped !== undefined
+          ? (result.flow || []).some(flow => flow.connector === condition.value && (condition.skipped === undefined || flow.executed === !condition.skipped) &&
+            (!condition.afterCommand || result.trace.filter(stage => stage.pipeline === flow.pipeline - 1).at(-1)?.command === condition.afterCommand))
+          : (result.connectors || []).includes(condition.value);
+          message = (condition.afterCommand ? condition.afterCommand + ' の後を ' : '') + condition.value + ' でつなぎ' + (condition.skipped ? '、条件に応じて次の実行を飛ばしている' : '、実行条件を設定している'); break;
+        case 'variable': passed = stages.some((stage, index) => stageAccepted(stage, lesson) && (!condition.command || stage.command === condition.command) &&
+          (condition.context === 'arguments' ? stage.argumentVariables || [] : stage.variables || []).includes(condition.name) &&
+          (!condition.afterCommand || stages[index - 1]?.command === condition.afterCommand));
+          message = '$' + condition.name + ' を' + (condition.context === 'arguments' ? '引数として展開して値を確認している' : '展開して値を確認している'); break;
         case 'pipeline': { const counts = new Map(); for (const stage of result.trace) counts.set(stage.pipeline, (counts.get(stage.pipeline) || 0) + 1); passed = [...counts.values()].some(count => count >= condition.minStages); message = '必要な段階をパイプでつないでいる'; break; }
         case 'pagerClosed': passed = session.pagerOpened && session.pagerClosed && !session.pagerOpen; message = 'ファイルを開き、q で表示を閉じている'; break;
         case 'source': { const sourceStages = condition.scope === 'last' ? result.trace : session.evidence; passed = sourceStages.some(stage => stageAccepted(stage, lesson) && stage.reads.includes(condition.path)); message = '指定された元ファイルを実際に読み込んでいる'; break; }
@@ -2540,20 +2765,23 @@ SOFTWARE.
 
   function cleanStage(value) {
     if (!object(value) || !safeText(value.command, 100) || !Array.isArray(value.args) || value.args.length > 128 || !value.args.every(x => safeText(x, 8192)) || !['stdin', 'stdout', 'stderr'].every(key => safeText(value[key])) || !Number.isInteger(value.code) || !canonical(value.cwdBefore) || !canonical(value.cwdAfter) || !Number.isInteger(value.pipeline) || !Number.isInteger(value.index)) return null;
-    const redirections = Array.isArray(value.redirections) ? value.redirections.filter(r => object(r) && ['<', '>', '>>'].includes(r.op) && canonical(r.target)).map(r => ({op: r.op, target: r.target})) : [];
+    const redirections = Array.isArray(value.redirections) ? value.redirections.filter(r => object(r) && (r.fd === undefined || [0, 1, 2].includes(r.fd)) &&
+      ((['<', '>', '>>'].includes(r.op) && canonical(r.target)) || (r.op === '>&' && ['1', '2'].includes(r.target))))
+      .map(r => ({op: r.op, target: r.target, ...(r.fd !== undefined ? {fd: r.fd} : {})})) : [];
     const reads = Array.isArray(value.reads) ? value.reads.filter(canonical).slice(0, 128) : [];
-    return {command: value.command, args: value.args.slice(), stdin: value.stdin, stdout: value.stdout, stderr: value.stderr, code: value.code, cwdBefore: value.cwdBefore, cwdAfter: value.cwdAfter, pipeline: value.pipeline, index: value.index, connector: [';', '&&', '||'].includes(value.connector) ? value.connector : ';', redirections, reads};
+    return {command: value.command, args: value.args.slice(), stdin: value.stdin, stdout: value.stdout, stderr: value.stderr, code: value.code, cwdBefore: value.cwdBefore, cwdAfter: value.cwdAfter, pipeline: value.pipeline, index: value.index, connector: [';', '&&', '||'].includes(value.connector) ? value.connector : ';', redirections, stderrRedirected: value.stderrRedirected === true, variables: Array.isArray(value.variables) && value.variables.includes('?') ? ['?'] : [], argumentVariables: Array.isArray(value.argumentVariables) && value.argumentVariables.includes('?') ? ['?'] : [], reads};
   }
 
   function cleanResult(value) {
     if (!object(value) || !safeText(value.stdout) || !safeText(value.stderr) || !Number.isInteger(value.code) || !Array.isArray(value.trace) || value.trace.length > 32) return null;
     const trace = value.trace.map(cleanStage);
     if (trace.some(stage => !stage)) return null;
-    return decorate({stdout: value.stdout, stderr: value.stderr, code: value.code, trace, ...(value.pager === true ? {pager: true} : {})});
+    const flow = Array.isArray(value.flow) ? value.flow.filter(item => object(item) && [';', '&&', '||'].includes(item.connector) && Number.isInteger(item.pipeline) && item.pipeline >= 0 && Number.isInteger(item.codeBefore) && typeof item.executed === 'boolean').slice(0, 32).map(({connector, pipeline, codeBefore, executed}) => ({connector, pipeline, codeBefore, executed})) : [];
+    return decorate({stdout: value.stdout, stderr: value.stderr, code: value.code, trace, flow, connectors: Array.isArray(value.connectors) ? value.connectors.filter(x => [';', '&&', '||'].includes(x)).slice(0, 64) : [], ...(value.pager === true ? {pager: true} : {})});
   }
 
   function serializeSession(session) {
-    return {version: VERSION, lessonId: session.lessonId, shell: {files: {...session.shell.files}, directories: [...session.shell.directories], cwd: session.shell.cwd, oldcwd: session.shell.oldcwd, history: session.shell.history.slice(-128)}, events: session.events.slice(-128), lastResult: session.lastResult, evidence: session.evidence.slice(-128), pagerOpen: session.pagerOpen, pagerOpened: session.pagerOpened, pagerClosed: session.pagerClosed};
+    return {version: VERSION, fixtureRevision: lessonFor(session.lessonId)?.fixtureRevision || 1, lessonId: session.lessonId, shell: {files: {...session.shell.files}, directories: [...session.shell.directories], cwd: session.shell.cwd, oldcwd: session.shell.oldcwd, history: session.shell.history.slice(-128), metadata: {...session.shell.metadata}, snapshotTime: session.shell.snapshotTime, lastExitCode: session.shell.lastExitCode}, events: session.events.slice(-128), lastResult: session.lastResult, evidence: session.evidence.slice(-128), pagerOpen: session.pagerOpen, pagerOpened: session.pagerOpened, pagerClosed: session.pagerClosed};
   }
 
   function restoreSession(snapshot) {
@@ -2563,7 +2791,18 @@ SOFTWARE.
       if (JSON.stringify(snapshot).length > MAX_SAVE) return session;
       const state = snapshot.shell;
       if (!object(state) || !object(state.files) || Object.keys(state.files).length > 256 || !Object.entries(state.files).every(([path, content]) => canonical(path) && safeText(content, 2097152)) || !Array.isArray(state.directories) || state.directories.length > 512 || !state.directories.every(canonical) || !canonical(state.cwd) || !canonical(state.oldcwd)) return session;
-      const shell = new root.LogLabShell(state.files);
+      const metadata = Object.create(null);
+      if (object(state.metadata)) for (const [path, entry] of Object.entries(state.metadata).slice(0, 768)) {
+        if (canonical(path) && object(entry) && Number.isFinite(entry.mtime) && Math.abs(entry.mtime) <= 8640000000000000) metadata[path] = {mtime: entry.mtime};
+      }
+      const files = {...state.files}, selected = lessonFor(snapshot.lessonId);
+      if ((snapshot.fixtureRevision || 1) < (selected?.fixtureRevision || 1)) {
+        const fixture = data().datasets[selected.fixture];
+        for (const path of selected.fixtureAdditions || []) {
+          if (canonical(path) && !own(files, path) && own(fixture.files, path) && !state.directories.includes(path)) files[path] = fixture.files[path];
+        }
+      }
+      const shell = new root.LogLabShell(files, {metadata, now: data().datasets[selected?.fixture]?.now, snapshotTime: Number.isFinite(state.snapshotTime) && Math.abs(state.snapshotTime) <= 8640000000000000 ? state.snapshotTime : undefined, lastExitCode: Number.isInteger(state.lastExitCode) && state.lastExitCode >= 0 && state.lastExitCode <= 255 ? state.lastExitCode : 0});
       shell.directories = new Set(state.directories);
       shell.directories.add('/');
       for (const path of Object.keys(shell.files)) shell.addParents(path);
@@ -2659,6 +2898,12 @@ SOFTWARE.
     return result;
   }
 
+  function promptFor(cwd) {
+    const home = '/home/analyst';
+    const location = cwd === home ? '~' : cwd.startsWith(home + '/') ? '~' + cwd.slice(home.length) : cwd;
+    return 'analyst@linuxroom:' + location + '$';
+  }
+
   function validId(id) { return id === 'sandbox' || byId.has(id); }
   function safeUI(raw) {
     const clean = { started: false, drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
@@ -2675,7 +2920,8 @@ SOFTWARE.
       const entries = raw.transcripts && Object.prototype.hasOwnProperty.call(raw.transcripts, id) ? raw.transcripts[id] : null;
       if (Array.isArray(entries)) clean.transcripts[id] = entries.slice(-60).filter(entry => entry && typeof entry === 'object' && typeof entry.input === 'string').map(entry => ({
         input: entry.input.slice(0, 8192), stdout: String(entry.stdout || '').slice(0, 24000), stderr: String(entry.stderr || '').slice(0, 12000),
-        code: Number.isFinite(entry.code) ? entry.code : 0, note: typeof entry.note === 'string' ? entry.note.slice(0, 1000) : ''
+        code: Number.isFinite(entry.code) ? entry.code : 0, note: typeof entry.note === 'string' ? entry.note.slice(0, 1000) : '',
+        cwd: typeof entry.cwd === 'string' && entry.cwd.startsWith('/') && !/[\x00-\x1f\x7f]/.test(entry.cwd) ? entry.cwd.slice(0, 4096) : null
       }));
     }
     return clean;
@@ -2741,6 +2987,8 @@ SOFTWARE.
     $('map-overall').textContent = '全体 ' + s.completed + ' / ' + s.total + ' レッスン修了';
     $('welcome-progress').textContent = s.completed ? '全体 ' + s.completed + ' / ' + s.total + ' レッスン修了。今日も一歩ずつ。' : '';
     $('course-summary').textContent = levels.length + ' 段階 · 全 ' + s.total + ' レッスン';
+    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.3');
+    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.3');
     $('start-learning').replaceChildren(document.createTextNode(ui.started ? '続きから学ぶ ' : '最初のレッスンをはじめる '), node('span', '', '→'));
     renderLevelCards();
   }
@@ -2848,7 +3096,7 @@ SOFTWARE.
     $('lesson-mode').textContent = currentLesson ? modeLabels[currentLesson.mode] || '一歩ずつ練習' : '自分のペースで';
     $('lesson-minutes').textContent = currentLesson ? '約 ' + currentLesson.minutes + ' 分' : '時間制限なし';
     $('lesson-goal').textContent = currentLesson ? currentLesson.goal : '習ったコマンドを、何度でも。';
-    $('lesson-explanation').replaceChildren(...(currentLesson ? currentLesson.explanation : ['ファイルを開いたり、探したり、パイプでつないだり。自由に操作してみましょう。', '下の「この課題で使えるファイル」でファイル名を確認できます。迷ったら help やコマンド帳を使ってください。']).map(text => node('p', '', text)));
+    $('lesson-explanation').replaceChildren(...(currentLesson ? currentLesson.explanation : ['ファイルを開いたり、探したり、パイプでつないだり。自由に操作してみましょう。', 'パイプでつないだら、「コマンドが、結果になるまで」で各段を選んでみよう。その段が受け取った入力と、次へ渡した出力を見比べられます。', '下の「この課題で使えるファイル」でファイル名を確認できます。迷ったら help やコマンド帳を使ってください。']).map(text => node('p', '', text)));
     const concepts = node('dl');
     (currentLesson ? currentLesson.concepts : [{ term: 'help', text: 'この教材で使えるコマンドを表示します。' }]).forEach(concept => {
       const row = node('div', 'concept-item');
@@ -2985,7 +3233,7 @@ SOFTWARE.
     const output = $('terminal-output');
     output.replaceChildren();
     const entries = ui.transcripts[currentSession.lessonId] || [];
-    if (!entries.length) output.append(node('div', 'terminal-welcome', 'Linuxroom · virtual terminal\n\n$ は入力せず、コマンドだけを打ちます。\n入力したら Enter。迷ったら、左の見本やヒントを見てみよう。'));
+    if (!entries.length) output.append(node('div', 'terminal-welcome', 'Linuxroom · virtual terminal\n\nanalyst@linuxroom:~$ はプロンプトの例です。\nユーザー名@ホスト名:現在地 のあとに、入力を待つ $ が付きます。\nプロンプトは入力せず、コマンドだけを打って Enter。'));
     entries.forEach(entry => output.append(transcriptNode(entry)));
     output.scrollTop = output.scrollHeight;
   }
@@ -2993,7 +3241,9 @@ SOFTWARE.
   function transcriptNode(entry) {
     const row = node('div', 'terminal-entry');
     const command = node('div', 'terminal-command');
-    command.append(node('span', '', '$'), node('span', '', entry.input));
+    const prompt = node('span', 'history-prompt', entry.cwd ? promptFor(entry.cwd) : '$');
+    prompt.title = entry.cwd ? '実行前の現在地: ' + entry.cwd : '旧版の履歴には実行前の現在地が保存されていません。';
+    command.append(prompt, node('span', '', entry.input));
     row.append(command);
     if (entry.stdout) row.append(node('pre', '', entry.stdout));
     if (entry.stderr) row.append(node('pre', 'error', entry.stderr));
@@ -3008,16 +3258,18 @@ SOFTWARE.
     checkpoint();
   }
 
-  function appendTranscript(input, result, note) {
+  function appendTranscript(input, result, note, cwdBefore) {
     const id = currentSession.lessonId;
     const entries = ui.transcripts[id] || (ui.transcripts[id] = []);
-    entries.push({ input, stdout: String(result.stdout || '').slice(0, 24000), stderr: String(result.stderr || '').slice(0, 12000), code: result.code || 0, note: note || '' });
+    entries.push({ input, cwd: cwdBefore || currentSession.shell.cwd, stdout: String(result.stdout || '').slice(0, 24000), stderr: String(result.stderr || '').slice(0, 12000), code: result.code || 0, note: note || '' });
     if (entries.length > 60) entries.splice(0, entries.length - 60);
     renderTranscript();
   }
 
   function updateShellView() {
-    $('terminal-cwd').textContent = currentSession.shell.cwd;
+    $('terminal-cwd').textContent = '現在地: ' + currentSession.shell.cwd;
+    $('terminal-prompt').textContent = promptFor(currentSession.shell.cwd);
+    $('terminal-prompt').title = 'analyst はユーザー名、linuxroom はホスト名。: の後ろは現在地、~ はホームフォルダ。$ は一般ユーザーの入力待ちです。プロンプトは入力しません。';
     const files = Object.keys(currentSession.shell.files || {}).sort();
     $('file-count').textContent = files.length + ' files';
     $('file-list').replaceChildren(...files.slice(0, 100).map(path => {
@@ -3037,6 +3289,7 @@ SOFTWARE.
     const input = $('command-input').value;
     if (!input.trim()) { $('command-input').focus(); return; }
     if (currentSession.pagerOpen) { if (input.trim() === 'q') closePager(); return; }
+    const cwdBefore = currentSession.shell.cwd;
     let result;
     try { result = Engine.run(currentSession, input); }
     catch (_) {
@@ -3048,10 +3301,10 @@ SOFTWARE.
     historyDraft = '';
     const noOutput = !result.stdout && !result.stderr;
     const lastStage = Array.isArray(result.trace) && result.trace[result.trace.length - 1];
-    const fallback = result.code === 1 && lastStage && lastStage.command === 'diff' ? '差分が見つかりました。diff の終了状態 1 は、二つの内容が異なることを表します。' : result.code === 1 && noOutput ? '一致する行がありませんでした。検索語や大文字・小文字を確認してみよう。' : noOutput && result.code === 0 ? '実行しました。画面に何も表示しないコマンドもあります。' : '';
+    const fallback = result.code === 1 && lastStage && lastStage.command === 'diff' ? '差分が見つかりました。diff の終了状態 1 は、二つの内容が異なることを表します。' : result.code === 1 && noOutput && lastStage && ['grep', 'rg'].includes(lastStage.command) ? '一致する行がありませんでした。検索語や大文字・小文字を確認してみよう。' : noOutput && result.code !== 0 ? '終了状態 ' + result.code + ' です。画面に何も表示されなくても、コマンドが成功したとは限りません。' : noOutput && result.code === 0 ? '実行しました。画面に何も表示しないコマンドもあります。' : '';
     const feedback = result.feedback || fallback;
     if (result.clear) clearTerminal();
-    else appendTranscript(input, result, result.pager ? '閲覧画面を開きました。q で閉じます。' : fallback);
+    else appendTranscript(input, result, result.pager ? '閲覧画面を開きました。q で閉じます。' : fallback, cwdBefore);
     $('run-feedback').textContent = feedback;
     $('run-feedback').className = 'run-feedback' + (result.stderr && !result.expectedStatus ? ' error' : '');
     if (Array.isArray(result.trace) && result.trace.length) {
@@ -3094,7 +3347,7 @@ SOFTWARE.
       }
       const button = node('button', 'stage-button');
       button.setAttribute('aria-pressed', String(i === traceIndex));
-      button.setAttribute('aria-label', '処理 ' + (i + 1) + ': ' + stageCommand(stage) + ' の出力を見る');
+      button.setAttribute('aria-label', '処理 ' + (i + 1) + ': ' + stageCommand(stage) + ' の入力と出力を見る');
       button.title = stageCommand(stage);
       button.append(node('strong', '', 'STEP ' + (i + 1)), document.createTextNode(stage.command));
       button.addEventListener('click', () => { traceIndex = i; renderTrace(); });
@@ -3104,9 +3357,12 @@ SOFTWARE.
     if (!stage) return;
     $('trace-detail-title').textContent = stageCommand(stage);
     $('trace-line-count').textContent = '出力 ' + lineCount(stage.stdout) + ' 行';
+    $('trace-input-count').textContent = lineCount(stage.stdin) + ' 行';
+    $('trace-input').textContent = stage.stdin || '（標準入力は空です。ファイル名を引数で渡す処理は、そのファイルを直接読みます）';
+    $('trace-input-details').open = Boolean(stage.stdin);
     $('trace-output').textContent = stage.stdout || (stage.stderr ? stage.stderr : '（表示する出力はありません）');
     let note = stage.stderr ? 'この処理でエラーが発生しました。エラー文と入力を確認してみよう。' : stage.code === 1 && stage.command === 'diff' ? '終了状態 1 は「差分あり」を表します。diff では、違いが見つかると 1 を返します。' : stage.code === 1 && ['grep', 'rg'].includes(stage.command) ? '終了状態 1 は「一致する行なし」を表します。検索語や大文字・小文字を確認してみよう。' : stage.code ? '終了状態 ' + stage.code + ' です。このコマンドの説明と結果を確認しましょう。' : '';
-    if (stage.redirections && stage.redirections.length) note += (note ? ' ' : '') + 'この欄は保存・リダイレクト前の実際の出力です。' + stage.redirections.map(redir => redir.op + ' ' + redir.target).join(' / ');
+    if (stage.redirections && stage.redirections.length) note += (note ? ' ' : '') + 'この欄は保存・リダイレクト前の実際の出力です。' + stage.redirections.map(redir => (redir.fd === 2 ? '2' : '') + redir.op + ' ' + redir.target).join(' / ');
     if (Number(stage.index) > 0 && latestTrace[traceIndex - 1] && stage.pipeline === latestTrace[traceIndex - 1].pipeline) note += (note ? ' ' : '') + '前の処理から ' + lineCount(stage.stdin) + ' 行を受け取りました。';
     else if (!stage.stdin) note += (note ? ' ' : '') + '最初の処理です。必要な入力は、ファイルや引数から受け取ります。';
     if (stage.cwdAfter && stage.cwdBefore !== stage.cwdAfter) note += (note ? ' ' : '') + '現在地: ' + stage.cwdBefore + ' → ' + stage.cwdAfter;
@@ -3231,25 +3487,31 @@ SOFTWARE.
   }
 
   const builtInReferences = [
+    { term: 'プロンプト / analyst@linuxroom:~$', text: 'コマンドの入力を待つ表示。analyst はユーザー名、linuxroom はホスト名（コンピューター名）、: の後ろが現在地。~ はホームフォルダ。$ は一般ユーザー、# は管理者の目印としてよく使われる。この教材では一般ユーザーで操作する。表示は環境ごとに異なる。プロンプト自体は入力しない。', example: 'analyst@linuxroom:~$ pwd\n/home/analyst\nanalyst@linuxroom:~$ cd logs\nanalyst@linuxroom:~/logs$' },
     { term: 'pwd', text: '今いるフォルダの場所を表示する。', example: 'pwd' },
-    { term: 'ls / cd', text: 'ls は中身の一覧。cd はフォルダを移動する。.. は一つ上のフォルダ。', example: 'ls\ncd logs\ncd ..' },
-    { term: 'cat / head / tail / less', text: '順に、全体・先頭・末尾・閲覧画面で読む。less は q で終了。', example: 'cat app.log\nhead -n 3 app.log\ntail -n 5 app.log\nless app.log' },
+    { term: 'ls / cd / ~', text: 'ls は中身の一覧。実機の端末では横に並ぶこともあり、ls -1 なら1行1項目。cd はフォルダを移動する。.. は一つ上、~ はホームフォルダ。移動するとプロンプトの現在地も変わる。', example: 'ls -1\ncd logs\ncd ..\ncd ~' },
+    { term: 'ls -l / -lh / -lt', text: '-l は権限・サイズ・更新日時などの詳細、-h は読みやすいサイズ単位、-t は更新日時の新しい順。更新日時やサイズの表記は実機の環境でも異なる。', example: 'ls -lh logs\nls -lt logs' },
+    { term: 'cat / head / tail / less', text: '順に、全体・先頭・末尾・閲覧画面で読む。head -c は先頭のバイト数、tail -n +2 は2行目から最後まで。less は q で終了。', example: 'cat app.log\nhead -n 3 app.log\nhead -c 20 app.log\ntail -n +2 members.csv\nless app.log' },
     { term: 'grep', text: '指定した文字を含む行を探す。-F は文字をそのまま検索、-n は行番号、-i は大文字と小文字を区別しない、-v は一致しない行。', example: "grep -n 'ERROR' app.log" },
     { term: '| / wc -l', text: '|（パイプ）は左の出力を右の入力へ渡す。wc -l は改行の数を数える。', example: "grep 'ERROR' app.log | wc -l" },
     { term: 'cut / awk', text: '必要な列を取り出す。cut -d は区切り文字、-f は列番号。awk の $1 は1列目、$NF は最後の列。', example: "cut -d ',' -f 2 members.csv\nawk '{print $2}' app.log" },
-    { term: 'sort / uniq -c', text: 'sort で並べ、uniq -c で隣り合う同じ行を数える。sort -nr は数字として大きい順に並べる。', example: 'sort names.txt | uniq -c | sort -nr' },
-    { term: 'mkdir / cp / mv', text: 'フォルダを作る・ファイルをコピーする・移動や名前の変更をする。', example: 'mkdir work\ncp app.log work/copy.log\nmv work/copy.log work/backup.log' },
+    { term: 'sort / sort -u / uniq -c', text: 'sort で並べ、uniq -c で隣り合う同じ行を数える。sort -nr は数字として大きい順に並べる。sort -u は並べ替えて重複を取り除く。', example: 'sort names.txt | uniq -c | sort -nr\nsort -u names.txt' },
+    { term: 'mkdir / cp / mv', text: 'フォルダを作る・ファイルをコピーする・移動や名前の変更をする。mkdir -p はフォルダが存在していても成功し、必要な親フォルダも作る。', example: 'mkdir -p work\ncp app.log work/copy.log\nmv work/copy.log work/backup.log' },
+    { term: '< / 標準入力', text: '< はファイルをコマンドの標準入力へ渡す。tr はファイル名を引数に取らないので、この書き方が使える。cat file | command と同じ入力を渡せる。wc -l < file はファイル名を付けずに行数だけを出す。', example: "tr '[:upper:]' '[:lower:]' < names.txt\nwc -l < app.log" },
+    { term: '&& / ; / 終了状態', text: '&& は左のコマンドが成功（終了状態 0）したときだけ次を実行する。; は左の成否にかかわらず次を実行する。準備に失敗したら止めたいときは && を使う。', example: 'mkdir -p work && cp app.log work/copy.log\npwd; ls' },
+    { term: '2>/dev/null / 標準エラー出力', text: '2> はエラーメッセージの出力先を変える。/dev/null は受け取った内容を捨てる特殊な出力先。エラーを非表示にしても、終了状態は変わらない。原因を調べるときは表示を戻そう。', example: 'ls missing.txt 2>/dev/null' },
+    { term: '$? / 終了状態', text: '$? は直前のコマンドの終了状態。通常は 0 が成功、0 以外が失敗や特別な状態を表す。grep の 1 は一致なし、diff の 1 は差分あり。echo $? 自体は成功するので、確認は直後に行う。', example: "grep 'ERROR' app.log\necho $?" },
     { term: '> / >> / tee', text: '> はファイルを上書き、>> は末尾に追記。tee は画面とファイルの両方へ出力。', example: "grep 'ERROR' app.log > errors.txt\ncat errors.txt | tee copy.txt" },
     { term: 'jq', text: 'JSON の項目を取り出す。select は条件で絞り込む。-r は文字列の引用符を外す。', example: 'jq -r \'select(.level == "ERROR") | .user\' events.jsonl' },
-    { term: 'help / history / clear', text: 'help はこの教材専用のヘルプ。history は入力履歴、clear は画面の表示を消す。ファイルや修了記録は消えない。', example: 'help grep\nhistory\nclear' },
+    { term: 'help / man / history / clear', text: '実機でコマンドのマニュアルを読むときは man grep などを使う。この教材の man は学習用 help と同じ案内を表示する。history は入力履歴、clear は画面の表示を消す。ファイルや修了記録は消えない。', example: 'man grep\nhelp grep\nhistory\nclear' },
     { term: 'echo / printf', text: '文字を出力する。printf では書式を指定できる。%s は文字列、\\n は改行。', example: "echo ready\nprintf '%s\\n' alice bob" },
     { term: 'tac / more', text: 'tac は行を逆の順番で表示する。more はファイルを閲覧する。この教材では less と同じ閲覧画面で、q で終了する。', example: 'tac app.log\nmore app.log' },
     { term: 'rg / find', text: 'rg はファイル内の文字を検索する。find は名前などの条件でファイルを探す。find の名前パターンは引用符で囲む。', example: "rg 'ERROR' logs\nfind logs -name '*.log'" },
     { term: 'grep -E / -A / -B / -C', text: '-E は拡張正規表現。^ は行頭、$ は行末、| はいずれかに一致。-A は後ろ、-B は前、-C は前後の行も表示する。', example: "grep -E '^(ERROR|WARN)' app.log\ngrep -C 1 'ERROR' app.log" },
-    { term: 'tr / sed / nl / column', text: 'tr は文字を変換する。sed は置換や行の抽出。nl は行番号を付け、column は列を見やすく整える。', example: "cat names.txt | tr 'A-Z' 'a-z'\nsed 's/ERROR/error/g' app.log\nnl app.log\ncolumn -t app.log" },
+    { term: 'tr / sed / nl / column', text: 'tr は文字を変換する。sed は置換や行の抽出。nl は行番号を付け、column は列を見やすく整える。', example: "tr '[:upper:]' '[:lower:]' < names.txt\nsed 's/ERROR/error/g' app.log\nnl app.log\ncolumn -t app.log" },
     { term: 'touch / rm / rmdir', text: 'touch は空ファイルの作成などに使う。rm はファイルを削除し、rmdir は空フォルダを削除する。この教材では課題内の仮想ファイルだけが変わる。', example: 'touch memo.txt\nrm memo.txt\nmkdir empty\nrmdir empty' },
     { term: 'diff / comm', text: 'diff は二つのファイルの違いを表示する。終了状態 1 は差分あり。comm は並べ替え済みの二つのファイルの、共通・片方だけの行を調べる。', example: 'diff before.txt after.txt\ncomm -12 sorted-a.txt sorted-b.txt' },
-    { term: 'join / paste / xargs', text: 'join は共通のキーで行を結合し、paste は行を横に並べる。xargs は入力から次のコマンドの引数を組み立てる。', example: 'join users.txt roles.txt\npaste names.txt counts.txt\ncat paths.txt | xargs wc -l' },
+    { term: 'join / paste / xargs', text: 'join は共通のキーで行を結合し、paste は行を横に並べる。xargs は入力から次のコマンドの引数を組み立てる。', example: 'join users.txt roles.txt\npaste names.txt counts.txt\nxargs wc -l < paths.txt' },
     { term: 'base64 / strings / rev', text: 'base64 は文字データの符号化・復号。strings は表示可能な文字の並びを抽出する。rev は各行の文字順を逆にする。', example: 'base64 -d encoded.txt\nstrings sample.bin\nrev names.txt' },
     { term: 'basename / dirname / realpath', text: 'パスのファイル名部分・親フォルダ部分・絶対パスを調べる。', example: 'basename /var/log/app.log\ndirname /var/log/app.log\nrealpath app.log' },
     { term: 'file / stat / du / date', text: 'file は種類、stat は詳細情報、du は使用量、date は日時を調べる。ファイル情報は学習用の仮想情報。date -u はブラウザの現在時刻を UTC で表示する。', example: 'file app.log\nstat app.log\ndu app.log\ndate -u' }
@@ -3327,6 +3589,7 @@ SOFTWARE.
 
   function importWasPreserved(raw, restored) {
     const sameKeys = (a, b) => JSON.stringify(Object.keys(a || {}).sort()) === JSON.stringify(Object.keys(b || {}).sort());
+    const own = (value, key) => Object.prototype.hasOwnProperty.call(value || {}, key);
     if (raw.currentId !== restored.currentId || !sameKeys(raw.completed, restored.completed) || !sameKeys(raw.sessions, restored.sessions) || !sameKeys(raw.hints, restored.hints)) return false;
     for (const id of Object.keys(raw.hints || {})) if (raw.hints[id] !== restored.hints[id]) return false;
     for (const id of Object.keys(raw.sessions)) {
@@ -3334,8 +3597,24 @@ SOFTWARE.
       const after = restored.sessions[id];
       if (!before || !before.shell || !after || !after.shell) return false;
       const a = before.shell, b = after.shell;
-      if (!sameKeys(a.files, b.files) || Object.keys(a.files || {}).some(path => a.files[path] !== b.files[path]) || a.cwd !== b.cwd || a.oldcwd !== b.oldcwd) return false;
-      if (!Array.isArray(a.directories) || JSON.stringify(a.directories.slice().sort()) !== JSON.stringify(b.directories.slice().sort())) return false;
+      if (Object.keys(a.files || {}).some(path => !own(b.files, path) || a.files[path] !== b.files[path]) || a.cwd !== b.cwd || a.oldcwd !== b.oldcwd) return false;
+      const lesson = byId.get(id);
+      const fixture = lesson && DATA.datasets[lesson.fixture];
+      const allowedFiles = new Set((before.fixtureRevision || 1) < (lesson && lesson.fixtureRevision || 1) ? lesson.fixtureAdditions || [] : []);
+      const additions = Object.keys(b.files || {}).filter(path => !own(a.files, path));
+      if (additions.some(path => !allowedFiles.has(path) || !fixture || !own(fixture.files, path) || b.files[path] !== fixture.files[path])) return false;
+      const allowedDirectories = new Set();
+      for (const path of additions) {
+        let parent = path.slice(0, path.lastIndexOf('/')) || '/';
+        while (true) {
+          allowedDirectories.add(parent);
+          if (parent === '/') break;
+          parent = parent.slice(0, parent.lastIndexOf('/')) || '/';
+        }
+      }
+      if (!Array.isArray(a.directories) || !Array.isArray(b.directories) || a.directories.some(path => !b.directories.includes(path)) || b.directories.some(path => !a.directories.includes(path) && !allowedDirectories.has(path))) return false;
+      if (own(a, 'lastExitCode') && a.lastExitCode !== b.lastExitCode || own(a, 'snapshotTime') && a.snapshotTime !== b.snapshotTime) return false;
+      if (own(a, 'metadata') && (!a.metadata || typeof a.metadata !== 'object' || Array.isArray(a.metadata) || Object.keys(a.metadata).some(path => JSON.stringify(a.metadata[path]) !== JSON.stringify(b.metadata && b.metadata[path])))) return false;
       if (!Array.isArray(a.history) || JSON.stringify(a.history) !== JSON.stringify(b.history)) return false;
       if (!Array.isArray(before.events) || JSON.stringify(before.events) !== JSON.stringify(after.events)) return false;
       if (!Array.isArray(before.evidence) || before.evidence.length !== after.evidence.length) return false;
@@ -3381,7 +3660,12 @@ SOFTWARE.
     $('start-learning').addEventListener('click', () => renderLesson(ui.started && validId(progress.currentId) ? progress.currentId : lessons[0].id, { focus: true }));
     ['map-button', 'welcome-map-button'].forEach(id => $(id).addEventListener('click', renderMap));
     ['sandbox-button', 'welcome-sandbox-button'].forEach(id => $(id).addEventListener('click', () => renderLesson('sandbox', { focus: true })));
-    ['reference-button', 'terminal-help'].forEach(id => $(id).addEventListener('click', showReference));
+    $('reference-button').addEventListener('click', showReference);
+    $('terminal-help').addEventListener('click', () => {
+      $('reference-search').value = '';
+      showReference();
+      $('prompt-guide').scrollIntoView({ block: 'start' });
+    });
     $('save-button').addEventListener('click', () => { checkpoint(); openDialog('save-dialog'); });
     $('reference-search').addEventListener('input', renderReferences);
     document.querySelectorAll('.close-dialog').forEach(button => button.addEventListener('click', () => closeDialog(button.closest('dialog'))));

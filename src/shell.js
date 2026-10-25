@@ -5,7 +5,7 @@
   const COMMANDS = ['help','pwd','cd','ls','cat','tac','less','more','grep','rg','sort','uniq','cut','tr','column','nl','diff','jq','base64','tee','head','tail','wc','sed','awk','find','echo','printf','paste','comm','join','xargs','rev','strings','basename','dirname','realpath','file','stat','du','date','clear','history','mkdir','touch','cp','mv','rm','rmdir'];
   const USAGE = {
     help: 'help [command]', pwd: 'pwd', cd: 'cd [directory|-]',
-    ls: 'ls [-alhdRSr] [path ...]', cat: 'cat [-n] [file ...]', tac: 'tac [file ...]',
+    ls: 'ls [-1alhdtRSr] [path ...]', cat: 'cat [-n] [file ...]', tac: 'tac [file ...]',
     less: 'less [file ...]  (read-only viewer; q closes)', more: 'more [file ...]  (read-only viewer; q closes)',
     grep: 'grep [-EFiwvncrRlhHLqxo] [-m N] [-A N|-B N|-C N] [-e pattern ...] [--include glob|--exclude glob|--exclude-dir glob] [--] pattern [file ...]',
     rg: 'rg [-FiwvnclHhqo] [-A N|-B N|-C N] [-e pattern] [-g glob] [--no-heading] [--count] [pattern] [path ...] | rg --files [-g glob] [path ...]',
@@ -24,7 +24,7 @@
     xargs: 'xargs [-0r] [-d delimiter] [-n N] [-I token] [virtual-command [argument ...]]', rev: 'rev [file ...]',
     strings: 'strings [-a] [-n minimum] [-t d|o|x] [file ...]', basename: 'basename [-a] [-s suffix] path [suffix]',
     dirname: 'dirname path ...', realpath: 'realpath [-m|-e] path ...', file: 'file [-bi] path ...',
-    stat: 'stat [-c format] path ...', du: 'du [-ashb] [--max-depth N] [path ...]',
+    stat: 'stat [-c format] path ...', du: 'du [-acshb] [--max-depth N] [path ...]',
     date: 'date [-u] [-d ISO-date|@epoch] [+format]', mv: 'mv [-n] source destination', rmdir: 'rmdir [-p] directory ...',
     vi: 'vi [file]  (standalone only)', view: 'view [file]  (read-only editor; standalone only)',
     sl: 'sl  (steam locomotive; standalone only; wait until it passes)',
@@ -56,26 +56,28 @@
     if (pattern.length > 512) fail('regular expression exceeds 512 characters');
     let source=posixClasses(extended ? pattern : basicRegex(pattern));
     if (/\(\?/.test(source)) fail('regular expression lookarounds and special groups are unsupported');
-    if (/\([^)]*[*+][^)]*\)[*+{]/.test(source)) fail('nested repeated groups are unsupported in this browser exercise');
+    if (/\([^)]*[*+][^)]*\)[*+{]/.test(source)) fail('nested repeated groups are unsupported in this browser exercise; for an IPv4-shaped token use [0-9]{1,3}(\\.[0-9]{1,3}){3} with grep -E (this does not validate octet ranges)');
     try { return new RegExp(source, insensitive ? 'i' : ''); }
     catch (e) { fail('invalid regular expression: ' + e.message); }
   }
   function lex(input) {
-    const tokens=[]; let value='', mask=[], started=false, quote=null,plain=true;
-    const add=(c,unquoted) => { value+=c; mask.push(Boolean(unquoted && (c==='*'||c==='?'))); started=true; };
-    const flush=()=>{ if(started) tokens.push({kind:'word',value,mask}); value=''; mask=[]; started=false;plain=true; };
+    const tokens=[]; let value='', mask=[], started=false, quote=null,plain=true,tilde=false,tildeEnd=false,statusOffsets=[];
+    const add=(c,unquoted) => { if(!started&&c==='~'&&unquoted)tilde=true;if(tilde&&c==='/'&&unquoted)tildeEnd=true;value+=c; mask.push(Boolean(unquoted && (c==='*'||c==='?'))); started=true; };
+    const flush=()=>{ if(started) tokens.push({kind:'word',value,mask,tilde,statusOffsets}); value=''; mask=[]; started=false;plain=true;tilde=false;tildeEnd=false;statusOffsets=[]; };
     for(let i=0;i<input.length;i++) {
       const c=input[i];
       if(quote) {
         if(c===quote) { quote=null; continue; }
         if(quote==='"' && c==='\\' && i+1<input.length && /["\\$`\n]/.test(input[i+1])) { add(input[++i],false); continue; }
         if(quote==='"' && (c==='`'||(c==='$'&&input[i+1]==='('))) fail('command substitution is unsupported');
+        if(quote==='"' && c==='$'&&input[i+1]==='?'){statusOffsets.push(value.length);add('$',false);add('?',false);i++;plain=false;continue;}
         if(quote==='"' && c==='$' && /[A-Za-z_?{0-9]/.test(input[i+1]||'')) fail('shell variable expansion is unsupported; use literal paths');
         add(c,false); continue;
       }
-      if(c==='\''||c==='"') { quote=c; started=true;plain=false; continue; }
-      if(c==='\\') { if(i+1===input.length) fail('unfinished escape');plain=false; add(input[++i],false); continue; }
+      if(c==='\''||c==='"') { if(!tildeEnd)tilde=false;quote=c; started=true;plain=false; continue; }
+      if(c==='\\') { if(i+1===input.length) fail('unfinished escape');if(!tildeEnd)tilde=false;plain=false; add(input[++i],false); continue; }
       if(c==='`'||(c==='$'&&input[i+1]==='(')) fail('command substitution is unsupported; quote awk programs with single quotes');
+      if(c==='$'&&input[i+1]==='?'){statusOffsets.push(value.length);add('$',false);add('?',false);i++;plain=false;continue;}
       if(c==='$' && /[A-Za-z_?{0-9]/.test(input[i+1]||'')) fail('shell variable expansion is unsupported; use literal paths');
       if(c==='\n'||c===';') { flush(); tokens.push({kind:'op',value:';'}); continue; }
       if(/\s/.test(c)) { flush(); continue; }
@@ -84,6 +86,7 @@
         const ioNumber=started&&plain&&/^\d+$/.test(value)?value:null;
         flush(); let op=c;
         if(input[i+1]===c && (c==='|'||c==='&'||c==='>')) op+=input[++i];
+        else if(c==='>'&&input[i+1]==='&')op+=input[++i];
         if(op==='&') fail('background commands are unsupported');
         if(c==='<'&&input[i+1]==='<') fail('here documents are unsupported');
         tokens.push({kind:'op',value:op,ioNumber}); continue;
@@ -101,10 +104,13 @@
       const token=tokens[i];
       if(token.kind==='word') { words.push(token); continue; }
       const op=token.value;
-      if(op==='>'||op==='>>'||op==='<') {
+      if(op==='>'||op==='>>'||op==='<'||op==='>&') {
         if(!tokens[i+1]||tokens[i+1].kind!=='word') fail('redirection requires a filename');
-        if(token.ioNumber!==null&&token.ioNumber!==undefined){words.pop();if(token.ioNumber!==(op==='<'?'0':'1'))fail(token.ioNumber==='2'?'stderr redirection is unsupported':'this file descriptor redirection is unsupported');}
-        redirs.push({op,target:tokens[++i]}); continue;
+        const fd=token.ioNumber===null||token.ioNumber===undefined?(op==='<'?0:1):Number(token.ioNumber);
+        if(token.ioNumber!==null&&token.ioNumber!==undefined)words.pop();
+        if(op==='<'?fd!==0:fd!==1&&fd!==2)fail('this file descriptor redirection is unsupported');
+        const target=tokens[++i];
+        redirs.push({op,fd,target}); continue;
       }
       if(op==='|') { finishCommand(); continue; }
       if(op===';'||op==='&&'||op==='||') {
@@ -142,10 +148,14 @@
     return index=>ranges.some(([a,b])=>index>=a&&index<=b);
   }
   class LogLabShell {
-    constructor(files={}) {
+    constructor(files={},options={}) {
       this.files=Object.create(null); this.directories=new Set(['/','/home','/home/analyst','/tmp']);
+      this.snapshotTime=Number.isFinite(options.snapshotTime)?options.snapshotTime:Date.UTC(2026,9,25,9);
+      this.clock=typeof options.now==='function'?options.now:()=>options.now===undefined?Date.now():new Date(options.now).getTime();
+      this.metadata=Object.create(null);this.lastExitCode=Number.isInteger(options.lastExitCode)?options.lastExitCode:0;
       this.cwd='/home/analyst'; this.oldcwd=this.cwd; this.history=[]; this.supportedCommands=COMMANDS.slice();
-      for(const [path,content] of Object.entries(files)) { const p=this.resolve(path); this.files[p]=String(content); this.addParents(p); }
+      for(const [path,content] of Object.entries(files)) { const p=this.resolve(path); this.files[p]=String(content); this.addParents(p);this.metadata[p]={mtime:this.snapshotTime}; }
+      for(const [path,entry] of Object.entries(options.metadata||{})){const mtime=new Date(entry.mtime).getTime();if(Number.isFinite(mtime))this.metadata[this.resolve(path)]={mtime};}
     }
     resolve(path) {
       const parts=(String(path).startsWith('/')?String(path):this.cwd+'/'+String(path)).split('/'), out=[];
@@ -156,7 +166,10 @@
     isFile(path) { return Object.prototype.hasOwnProperty.call(this.files,path); }
     isDir(path) { return this.directories.has(path) || Object.keys(this.files).some(p=>p.startsWith(path==='/'?'/':path+'/')); }
     allPaths() { for(const p of Object.keys(this.files)) this.addParents(p); return [...new Set([...this.directories,...Object.keys(this.files)])].sort(cmp); }
+    getMetadata(path) {const p=this.resolve(path);return this.metadata[p]||(this.metadata[p]={mtime:this.snapshotTime});}
     expand(token) {
+      if(token.statusOffsets?.length){if(this._traceVariables)this._traceVariables.add('?');let value=token.value,mask=token.mask.slice();for(const at of [...token.statusOffsets].reverse()){const status=String(this._expansionStatus===undefined?this.lastExitCode:this._expansionStatus);value=value.slice(0,at)+status+value.slice(at+2);mask.splice(at,2,...Array(status.length).fill(false));}token={...token,value,mask};}
+      if(token.tilde&&(token.value==='~'||token.value.startsWith('~/'))){const prefix='/home/analyst';token={...token,value:prefix+token.value.slice(1),mask:[...Array(prefix.length).fill(false),...token.mask.slice(1)]};}
       if(!token.mask.some(Boolean)) return [token.value];
       const segments=[]; let segment=[], offset=0;
       for(const part of token.value.split('/')) { const masks=token.mask.slice(offset,offset+part.length); offset+=part.length+1; if(!part||part==='.') continue; if(part==='..') segments.push({parent:true}); else segments.push({part,masks}); }
@@ -167,11 +180,12 @@
       return found.length?found:[token.value];
     }
     relative(path) { const a=this.cwd.split('/').filter(Boolean),b=path.split('/').filter(Boolean); while(a.length&&b.length&&a[0]===b[0]) { a.shift();b.shift(); } return [...a.map(()=>'..'),...b].join('/')||'.'; }
-    read(path, cmd='read') { const p=this.resolve(path); if(this.isDir(p)) fail(cmd+': '+path+': is a directory',1); if(!this.isFile(p)) fail(cmd+': '+path+': no such file',1); if(this._traceReads)this._traceReads.push(p); return this.files[p]; }
+    read(path, cmd='read') { const p=this.resolve(path);if(p==='/dev/null'){if(this._traceReads)this._traceReads.push(p);return '';} if(this.isDir(p)) fail(cmd+': '+path+': Is a directory',1); if(!this.isFile(p)) fail(cmd+': '+path+': No such file or directory',1); if(this._traceReads)this._traceReads.push(p); return this.files[p]; }
     inputs(paths, stdin, cmd) { return paths.length?paths.map(name=>({name,text:name==='-'?stdin:this.read(name,cmd)})):[{name:'-',text:stdin}]; }
-    write(path,text,append=false) { const p=this.resolve(path); if(this.isDir(p)) fail('redirection: '+path+': is a directory',1); if(!this.isDir(dirname(p))) fail('redirection: '+path+': parent directory does not exist',1); const value=(append&&this.isFile(p)?this.files[p]:'')+text; if(value.length>MAX_FILE) fail('virtual file exceeds the 2 MiB text limit',1); this.files[p]=value; this.addParents(p); }
+    write(path,text,append=false,cmd='redirection') { const p=this.resolve(path);if(p==='/dev/null')return; if(this.isDir(p)) fail(cmd+': '+path+': Is a directory',1); if(!this.isDir(dirname(p))) fail(cmd+': '+path+': No such file or directory',1); const value=(append&&this.isFile(p)?this.files[p]:'')+text; if(value.length>MAX_FILE) fail(cmd+': '+path+': virtual file exceeds the 2 MiB text limit',1); this.files[p]=value;this.getMetadata(p).mtime=this.clock(); this.addParents(p); }
     getHelp(command) {
       if(command) {
+        if(command==='man')return 'man COMMAND — この教材では help COMMAND をページ表示します。実機では man でマニュアルを読みます。\n';
         if(!COMMANDS.includes(command)) fail('help: unknown command '+command,1);
         let extra='';
         if(command==='grep') extra='\nDefault grep uses basic regex: + ? | ( ) are literal unless escaped; -E enables extended regex.\n-F matches literal text. -r/-R recurse (virtual filesystem has no symlinks); -m limits selected lines per file.\n-L lists files without matching lines. Exit status still follows line matches: 0 match, 1 no match, 2 error.\nLong aliases: --recursive, --ignore-case, --invert-match, --line-number, --count, --regexp,\n--fixed-strings, --extended-regexp, --word-regexp, --line-regexp, --only-matching, --quiet,\n--files-with-matches, --files-without-match, --max-count, --after-context, --before-context, --context.\n--include/--exclude filter basenames; --exclude-dir filters directory names with * and ? globs.\nPCRE (-P), binary options, and color flags are unsupported.';
@@ -190,7 +204,7 @@
         if(command==='uniq') extra='\nConsecutive equal lines only. -i ignores case, -f skips fields, -s skips characters for comparison.\nOriginal first lines are retained. Use sort before uniq to group scattered equal values.';
         if(command==='wc') extra='\n-l newline count, -w whitespace-separated words, -m Unicode characters, -c UTF-8 bytes.\n-L maximum display width with 8-column tab stops. Multiple-file totals use the maximum for -L.';
         if(command==='cut') extra='\nFields/ranges: 1,3-5,7-, -3. -s omits lines without a delimiter; otherwise those lines pass through.\n--complement reverses selection; --output-delimiter changes field separation (or gaps between character ranges).';
-        if(command==='ls') extra='\n-a includes dotfiles, -l shows virtual permissions/owner and text byte sizes, -h human sizes,\n-d lists directories themselves, -R recurses, -S sorts by size, -r reverses. No fabricated timestamps.\nDate ordering, symlinks, permissions changes, and other options are unsupported.';
+        if(command==='ls') extra='\n-a includes dotfiles, -l shows virtual permissions/owner and text byte sizes, -h human sizes,\n-d lists directories themselves, -R recurses, -S sorts by size, -t newest first, -r reverses.\nModification times are simulated fixture metadata in UTC, updated by touch/writes; not host filesystem times.\nThis text terminal always shows one item per line; -1 is also accepted. Symlinks and permission changes are unsupported.';
         if(command==='find') extra='\nOne starting path. Name/path predicates combine with AND; -iname/-ipath ignore case.\nQuoted * and ? globs are supported. The starting path has depth 0; no -exec or boolean expressions.';
         if(command==='printf') extra='\nFormats: %s %b %c %d %i %u %o %x %X %f %e %E %g %G and %%.\nSupports numeric width/precision, -/0 padding, standard backslash escapes, \\xHH and octal.\nFormat repeats for extra arguments. Safe JavaScript integers only; %q/%n and dynamic widths are unsupported.';
         if(command==='paste') extra='\nDefault joins corresponding lines with tabs; -s joins each file in sequence.\n-d cycles delimiter characters; standard backslash escapes and \\0 for an empty delimiter are supported.';
@@ -202,8 +216,8 @@
         if(command==='dirname') extra='\nReturn the lexical parent of each path; paths need not exist.';
         if(command==='realpath') extra='\nNormalize virtual absolute paths and .. / .; there are no symlinks.\nDefault requires an existing parent; -e requires the path to exist; -m permits missing parents.';
         if(command==='file') extra='\nClassify virtual text using its contents: empty, ASCII, UTF-8, JSON/JSONL, or data.\n-b suppresses filenames; -i gives a basic MIME/charset description. No executable or archive inspection.';
-        if(command==='stat') extra='\nVirtual metadata only; no real owners, timestamps, inode allocation, or device numbers.\n-c formats: %n name, %s text bytes, %F type, %a octal virtual mode, %A mode letters, %%.';
-        if(command==='du') extra='\nVirtual logical text size, not physical disk allocation. Default units are rounded-up KiB.\n-b reports bytes, -h human sizes, -s summarizes, -a includes files; --max-depth limits display depth.';
+        if(command==='stat') extra='\nVirtual metadata only; no real owners, inode allocation, or device numbers.\n-c formats: %n name, %s text bytes, %F type, %a octal virtual mode, %A mode letters,\n%y simulated UTC modification time, %Y epoch modification seconds, %%.';
+        if(command==='du') extra='\nVirtual logical text size, not physical disk allocation. Default units are rounded-up KiB.\n-b reports bytes, -h human sizes, -s summarizes, -a includes files, -c adds a total.\nDirectory allocation is not modeled; real du -b includes the size of each directory.\nTo total only file contents, use du -cb bundle/*.log | tail -n 1. --max-depth limits display depth.';
         if(command==='date') extra='\nBrowser clock by default; -u formats UTC. -d accepts timezone-qualified ISO, YYYY-MM-DD (UTC), or @epoch.\nFormats: %Y %m %d %e %H %M %S %F %T %s %z %Z %a %A %b %B %u %w %j %n %t %%.\nRelative dates, setting the clock, locale modes, and nanoseconds are unsupported.';
         if(command==='mv') extra='\nMove one virtual file or directory; -n preserves an existing destination. No interactive mode or merging directories.';
         if(command==='rmdir') extra='\nRemove empty virtual directories; -p also removes empty parents. Current directory and its ancestors are protected.';
@@ -213,10 +227,10 @@
       }
       return 'Linuxroom 学習用の仮想ターミナル — Linux コマンドの一部を再現\n'+
         'Commands: '+COMMANDS.join(', ')+'\n'+
-        'Syntax: single/double quotes, escapes, |, <, >, >>, ;, &&, ||, unquoted * and ? globs.\n'+
+        'Syntax: quotes, escapes, |, <, >, >>, 2>, 2>>, 2>&1, ;, &&, ||, unquoted ~ / * / ? and $? status.\n'+
         'Use help COMMAND for exact options. Files and redirects stay in virtual memory.\n'+
-        'No host OS, server execution, package installation, shell variables, scripts, or network.\n'+
-        'less/more open the viewer; q closes. help はこの教材専用のヘルプです。\n';
+        'No host OS, server execution, package installation, general shell variables, scripts, or network.\n'+
+        'less/more open the viewer; q closes. help は教材専用ヘルプ。実機では man COMMAND。man は教材ヘルプの別名です。\n';
     }
     complete(input) {
       const m=input.match(/(?:^|[\s|;])([^\s|;]*)$/); if(!m) return [];
@@ -249,71 +263,83 @@
     }
     run(input) {
       input=String(input);
-      if(input.length>MAX_INPUT) return {stdout:'',stderr:'shell: input exceeds 8192 characters\n',code:2,trace:[]};
-      if(input.includes('\0')) return {stdout:'',stderr:'shell: NUL bytes are unsupported\n',code:2,trace:[]};
+      if(input.length>MAX_INPUT) {this.lastExitCode=2;return {stdout:'',stderr:'shell: input exceeds 8192 characters\n',code:2,trace:[],connectors:[],flow:[]};}
+      if(input.includes('\0')) {this.lastExitCode=2;return {stdout:'',stderr:'shell: NUL bytes are unsupported\n',code:2,trace:[],connectors:[],flow:[]};}
       if(input.trim()) this.history.push(input);
-      let stdout='',stderr='',code=0,clear=false,pager=false;
-      const trace=[];
+      let stdout='',stderr='',code=this.lastExitCode,clear=false,pager=false;
+      const trace=[],connectors=[],flow=[];
       try {
         const chains=parse(lex(input));
+        connectors.push(...chains.slice(1).map(chain=>chain.connector));
         for(let pipeline=0;pipeline<chains.length;pipeline++) {
-          const chain=chains[pipeline];
-          if(chain.connector==='&&'&&code!==0 || chain.connector==='||'&&code===0) continue;
+          const chain=chains[pipeline],executed=!(chain.connector==='&&'&&code!==0 || chain.connector==='||'&&code===0);
+          flow.push({connector:chain.connector,pipeline,codeBefore:code,executed});
+          if(!executed) continue;
+          // All stages expand against the previous pipeline status, as in Bash.
+          this._expansionStatus=code;
           let data='',last={stdout:'',stderr:'',code:0};
           for(let nodeIndex=0;nodeIndex<chain.pipeline.length;nodeIndex++) {
-            const node=chain.pipeline[nodeIndex];
-            let target=null,stdin=data,words=node.words.map(t=>t.value), redirections=[];
-            const cwdBefore=this.cwd,reads=[];
-            this._traceReads=reads;
+            const node=chain.pipeline[nodeIndex],pipeSink={kind:'stdout'},errorSink={kind:'stderr'},fds={1:pipeSink,2:errorSink},openedOutputs=new Set();
+            let stdin=data,words=node.words.map(t=>t.value),redirections=[],argumentVariables=[],emittedStderr=false;
+            const cwdBefore=this.cwd,reads=[],variables=new Set();
+            this._traceReads=reads;this._traceVariables=variables;
             try {
               words=node.words.flatMap(t=>this.expand(t));
+              argumentVariables=[...variables];
               for(const r of node.redirs) {
+                if(r.op==='>&'){const targets=this.expand(r.target);if(targets.length!==1||!/^[12]$/.test(targets[0]))fail('descriptor duplication supports only 1 and 2');redirections.push({op:r.op,fd:r.fd,target:targets[0]});fds[r.fd]=fds[Number(targets[0])];continue;}
                 const targets=this.expand(r.target);
                 if(targets.length!==1) fail('ambiguous '+(r.op==='<'?'input':'output')+' redirection');
-                redirections.push({op:r.op,target:this.resolve(targets[0])});
+                const path=this.resolve(targets[0]);redirections.push({op:r.op,fd:r.fd,target:path});
                 if(r.op==='<') stdin=this.read(targets[0],'redirection');
-                else { this.write(targets[0],'',r.op==='>>');target=targets[0]; }
+                else {if(path!=='/dev/null'&&openedOutputs.has(path))fail('independent redirects to the same file are unsupported; use > file 2>&1 to share one descriptor');openedOutputs.add(path);this.write(targets[0],'',r.op==='>>');fds[r.fd]={kind:'file',path:targets[0]};}
               }
               last=this.execute(words[0],words.slice(1),stdin,{hasStdin:nodeIndex>0||node.redirs.some(r=>r.op==='<')});
             } catch(e) {
               last={stdout:'',stderr:(e instanceof ShellError?e.message:'shell: internal error')+'\n',code:e instanceof ShellError?e.code:2};
-            } finally { this._traceReads=null; }
+            } finally { this._traceReads=null;this._traceVariables=null; }
             last.stdout=last.stdout||''; last.stderr=last.stderr||''; last.code=last.code||0;
-            if(last.stdout.length>MAX_OUTPUT) { last.stdout=last.stdout.slice(0,MAX_OUTPUT);last.stderr+='shell: output truncated at 512 KiB; filter the data or redirect a smaller result\n';last.code=1; }
-            data=last.stdout;
-            if(target!==null) {
-              try { this.write(target,data,true);data=''; }
-              catch(e) { last.stderr+=(e instanceof ShellError?e.message:'shell: internal error')+'\n';last.code=e instanceof ShellError?e.code:2;data=''; }
+            if(last.stdout.length>MAX_OUTPUT) { last.stdout=last.stdout.slice(0,MAX_OUTPUT);last.stderr+='shell: output truncated at 512 KiB; filter the data or redirect a smaller result\n';last.code=1;delete last.events; }
+            data='';
+            for(const [fd,chunk] of last.events||[[1,last.stdout],[2,last.stderr]]) {
+              const sink=fds[fd];if(!chunk)continue;
+              if(sink.kind==='stdout')data+=chunk;
+              else if(sink.kind==='stderr'){stderr+=chunk;emittedStderr=true;}
+              else try {this.write(sink.path,chunk,true);}
+              catch(e) {const message=(e instanceof ShellError?e.message:'shell: internal error')+'\n';stderr+=message;emittedStderr=true;last.stderr+=message;last.code=e instanceof ShellError?e.code:2;}
             }
-            stderr+=last.stderr;
-            trace.push({command:words[0]||'',args:words.slice(1),stdin,stdout:last.stdout,stderr:last.stderr,code:last.code,cwdBefore,cwdAfter:this.cwd,pipeline,index:nodeIndex,connector:chain.connector,redirections,reads:[...new Set(reads)]});
+            trace.push({command:words[0]||'',args:words.slice(1),stdin,stdout:last.stdout,stderr:last.stderr,code:last.code,cwdBefore,cwdAfter:this.cwd,pipeline,index:nodeIndex,connector:chain.connector,redirections,argumentVariables,variables:[...variables],stderrRedirected:fds[2].kind!=='stderr'&&!emittedStderr,reads:[...new Set(reads)]});
             if(last.clear) clear=true;
-            if(nodeIndex===chain.pipeline.length-1)pager=Boolean(last.pager&&target===null);
+            if(nodeIndex===chain.pipeline.length-1)pager=Boolean(last.pager&&fds[1]===pipeSink);
           }
           stdout+=data;code=last.code;
           if(stdout.length>MAX_OUTPUT) {stdout=stdout.slice(0,MAX_OUTPUT);stderr+='shell: total output truncated at 512 KiB\n';code=1;break;}
         }
       } catch(e) {stderr+=(e instanceof ShellError?e.message:'shell: internal error')+'\n';code=e instanceof ShellError?e.code:2;}
-      return {stdout,stderr,code,trace,...(clear?{clear:true}:{}),...(pager?{pager:true}:{})};
+      finally {delete this._expansionStatus;}
+      this.lastExitCode=code;
+      return {stdout,stderr,code,trace,connectors,flow,...(clear?{clear:true}:{}),...(pager?{pager:true}:{})};
     }
     execute(cmd,args,stdin,context={}) {
       if(['vi','view','sl'].includes(cmd)) fail(cmd+': Linuxroom では利用できません。ファイルを読むには cat または less を使ってください。',127);
-      if(!COMMANDS.includes(cmd)) fail(cmd+': command not found. Type help for the supported training commands.',127);
+      if(!COMMANDS.includes(cmd)&&cmd!=='man') fail(cmd+': command not found. Type help for the supported training commands.',127);
       const result=(stdout='',code=0,extra={})=>({stdout,stderr:'',code,...extra});
       if(args.includes('--help')&&(args.indexOf('--')<0||args.indexOf('--help')<args.indexOf('--'))) return result(this.getHelp(cmd));
       switch(cmd) {
+        case 'man': if(args.length!==1)fail('man: one command name is required',2);return result('Linuxroom 学習用ヘルプ — 実機の man マニュアルではありません。実機では man COMMAND で詳細を調べます。\n\n'+this.getHelp(args[0]),0,{pager:true});
         case 'help': if(args.length>1) usageError(cmd,'too many arguments'); return result(this.getHelp(args[0]));
         case 'pwd': if(args.length) usageError(cmd,'no options are supported'); return result(this.cwd+'\n');
         case 'clear': if(args.length) usageError(cmd,'no arguments are supported'); return result('',0,{clear:true});
         case 'sl': if(args.length)usageError(cmd,'no options or arguments are supported');return result('',0,{train:true});
         case 'history': if(args.length) usageError(cmd,'no arguments are supported'); return result(lineOutput(this.history.map((x,i)=>String(i+1).padStart(4)+'  '+x)));
-        case 'cd': { if(args.length>1) usageError(cmd,'too many arguments'); const dest=args[0]==='-'?this.oldcwd:this.resolve(args[0]||'/home/analyst'); if(!this.isDir(dest)) fail('cd: '+(args[0]||dest)+': no such directory',1); const old=this.cwd;this.cwd=dest;this.oldcwd=old;return result(args[0]==='-'?dest+'\n':''); }
+        case 'cd': { if(args.length>1) usageError(cmd,'too many arguments'); const dest=args[0]==='-'?this.oldcwd:this.resolve(args[0]||'/home/analyst'); if(!this.isDir(dest)) fail('cd: '+(args[0]||dest)+': '+(this.isFile(dest)?'Not a directory':'No such file or directory'),1); const old=this.cwd;this.cwd=dest;this.oldcwd=old;return result(args[0]==='-'?dest+'\n':''); }
         case 'echo': { let n=false; if(args[0]==='-n'){n=true;args=args.slice(1);} if(args[0]==='-e'||args[0]==='-E') usageError(cmd,'escape expansion options are unsupported'); return result(args.join(' ')+(n?'':'\n')); }
         case 'ls': return result(runLs(this,args));
-        case 'cat': { const {flags,rest}=simpleOptions(args,'n',cmd), text=this.inputs(rest,stdin,cmd).map(f=>f.text).join(''); if(!flags.has('n')) return result(text); return result(lineChunks(text).map((line,i)=>String(i+1).padStart(6)+'\t'+line).join('')); }
+        case 'cat': {const {flags,rest}=simpleOptions(args,'n',cmd);let text='',stderr='',code=0,lineNumber=0,lineStart=true;const events=[];for(const path of rest.length?rest:['-']){try{let chunk=path==='-'?stdin:this.read(path,cmd);if(flags.has('n'))chunk=lineChunks(chunk).map(line=>{const numbered=(lineStart?String(++lineNumber).padStart(6)+'\t':'')+line;lineStart=line.endsWith('\n');return numbered;}).join('');text+=chunk;events.push([1,chunk]);}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';events.push([2,e.message+'\n']);code=1;}}return {stdout:text,stderr,code,events};}
+        case 'zcat': case 'zgrep': case 'zless': {const decompression=this.decompressing;this.decompressing=true;try{if(cmd==='zgrep')return this.grep(args,stdin);const {rest}=simpleOptions(args,'',cmd);if(!rest.length||rest.includes('-'))usageError(cmd,'named gzip fixtures are required; binary standard input is unsupported');const texts=rest.map(path=>{const text=this.read(path,cmd);if(!this.getMetadata(path).compressed)fail(cmd+': '+path+': not in gzip format (use cat for plain text)',1);return text;});return result(texts.join(''),0,cmd==='zless'?{pager:true}:{});}finally{this.decompressing=decompression;}}
         case 'tac': {const {rest}=simpleOptions(args,'',cmd);return result(this.inputs(rest,stdin,cmd).map(f=>lineChunks(f.text).reverse().join('')).join(''));}
         case 'base64': return result(runBase64(this,args,stdin));
-        case 'tee': {const {flags,rest}=simpleOptions(args,'a',cmd);let stderr='',code=0;for(const path of rest){try{this.write(path,stdin,flags.has('a'));}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';code=1;}}return {stdout:stdin,stderr,code};}
+        case 'tee': {const {flags,rest}=simpleOptions(args,'a',cmd);let stderr='',code=0;for(const path of rest){try{this.write(path,stdin,flags.has('a'),cmd);}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';code=1;}}return {stdout:stdin,stderr,code};}
         case 'less': case 'more': { const {rest}=simpleOptions(args,'',cmd); return result(this.inputs(rest,stdin,cmd).map(f=>f.text).join(''),0,{pager:true}); }
         case 'grep': return this.grep(args,stdin);
         case 'rg': return this.rg(args,stdin,context.hasStdin);
@@ -341,17 +367,17 @@
         case 'file': case 'stat': case 'du': return result(runMetadata(this,cmd,args));
         case 'date': return result(runDate(args));
         case 'mv': case 'rmdir': return result(runMove(this,cmd,args));
-        case 'vi': case 'view': {const {rest}=simpleOptions(args,'',cmd);if(rest.length>1)usageError(cmd,'only one file is supported');const path=this.resolve(rest[0]||'/home/analyst/untitled.txt');if(this.isDir(path))fail(cmd+': '+path+': is a directory',1);if(!this.isFile(path)){if(cmd==='view')fail('view: '+path+': no such file',1);if(!this.isDir(dirname(path)))fail('vi: parent directory does not exist',1);}return result('',0,{editor:{path,text:this.isFile(path)?this.files[path]:'',readonly:cmd==='view'}});}
-        case 'mkdir': { const {flags,rest}=simpleOptions(args,'p',cmd); if(!rest.length) usageError(cmd,'missing directory'); for(const name of rest) {const p=this.resolve(name);if(this.isFile(p)) fail('mkdir: '+name+': file exists',1);if(this.isDir(p)&&!flags.has('p')) fail('mkdir: '+name+': directory exists',1);if(!flags.has('p')&&!this.isDir(dirname(p)))fail('mkdir: '+name+': parent directory does not exist',1);this.directories.add(p);this.addParents(p);}return result(); }
-        case 'touch': { const {rest}=simpleOptions(args,'',cmd);if(!rest.length)usageError(cmd,'missing file');for(const name of rest){const p=this.resolve(name);if(!this.isFile(p)&&!this.isDir(p))this.write(name,'');}return result(); }
-        case 'cp': { const {rest}=simpleOptions(args,'',cmd);if(rest.length!==2)usageError(cmd,'exactly two paths are required');let to=this.resolve(rest[1]);if(this.isDir(to))to+=(to==='/'?'':'/')+basename(this.resolve(rest[0]));if(to===this.resolve(rest[0]))fail('cp: source and destination are the same file',1);this.write(to,this.read(rest[0],cmd));return result(); }
-        case 'rm': { const {flags,rest}=simpleOptions(args,'f',cmd);if(!rest.length&&!flags.has('f'))usageError(cmd,'missing file');for(const name of rest){const p=this.resolve(name);if(this.isDir(p))fail('rm: '+name+': directories cannot be removed by this training command',1);if(!this.isFile(p)&&!flags.has('f'))fail('rm: '+name+': no such file',1);delete this.files[p];}return result(); }
+        case 'vi': case 'view': {const {rest}=simpleOptions(args,'',cmd);if(rest.length>1)usageError(cmd,'only one file is supported');const path=this.resolve(rest[0]||'/home/analyst/untitled.txt');if(this.isDir(path))fail(cmd+': '+path+': Is a directory',1);if(!this.isFile(path)){if(cmd==='view')fail('view: '+path+': No such file or directory',1);if(!this.isDir(dirname(path)))fail('vi: No such file or directory',1);}return result('',0,{editor:{path,text:this.isFile(path)?this.files[path]:'',readonly:cmd==='view'}});}
+        case 'mkdir': { const {flags,rest}=simpleOptions(args,'p',cmd); if(!rest.length) usageError(cmd,'missing directory'); for(const name of rest) {const p=this.resolve(name);if(this.isFile(p)) fail('mkdir: '+name+': File exists',1);if(this.isDir(p)&&!flags.has('p')) fail('mkdir: '+name+': File exists',1);if(!flags.has('p')&&!this.isDir(dirname(p)))fail('mkdir: '+name+': No such file or directory',1);this.directories.add(p);this.addParents(p);}return result(); }
+        case 'touch': { const {rest}=simpleOptions(args,'',cmd);if(!rest.length)usageError(cmd,'missing file');for(const name of rest){const p=this.resolve(name);if(!this.isFile(p)&&!this.isDir(p))this.write(name,'',false,cmd);this.getMetadata(p).mtime=this.clock();}return result(); }
+        case 'cp': { const {rest}=simpleOptions(args,'',cmd);if(rest.length!==2)usageError(cmd,'exactly two paths are required');let to=this.resolve(rest[1]);if(this.isDir(to))to+=(to==='/'?'':'/')+basename(this.resolve(rest[0]));if(to===this.resolve(rest[0]))fail('cp: source and destination are the same file',1);this.write(to,this.read(rest[0],cmd),false,cmd);return result(); }
+        case 'rm': { const {flags,rest}=simpleOptions(args,'f',cmd);if(!rest.length&&!flags.has('f'))usageError(cmd,'missing file');for(const name of rest){const p=this.resolve(name);if(this.isDir(p))fail('rm: '+name+': Is a directory',1);if(!this.isFile(p)&&!flags.has('f'))fail('rm: '+name+': No such file or directory',1);delete this.files[p];delete this.metadata[p];}return result(); }
       }
     }
     ls(args) {
       const {flags,rest}=simpleOptions(args,'alh','ls'), paths=rest.length?rest:['.'], sections=[];
       const format=(p,name)=>{ if(!flags.has('l'))return name;const dir=this.isDir(p),size=dir?0:bytes(this.files[p]);let shown=String(size);if(flags.has('h')&&size>=1024)shown=(size/1024).toFixed(size<10240?1:0)+'K';return (dir?'drwxr-xr-x':'-rw-r--r--')+' 1 analyst analyst '+shown.padStart(7)+' '+name; };
-      for(const name of paths){const p=this.resolve(name);if(this.isFile(p)){sections.push(format(p,name));continue;}if(!this.isDir(p))fail('ls: '+name+': no such file or directory',1);let children=this.allPaths().filter(x=>x!==p&&dirname(x)===p).filter(x=>flags.has('a')||!basename(x).startsWith('.'));let rows=children.map(x=>format(x,basename(x)));if(flags.has('a'))rows=[format(p,'.'),format(dirname(p),'..'),...rows];sections.push((paths.length>1?name+':\n':'')+rows.join('\n'));}
+      for(const name of paths){const p=this.resolve(name);if(this.isFile(p)){sections.push(format(p,name));continue;}if(!this.isDir(p))fail('ls: '+name+': No such file or directory',1);let children=this.allPaths().filter(x=>x!==p&&dirname(x)===p).filter(x=>flags.has('a')||!basename(x).startsWith('.'));let rows=children.map(x=>format(x,basename(x)));if(flags.has('a'))rows=[format(p,'.'),format(dirname(p),'..'),...rows];sections.push((paths.length>1?name+':\n':'')+rows.join('\n'));}
       return sections.join('\n\n')+(sections.some(Boolean)?'\n':'');
     }
     rg(args,stdin,hasStdin) {
@@ -369,17 +395,17 @@
       if(filesMode&&patterns.length)usageError('rg','--files does not accept a search pattern');
       const fromStdin=!filesMode&&!paths.length&&hasStdin;
       const finish=result=>{if(passed.includes('-c')&&!passed.includes('-q'))result.stdout=lineOutput(asLines(result.stdout).filter(line=>line!=='0'&&!/:0$/.test(line)));return result;};
-      if(fromStdin){if(globs.length)usageError('rg','-g requires filesystem input');return finish(this.grep([...(!fixed?['-E']:[]),...passed,...patterns.flatMap(p=>['-e',p])],stdin));}
+      if(fromStdin){if(globs.length)usageError('rg','-g requires filesystem input');return finish(this.grep([...(!fixed?['-E']:[]),...passed,...patterns.flatMap(p=>['-e',p])],stdin,{allowDigitEscapes:true}));}
       let recurse=false;const candidates=[];
-      for(const path of paths.length?paths:['.']){const p=this.resolve(path);if(this.isDir(p)){recurse=true;for(const file of Object.keys(this.files).filter(f=>f.startsWith(p==='/'?'/':p+'/')).sort(cmp))candidates.push({p:file,name:path.startsWith('/')?file:this.relative(file)});}else{if(!this.isFile(p))fail('rg: '+path+': no such file',2);candidates.push({p,name:path});}}
+      for(const path of paths.length?paths:['.']){const p=this.resolve(path);if(this.isDir(p)){recurse=true;for(const file of Object.keys(this.files).filter(f=>f.startsWith(p==='/'?'/':p+'/')).sort(cmp))candidates.push({p:file,name:path.startsWith('/')?file:this.relative(file)});}else{if(!this.isFile(p))fail('rg: '+path+': No such file or directory',2);candidates.push({p,name:path});}}
       const matchGlob=(pattern,path)=>{const target=pattern.includes('/')?path:basename(path);let s='';for(let i=0;i<pattern.length;i++){const c=pattern[i];if(c==='*'&&pattern[i+1]==='*'){i++;if(pattern[i+1]==='/'){i++;s+='(?:.*/)?';}else s+='.*';}else s+=c==='*'?'[^/]*':c==='?'?'[^/]':escRE(c);}return new RegExp('^'+s+'$').test(target)||new RegExp('^'+s+'$').test(path.replace(/^\//,''));};
       const includes=globs.filter(g=>!g.startsWith('!')),excludes=globs.filter(g=>g.startsWith('!')).map(g=>g.slice(1));
       const seen=new Set(),selected=candidates.filter(f=>{if(seen.has(f.p))return false;seen.add(f.p);return (hidden||!this.relative(f.p).split('/').some(seg=>seg.startsWith('.')&&seg!=='.'&&seg!=='..'))&&(!includes.length||includes.some(g=>matchGlob(g,f.name)))&&!excludes.some(g=>matchGlob(g,f.name));});
       if(filesMode)return {stdout:lineOutput(selected.map(f=>f.name)),stderr:'',code:selected.length?0:1};
       if(!selected.length)return {stdout:'',stderr:'',code:1};
-      return finish(this.grep([...(!fixed?['-E']:[]),...(recurse?['-H']:[]),...passed,...patterns.flatMap(p=>['-e',p]),'--',...selected.map(f=>f.name)],stdin));
+      return finish(this.grep([...(!fixed?['-E']:[]),...(recurse?['-H']:[]),...passed,...patterns.flatMap(p=>['-e',p]),'--',...selected.map(f=>f.name)],stdin,{allowDigitEscapes:true}));
     }
-    grep(args,stdin) {
+    grep(args,stdin,options={}) {
       args=longOptions(args,{'--recursive':'r','--dereference-recursive':'R','--ignore-case':'i','--invert-match':'v','--line-number':'n','--count':'c','--files-with-matches':'l','--files-without-match':'L','--only-matching':'o','--quiet':'q','--word-regexp':'w','--line-regexp':'x','--fixed-strings':'F','--extended-regexp':'E','--no-filename':'h','--with-filename':'H'},{'--regexp':'e','--max-count':'m','--after-context':'A','--before-context':'B','--context':'C','--include':'--include','--exclude':'--exclude','--exclude-dir':'--exclude-dir'},'grep');
       const flags=new Set(), patterns=[],paths=[],includes=[],excludes=[],excludedDirs=[];let after=false,A=0,B=0,maxCount=Infinity;
       for(let i=0;i<args.length;i++){
@@ -397,6 +423,7 @@
       if(flags.has('E')&&flags.has('F'))usageError('grep','-E and -F cannot be combined');
       const matchers=patterns.flatMap(p=>p.split('\n')).map(p=>{
         if(flags.has('F'))return {fixed:flags.has('i')?p.toLowerCase():p};
+        if(!options.allowDigitEscapes){for(let i=0;i<p.length;i++)if(p[i]==='\\'){if(/[dD]/.test(p[i+1]||''))usageError('grep','\\d/\\D are not supported by BRE/ERE grep; use [0-9] or [[:digit:]] (negate with [^0-9]); PCRE -P is unavailable');i++;}}
         return {re:regex(p,flags.has('E'),flags.has('i'))};
       });
       const isWord=c=>Boolean(c&&/[A-Za-z0-9_]/.test(c));
@@ -414,9 +441,8 @@
       if(flags.has('r')||flags.has('R')){expanded=[];for(const name of paths.length?paths:['.']){const p=this.resolve(name);if(this.isDir(p)){recursiveDirectory=true;expanded.push(...Object.keys(this.files).filter(x=>x.startsWith(p==='/'?'/':p+'/')).sort(cmp).map(x=>name.startsWith('/')?x:name.replace(/\/$/,'')+'/'+x.slice(p.length+1)));}else expanded.push(name);}}
       expanded=expanded.filter(path=>path==='-'||(!includes.length||includes.some(g=>globMatch(g,basename(path))))&&!excludes.some(g=>globMatch(g,basename(path)))&&!excludedDirs.some(g=>dirname(this.resolve(path)).split('/').some(d=>globMatch(g,d))));
       if(!expanded.length&&paths.length)return {stdout:'',stderr:'',code:1};
-      let inputs;try{inputs=this.inputs(expanded,stdin,'grep');}catch(e){if(e instanceof ShellError)e.code=2;throw e;}
-      const withName=flags.has('H')||(!flags.has('h')&&(inputs.length>1||recursiveDirectory));let any=false,out=[];
-      for(const file of inputs){const lines=asLines(file.text),chosen=[],hits=[];for(let i=0;i<lines.length;i++){hits[i]=matches(lines[i]);if(chosen.length<maxCount&&(flags.has('v')?!hits[i].length:hits[i].length)){chosen.push(i);any=true;}}
+      const inputs=expanded.length?expanded.map(name=>({name})):[{name:'-',text:stdin}],withName=flags.has('H')||(!flags.has('h')&&(inputs.length>1||recursiveDirectory));let any=false,out=[],stderr='';
+      for(const file of inputs){try{file.text=file.name==='-'?stdin:this.read(file.name,'grep');}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';continue;}const lines=asLines(file.text),chosen=[],hits=[];for(let i=0;i<lines.length;i++){hits[i]=matches(lines[i]);if(chosen.length<maxCount&&(flags.has('v')?!hits[i].length:hits[i].length)){chosen.push(i);any=true;}}
         if(flags.has('q'))continue;
         const prefix=withName?(file.name==='-'?'(standard input)':file.name)+':':'';
         if(flags.has('l')){if(chosen.length)out.push(file.name==='-'?'(standard input)':file.name);continue;}
@@ -426,7 +452,7 @@
         const selected=new Set(chosen),visible=new Set();for(const n of chosen)for(let i=Math.max(0,n-B);i<=Math.min(lines.length-1,n+A);i++)visible.add(i);
         let previous=-2;for(const i of [...visible].sort((a,b)=>a-b)){if((A||B)&&previous>=0&&i>previous+1)out.push('--');const sep=selected.has(i)?':':'-';out.push((withName?(file.name==='-'?'(standard input)':file.name)+sep:'')+(flags.has('n')?(i+1)+sep:'')+lines[i]);previous=i;}
       }
-      return {stdout:lineOutput(out),stderr:'',code:any?0:1};
+      return {stdout:lineOutput(out),stderr,code:flags.has('q')&&any?0:stderr?2:any?0:1};
     }
     sort(args,stdin) {
       const flags=new Set(),paths=[];let key=null,delim=null,after=false,keyNumeric=false,keyReverse=false;
@@ -470,7 +496,7 @@
     find(args) {
       let path='.',type=null,name=null,i=0;if(args[0]&&!args[0].startsWith('-'))path=args[i++];
       for(;i<args.length;i++){if(args[i]==='-type'){type=args[++i];if(type!=='f'&&type!=='d')usageError('find','-type supports f or d');}else if(args[i]==='-name'){name=args[++i];if(name===undefined)usageError('find','-name requires a quoted pattern');}else usageError('find','unsupported predicate '+args[i]);}
-      const start=this.resolve(path);if(!this.isFile(start)&&!this.isDir(start))fail('find: '+path+': no such file or directory',1);const matcher=name===null?null:new RegExp('^'+Array.from(name).map(c=>c==='*'?'.*':c==='?'?'.':escRE(c)).join('')+'$');
+      const start=this.resolve(path);if(!this.isFile(start)&&!this.isDir(start))fail('find: '+path+': No such file or directory',1);const matcher=name===null?null:new RegExp('^'+Array.from(name).map(c=>c==='*'?'.*':c==='?'?'.':escRE(c)).join('')+'$');
       return lineOutput(this.allPaths().filter(p=>(p===start||p.startsWith(start==='/'?'/':start+'/'))&&(!type||(type==='f'?this.isFile(p):this.isDir(p)))&&(!matcher||matcher.test(basename(p)))).map(p=>path.startsWith('/')?p:path==='.'?(p===this.cwd?'.':'./'+this.relative(p)):path.replace(/\/$/,'')+p.slice(start.length)));
     }
     awk(args,stdin) { return runAwk(this,args,stdin); }
@@ -487,13 +513,18 @@
     for(let i=0;i<args.length;i++){const arg=args[i];if(!after&&arg==='--'){after=true;continue;}if(!after&&arg.startsWith('-')&&arg!=='-'){for(let j=1;j<arg.length;j++){const f=arg[j];if(valued.includes(f)){const t=takeValue(args,i,arg.slice(j+1),cmd,'-'+f);i=t.next;values[f]=t.value;break;}if(!allowed.includes(f))usageError(cmd,'unsupported option -'+f);flags.add(f);}}else rest.push(arg);}return {flags,values,rest};
   }
   function positive(value,cmd,name,zero=false) {if(!/^\d+$/.test(value)||+value<(zero?0:1)||+value>1000000)usageError(cmd,name+' must be '+(zero?'nonnegative':'positive')+' and at most 1000000');return +value;}
+  function lsTimestamp(time) {const date=new Date(time),months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return months[date.getUTCMonth()]+' '+String(date.getUTCDate()).padStart(2)+' '+String(date.getUTCHours()).padStart(2,'0')+':'+String(date.getUTCMinutes()).padStart(2,'0');}
   function humanSize(n) {if(n<1024)return String(n);const units=['K','M','G'];let i=-1;do{n/=1024;i++;}while(n>=1024&&i<units.length-1);return n.toFixed(n<10?1:0)+units[i];}
   function runLs(shell,args) {
-    args=longOptions(args,{'--all':'a','--directory':'d','--recursive':'R','--reverse':'r','--human-readable':'h'},{},'ls');
-    const {flags,rest}=simpleOptions(args,'alhdRSr','ls'),paths=rest.length?rest:['.'],sections=[];
-    const format=(p,name)=>{if(!flags.has('l'))return name;const dir=shell.isDir(p),size=dir?0:bytes(shell.files[p]);return (dir?'drwxr-xr-x':'-rw-r--r--')+' 1 analyst analyst '+(flags.has('h')?humanSize(size):String(size)).padStart(7)+' '+name;};
-    const visit=(p,label,heading)=>{let children=shell.allPaths().filter(x=>x!==p&&dirname(x)===p).filter(x=>flags.has('a')||!basename(x).startsWith('.'));children.sort((a,b)=>(flags.has('S')?(shell.isDir(b)?0:bytes(shell.files[b]))-(shell.isDir(a)?0:bytes(shell.files[a])):0)||cmp(basename(a),basename(b)));if(flags.has('r'))children.reverse();const rows=children.map(x=>format(x,basename(x)));if(flags.has('a'))rows.unshift(format(p,'.'),format(dirname(p),'..'));sections.push((heading?label+':\n':'')+rows.join('\n'));if(flags.has('R'))for(const child of children)if(shell.isDir(child))visit(child,label.replace(/\/$/,'')+'/'+basename(child),true);};
-    for(const name of paths){const p=shell.resolve(name);if(shell.isFile(p)||flags.has('d')&&shell.isDir(p))sections.push(format(p,name));else if(shell.isDir(p))visit(p,name,paths.length>1||flags.has('R'));else fail('ls: '+name+': no such file or directory',1);}
+    let sort='name',after=false;const cleaned=[];for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--'){after=true;cleaned.push(arg);continue;}if(!after&&(arg==='--sort'||arg.startsWith('--sort='))){sort=arg==='--sort'?args[++i]:arg.slice(7);if(!['time','size','name'].includes(sort))usageError('ls','--sort supports time, size, or name');}else{if(!after&&/^-[^-]/.test(arg))for(const f of arg.slice(1))if(f==='t'||f==='S')sort=f==='t'?'time':'size';cleaned.push(arg);}}
+    args=longOptions(cleaned,{'--all':'a','--directory':'d','--recursive':'R','--reverse':'r','--human-readable':'h'},{},'ls');
+    const {flags,rest}=simpleOptions(args,'1alhdtRSr','ls'),paths=rest.length?rest:['.'],sections=[],fileRows=[];
+    const format=(p,name)=>{if(!flags.has('l'))return name;const dir=shell.isDir(p),size=dir?0:bytes(shell.files[p]),meta=shell.getMetadata(p);return (dir?'drwxr-xr-x':'-rw-r--r--')+' 1 analyst analyst '+(flags.has('h')?humanSize(size):String(size)).padStart(7)+' '+lsTimestamp(meta.mtime)+' '+name;};
+    const compare=(a,b)=>(sort==='time'?shell.getMetadata(b).mtime-shell.getMetadata(a).mtime:sort==='size'?(shell.isDir(b)?0:bytes(shell.files[b]))-(shell.isDir(a)?0:bytes(shell.files[a])):0)||cmp(basename(a),basename(b));
+    const visit=(p,label,heading)=>{let children=shell.allPaths().filter(x=>x!==p&&dirname(x)===p).filter(x=>flags.has('a')||!basename(x).startsWith('.'));children.sort(compare);if(flags.has('r'))children.reverse();const rows=children.map(x=>format(x,basename(x)));if(flags.has('a'))rows.unshift(format(p,'.'),format(dirname(p),'..'));sections.push((heading?label+':\n':'')+rows.join('\n'));if(flags.has('R'))for(const child of children)if(shell.isDir(child))visit(child,label.replace(/\/$/,'')+'/'+basename(child),true);};
+    for(const name of paths){const p=shell.resolve(name);if(shell.isFile(p)||flags.has('d')&&shell.isDir(p))fileRows.push({p,name});else if(!shell.isDir(p))fail('ls: '+name+': No such file or directory',1);}
+    fileRows.sort((a,b)=>compare(a.p,b.p));if(flags.has('r'))fileRows.reverse();if(fileRows.length)sections.push(fileRows.map(f=>format(f.p,f.name)).join('\n'));
+    for(const name of paths){const p=shell.resolve(name);if(!flags.has('d')&&shell.isDir(p))visit(p,name,paths.length>1||flags.has('R'));}
     return sections.join('\n\n')+(sections.some(Boolean)?'\n':'');
   }
   function runSort(shell,args,stdin) {
@@ -532,7 +563,7 @@
   function runFind(shell,args) {
     let path='.',type=null,min=0,max=Infinity,i=0;const predicates=[];if(args[0]&&!args[0].startsWith('-'))path=args[i++];
     for(;i<args.length;i++){const flag=args[i],value=args[++i];if(value===undefined)usageError('find',flag+' requires a value');if(flag==='-type'){if(value!=='f'&&value!=='d')usageError('find','-type supports f or d');type=value;}else if(flag==='-maxdepth')max=positive(value,'find','maximum depth',true);else if(flag==='-mindepth')min=positive(value,'find','minimum depth',true);else if(['-name','-iname','-path','-ipath'].includes(flag))predicates.push({flag,value});else usageError('find','unsupported predicate '+flag);}
-    const start=shell.resolve(path);if(!shell.isFile(start)&&!shell.isDir(start))fail('find: '+path+': no such file or directory',1);const label=p=>path.startsWith('/')?p:path==='.'?(p===shell.cwd?'.':'./'+shell.relative(p)):path.replace(/\/$/,'')+p.slice(start.length);
+    const start=shell.resolve(path);if(!shell.isFile(start)&&!shell.isDir(start))fail('find: '+path+': No such file or directory',1);const label=p=>path.startsWith('/')?p:path==='.'?(p===shell.cwd?'.':'./'+shell.relative(p)):path.replace(/\/$/,'')+p.slice(start.length);
     return lineOutput(shell.allPaths().filter(p=>{if(p!==start&&!p.startsWith(start==='/'?'/':start+'/'))return false;const depth=p===start?0:p.slice(start==='/'?1:start.length+1).split('/').length;return depth>=min&&depth<=max&&(!type||(type==='f'?shell.isFile(p):shell.isDir(p)))&&predicates.every(pred=>globMatch(pred.value,pred.flag.includes('path')?label(p):basename(p),pred.flag.startsWith('-i')));}).map(label));
   }
   function sedScripts(source) {
@@ -559,7 +590,7 @@
           if(command.action==='p')out.push(line+ending);else if(command.action==='d'){deleted=true;break;}else{const s=command.substitute,changed=s.base.test(line);line=line.replace(s.re,(...a)=>{const full=a[0],groups=a.slice(1,-2);return s.replacement.replace(/\\([1-9&\\])|&/g,(m,g)=>g?g==='&'?'&':g==='\\'?'\\':groups[+g-1]||'':full);});if(changed&&s.print)out.push(line+ending);}}
         if(!quiet&&!deleted)out.push(line+ending);
       }return out.join('');};
-    const inputs=shell.inputs(paths,stdin,'sed');if(inplace){for(const input of inputs){const output=apply(input.text);if(suffix)shell.write(input.name+suffix,input.text);shell.write(input.name,output);}return '';}return apply('',inputs.flatMap(f=>lineChunks(f.text)));
+    const inputs=shell.inputs(paths,stdin,'sed');if(inplace){for(const input of inputs){const output=apply(input.text);if(suffix)shell.write(input.name+suffix,input.text,false,'sed');shell.write(input.name,output,false,'sed');}return '';}return apply('',inputs.flatMap(f=>lineChunks(f.text)));
   }
   function decodeTextEscapes(source,cmd) {
     let out='';for(let i=0;i<source.length;i++){if(source[i]!=='\\'){out+=source[i];continue;}const c=source[++i];if(c===undefined)usageError(cmd,'unfinished backslash escape');const map={n:'\n',r:'\r',t:'\t',a:'\x07',b:'\b',f:'\f',v:'\v','\\':'\\'};if(Object.prototype.hasOwnProperty.call(map,c)){out+=map[c];continue;}if(c==='x'){const m=source.slice(i+1).match(/^[0-9a-fA-F]{1,2}/);if(!m)usageError(cmd,'\\x requires hexadecimal digits');out+=String.fromCharCode(parseInt(m[0],16));i+=m[0].length;continue;}if(/[0-7]/.test(c)){const m=source.slice(i).match(/^[0-7]{1,3}/);out+=String.fromCharCode(parseInt(m[0],8));i+=m[0].length-1;continue;}usageError(cmd,'unsupported escape \\'+c);}return out;
@@ -605,13 +636,13 @@
   function runPaths(shell,cmd,args) {
     if(cmd==='basename'){const {flags,values,rest}=parseValued(args,'a','s',cmd);if(!rest.length)usageError(cmd,'missing path');let suffix=values.s,names=rest;if(!flags.has('a')&&values.s===undefined){if(rest.length>2)usageError(cmd,'too many operands; use -a for multiple paths');names=[rest[0]];suffix=rest[1];}return lineOutput(names.map(path=>{let name=pathBase(path);if(suffix&&name!==suffix&&name.endsWith(suffix))name=name.slice(0,-suffix.length);return name;}));}
     if(cmd==='dirname'){const {rest}=simpleOptions(args,'',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(pathDir));}
-    const {flags,rest}=simpleOptions(args,'me',cmd);if(!rest.length)usageError(cmd,'missing path');if(flags.has('m')&&flags.has('e'))usageError(cmd,'choose -m or -e');return lineOutput(rest.map(path=>{const p=shell.resolve(path);if(flags.has('e')&&!shell.isFile(p)&&!shell.isDir(p)||!flags.has('m')&&!shell.isDir(dirname(p)))fail('realpath: '+path+': no such file or directory',1);return p;}));
+    const {flags,rest}=simpleOptions(args,'me',cmd);if(!rest.length)usageError(cmd,'missing path');if(flags.has('m')&&flags.has('e'))usageError(cmd,'choose -m or -e');return lineOutput(rest.map(path=>{const p=shell.resolve(path);if(flags.has('e')&&!shell.isFile(p)&&!shell.isDir(p)||!flags.has('m')&&!shell.isDir(dirname(p)))fail('realpath: '+path+': No such file or directory',1);return p;}));
   }
   function runMetadata(shell,cmd,args) {
-    if(cmd==='file'){const {flags,rest}=simpleOptions(args,'bi',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(path=>{const p=shell.resolve(path);let description;if(shell.isDir(p))description=flags.has('i')?'inode/directory; charset=binary':'directory';else if(!shell.isFile(p))fail('file: '+path+': no such file',1);else{const text=shell.files[p],ascii=/^[\x00-\x7f]*$/.test(text),binary=/[\x00-\x08\x0e-\x1f]/.test(text);if(flags.has('i'))description=(binary?'application/octet-stream':text.trim()&&(()=>{try{JSON.parse(text);return true;}catch(_){return false;}})()?'application/json':'text/plain')+'; charset='+(binary?'binary':ascii?'us-ascii':'utf-8');else if(!text)description='empty';else if(binary)description='data';else{let json=false,jsonl=false;try{JSON.parse(text);json=true;}catch(_){try{const rows=asLines(text).filter(s=>s.trim());if(rows.length>1){rows.forEach(s=>JSON.parse(s));jsonl=true;}}catch(_){}}description=json?'JSON text data':jsonl?'JSON Lines text data':ascii?'ASCII text':'UTF-8 Unicode text';}}return (flags.has('b')?'':path+': ')+description;}));}
-    if(cmd==='stat'){const {values,rest}=parseValued(args,'','c',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(path=>{const p=shell.resolve(path),dir=shell.isDir(p);if(!dir&&!shell.isFile(p))fail('stat: '+path+': no such file',1);const data={n:path,s:String(dir?0:bytes(shell.files[p])),F:dir?'directory':'regular file',a:dir?'755':'644',A:dir?'drwxr-xr-x':'-rw-r--r--'};if(values.c!==undefined)return values.c.replace(/%(%|[A-Za-z])/g,(_,key)=>{if(key==='%')return '%';if(!Object.prototype.hasOwnProperty.call(data,key))usageError(cmd,'unsupported format %'+key);return data[key];});return '  File: '+path+'\n  Size: '+data.s+' bytes\n  Type: '+data.F+'\n  Mode: '+data.a+' ('+data.A+', virtual)';}));}
-    let depth=Infinity;const cleaned=[];let after=false;for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--'){after=true;cleaned.push(arg);continue;}if(!after&&(arg==='--max-depth'||arg.startsWith('--max-depth='))){const value=arg.includes('=')?arg.slice(arg.indexOf('=')+1):args[++i];depth=positive(value,'du','maximum depth',true);}else cleaned.push(arg);}const {flags,rest}=simpleOptions(cleaned,'ashb',cmd),paths=rest.length?rest:['.'],out=[];if(flags.has('b')&&flags.has('h'))usageError(cmd,'choose -b or -h');const logical=p=>shell.isFile(p)?bytes(shell.files[p]):Object.entries(shell.files).reduce((n,[file,text])=>n+(file.startsWith(p==='/'?'/':p+'/')?bytes(text):0),0),show=n=>flags.has('b')?String(n):flags.has('h')?humanSize(n):String(Math.ceil(n/1024));
-    for(const path of paths){const start=shell.resolve(path);if(!shell.isFile(start)&&!shell.isDir(start))fail('du: '+path+': no such file or directory',1);if(flags.has('s')||shell.isFile(start)){out.push(show(logical(start))+'\t'+path);continue;}const all=shell.allPaths().filter(p=>p===start||p.startsWith(start==='/'?'/':start+'/')).filter(p=>flags.has('a')||shell.isDir(p)).filter(p=>(p===start?0:p.slice(start==='/'?1:start.length+1).split('/').length)<=depth).sort((a,b)=>b.split('/').length-a.split('/').length||cmp(a,b));for(const p of all)out.push(show(logical(p))+'\t'+(p===start?path:path.replace(/\/$/,'')+p.slice(start.length)));}return lineOutput(out);
+    if(cmd==='file'){const {flags,rest}=simpleOptions(args,'bi',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(path=>{const p=shell.resolve(path);let description;if(shell.isDir(p))description=flags.has('i')?'inode/directory; charset=binary':'directory';else if(!shell.isFile(p))fail('file: '+path+': No such file or directory',1);else{const text=shell.files[p],ascii=/^[\x00-\x7f]*$/.test(text),binary=/[\x00-\x08\x0e-\x1f]/.test(text);if(flags.has('i'))description=(binary?'application/octet-stream':text.trim()&&(()=>{try{JSON.parse(text);return true;}catch(_){return false;}})()?'application/json':'text/plain')+'; charset='+(binary?'binary':ascii?'us-ascii':'utf-8');else if(!text)description='empty';else if(binary)description='data';else{let json=false,jsonl=false;try{JSON.parse(text);json=true;}catch(_){try{const rows=asLines(text).filter(s=>s.trim());if(rows.length>1){rows.forEach(s=>JSON.parse(s));jsonl=true;}}catch(_){}}description=json?'JSON text data':jsonl?'JSON Lines text data':ascii?'ASCII text':'UTF-8 Unicode text';}}return (flags.has('b')?'':path+': ')+description;}));}
+    if(cmd==='stat'){const {values,rest}=parseValued(args,'','c',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(path=>{const p=shell.resolve(path),dir=shell.isDir(p);if(!dir&&!shell.isFile(p))fail('stat: '+path+': No such file or directory',1);const meta=shell.getMetadata(p),data={y:new Date(meta.mtime).toISOString().replace('T',' ').replace('Z',' +0000'),Y:String(Math.floor(meta.mtime/1000)),n:path,s:String(dir?0:bytes(shell.files[p])),F:dir?'directory':'regular file',a:dir?'755':'644',A:dir?'drwxr-xr-x':'-rw-r--r--'};if(values.c!==undefined)return values.c.replace(/%(%|[A-Za-z])/g,(_,key)=>{if(key==='%')return '%';if(!Object.prototype.hasOwnProperty.call(data,key))usageError(cmd,'unsupported format %'+key);return data[key];});return '  File: '+path+'\n  Size: '+data.s+' bytes\n  Type: '+data.F+'\n  Mode: '+data.a+' ('+data.A+', virtual)';}));}
+    let depth=Infinity;const cleaned=[];let after=false;for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--'){after=true;cleaned.push(arg);continue;}if(!after&&(arg==='--max-depth'||arg.startsWith('--max-depth='))){const value=arg.includes('=')?arg.slice(arg.indexOf('=')+1):args[++i];depth=positive(value,'du','maximum depth',true);}else cleaned.push(arg);}const {flags,rest}=simpleOptions(cleaned,'ashbc',cmd),paths=rest.length?rest:['.'],out=[];let total=0;const counted=new Set();if(flags.has('b')&&flags.has('h'))usageError(cmd,'choose -b or -h');const logical=p=>shell.isFile(p)?bytes(shell.files[p]):Object.entries(shell.files).reduce((n,[file,text])=>n+(file.startsWith(p==='/'?'/':p+'/')?bytes(text):0),0),show=n=>flags.has('b')?String(n):flags.has('h')?humanSize(n):String(Math.ceil(n/1024));
+    for(const path of paths){const start=shell.resolve(path);if(!shell.isFile(start)&&!shell.isDir(start))fail('du: '+path+': No such file or directory',1);if(!counted.has(start)){total+=logical(start);counted.add(start);}if(flags.has('s')||shell.isFile(start)){out.push(show(logical(start))+'\t'+path);continue;}const all=shell.allPaths().filter(p=>p===start||p.startsWith(start==='/'?'/':start+'/')).filter(p=>flags.has('a')||shell.isDir(p)).filter(p=>(p===start?0:p.slice(start==='/'?1:start.length+1).split('/').length)<=depth).sort((a,b)=>b.split('/').length-a.split('/').length||cmp(a,b));for(const p of all)out.push(show(logical(p))+'\t'+(p===start?path:path.replace(/\/$/,'')+p.slice(start.length)));}if(flags.has('c'))out.push(show(total)+'\ttotal');return lineOutput(out);
   }
   function runDate(args) {
     args=longOptions(args,{'--utc':'u','--universal':'u'},{'--date':'d'},'date');const {flags,values,rest}=parseValued(args,'u','d','date');if(rest.length>1||rest.length&&rest[0][0]!=='+')usageError('date','use one +format operand');let date=new Date();if(values.d!==undefined){const value=values.d;if(/^@-?\d+(?:\.\d+)?$/.test(value))date=new Date(+value.slice(1)*1000);else{let normalized=value.replace(/ UTC$/,'Z').replace(' ','T');if(/^\d{4}-\d{2}-\d{2}$/.test(normalized))normalized+='T00:00:00Z';if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:?\d{2})$/.test(normalized))usageError('date','-d accepts an ISO date with timezone, YYYY-MM-DD, or @epoch; relative dates are unsupported');const y=+normalized.slice(0,4),m=+normalized.slice(5,7),d=+normalized.slice(8,10);if(m<1||m>12||d<1||d>new Date(Date.UTC(y,m,0)).getUTCDate())usageError('date','invalid calendar date');date=new Date(normalized);}if(!Number.isFinite(date.getTime()))usageError('date','invalid date');}
@@ -619,8 +650,8 @@
     const formats={Y:String(year),m:pad(month+1),d:pad(day),e:String(day).padStart(2),H:pad(hour),M:pad(minute),S:pad(second),F:year+'-'+pad(month+1)+'-'+pad(day),T:pad(hour)+':'+pad(minute)+':'+pad(second),s:String(Math.floor(date.getTime()/1000)),z:zone,Z:utc?'UTC':Intl.DateTimeFormat('en',{timeZoneName:'short'}).formatToParts(date).find(p=>p.type==='timeZoneName').value,a:shortDays[week],A:longDays[week],b:shortMonths[month],B:longMonths[month],u:String(week||7),w:String(week),j:pad(Math.floor((Date.UTC(year,month,day)-Date.UTC(year,0,1))/86400000)+1,3),n:'\n',t:'\t','%':'%'};const format=rest.length?rest[0].slice(1):'%a %b %e %T %Z %Y';return format.replace(/%(.|$)/g,(_,key)=>{if(!Object.prototype.hasOwnProperty.call(formats,key))usageError('date','unsupported format %'+key);return formats[key];})+'\n';
   }
   function runMove(shell,cmd,args) {
-    const {flags,rest}=simpleOptions(args,cmd==='mv'?'n':'p',cmd);if(cmd==='rmdir'){if(!rest.length)usageError(cmd,'missing directory');for(const path of rest){let p=shell.resolve(path);while(true){if(!shell.isDir(p))fail('rmdir: '+p+': no such directory',1);if(shell.cwd===p||shell.cwd.startsWith(p==='/'?'/':p+'/'))fail('rmdir: cannot remove the current directory or an ancestor',1);if(shell.allPaths().some(x=>x!==p&&dirname(x)===p))fail('rmdir: '+p+': directory not empty',1);shell.directories.delete(p);if(!flags.has('p')||dirname(p)==='/')break;p=dirname(p);}}return '';}
-    if(rest.length!==2)usageError(cmd,'exactly two paths are required');const source=shell.resolve(rest[0]);if(!shell.isFile(source)&&!shell.isDir(source))fail('mv: '+rest[0]+': no such file or directory',1);let destination=shell.resolve(rest[1]);if(shell.isDir(destination))destination+=(destination==='/'?'':'/')+basename(source);if(source===destination)return '';if(destination.startsWith(source+'/'))fail('mv: cannot move a directory inside itself',1);if(!shell.isDir(dirname(destination)))fail('mv: destination parent does not exist',1);if(flags.has('n')&&(shell.isFile(destination)||shell.isDir(destination)))return '';if(shell.isDir(source)){if(shell.isFile(destination)||shell.isDir(destination))fail('mv: destination already exists',1);const files=Object.entries(shell.files).filter(([p])=>p.startsWith(source+'/')),dirs=[...shell.directories].filter(p=>p===source||p.startsWith(source+'/'));for(const [p,text] of files){shell.files[destination+p.slice(source.length)]=text;delete shell.files[p];}for(const p of dirs){shell.directories.delete(p);shell.directories.add(destination+p.slice(source.length));}if(shell.cwd===source||shell.cwd.startsWith(source+'/'))shell.cwd=destination+shell.cwd.slice(source.length);if(shell.oldcwd===source||shell.oldcwd.startsWith(source+'/'))shell.oldcwd=destination+shell.oldcwd.slice(source.length);shell.addParents(destination);}else{shell.write(destination,shell.files[source]);delete shell.files[source];}return '';
+    const {flags,rest}=simpleOptions(args,cmd==='mv'?'n':'p',cmd);if(cmd==='rmdir'){if(!rest.length)usageError(cmd,'missing directory');for(const path of rest){let p=shell.resolve(path);while(true){if(!shell.isDir(p))fail('rmdir: '+p+': No such file or directory',1);if(shell.cwd===p||shell.cwd.startsWith(p==='/'?'/':p+'/'))fail('rmdir: cannot remove the current directory or an ancestor',1);if(shell.allPaths().some(x=>x!==p&&dirname(x)===p))fail('rmdir: '+p+': Directory not empty',1);shell.directories.delete(p);delete shell.metadata[p];if(!flags.has('p')||dirname(p)==='/')break;p=dirname(p);}}return '';}
+    if(rest.length!==2)usageError(cmd,'exactly two paths are required');const source=shell.resolve(rest[0]);if(!shell.isFile(source)&&!shell.isDir(source))fail('mv: '+rest[0]+': No such file or directory',1);let destination=shell.resolve(rest[1]);if(shell.isDir(destination))destination+=(destination==='/'?'':'/')+basename(source);if(source===destination)return '';if(destination.startsWith(source+'/'))fail('mv: cannot move a directory inside itself',1);if(!shell.isDir(dirname(destination)))fail('mv: '+rest[1]+': No such file or directory',1);if(flags.has('n')&&(shell.isFile(destination)||shell.isDir(destination)))return '';if(shell.isDir(source)){if(shell.isFile(destination)||shell.isDir(destination))fail('mv: destination already exists',1);const files=Object.entries(shell.files).filter(([p])=>p.startsWith(source+'/')),dirs=[...shell.directories].filter(p=>p===source||p.startsWith(source+'/'));for(const [p,text] of files){const next=destination+p.slice(source.length);shell.files[next]=text;shell.metadata[next]={...shell.getMetadata(p)};delete shell.files[p];delete shell.metadata[p];}for(const p of dirs){const next=destination+p.slice(source.length);shell.metadata[next]={...shell.getMetadata(p)};delete shell.metadata[p];shell.directories.delete(p);shell.directories.add(next);}if(shell.cwd===source||shell.cwd.startsWith(source+'/'))shell.cwd=destination+shell.cwd.slice(source.length);if(shell.oldcwd===source||shell.oldcwd.startsWith(source+'/'))shell.oldcwd=destination+shell.oldcwd.slice(source.length);shell.addParents(destination);}else{const meta={...shell.getMetadata(source)};shell.write(destination,shell.files[source],false,cmd);shell.metadata[destination]=meta;delete shell.files[source];delete shell.metadata[source];}return '';
   }
 
   function trSet(source) {
@@ -807,7 +838,8 @@
     const render=v=>v instanceof RegExp?+v.test(env.line):String(v);
     const emit=printers=>out.push(printers.map(p=>render(p.value(env))).join(String(env.vars.OFS))+String(env.vars.ORS));
     for(const begin of begins)for(const statement of awkStatements(begin.action)){const assignment=statement.match(/^([A-Za-z_]\w*)\s*=\s*([\s\S]+)$/);if(assignment){if(['NR','NF','FNR'].includes(assignment[1]))usageError('awk','assigning record counters is unsupported');env.vars[assignment[1]]=awkExpr(assignment[2]).value(env);}else emit(compilePrint(statement));}
-    const fs=env.vars.FS===' '?null:env.vars.FS===''?'':regex(String(env.vars.FS));
+    // AWK treats a one-character FS literally (except the special space value).
+    const fieldSeparator=String(env.vars.FS),fs=fieldSeparator===' '?null:fieldSeparator.length<=1?fieldSeparator:regex(fieldSeparator);
     for(const input of shell.inputs(paths,stdin,'awk')){env.FNR=0;for(const line of asLines(input.text)){env.line=line;env.fields=fs===''?Array.from(line):fs?line.split(fs):line.trim()?line.trim().split(/\s+/):[];env.NR++;env.FNR++;if(!main||filter&&!filter.test(env))continue;if(printers)emit(printers);if(counter)env.vars[counter]=(Number(env.vars[counter])||0)+1;if(sum)env.vars[sum.name]=(Number(env.vars[sum.name])||0)+(Number(sum.value.value(env))||0);if(aggregate){const key=String(aggregate.key.value(env));aggregate.values.set(key,(aggregate.values.get(key)||0)+1);}}}
     if(endPrinters)emit(endPrinters);if(aggregate&&aggregateOrder)for(const [key,count] of aggregate.values)out.push((aggregateOrder==='count'?count+String(env.vars.OFS)+key:key+String(env.vars.OFS)+count)+String(env.vars.ORS));return out.join('');
   }

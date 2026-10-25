@@ -1,12 +1,13 @@
 'use strict';
-const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 require('../src/shell.js');require('./load-data.cjs');require('../src/engine.js');
 const D=globalThis.LINUXROOM_DATA,E=globalThis.LinuxroomEngine;
 
-test('beginner curriculum is unchanged apart from additive level metadata',()=>{
-  const beginner=D.lessons.filter(l=>l.level==='beginner').map(({level,...lesson})=>lesson);
-  const digest=crypto.createHash('sha256').update(JSON.stringify(beginner)).digest('hex');
-  assert.equal(digest,fs.readFileSync(path.join(__dirname,'fixtures/v0.1-lessons.sha256'),'utf8').trim());
+test('all original lesson IDs retain their order and saved completions',()=>{
+  const old=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v0.2-progress.json'),'utf8'));
+  const ids=Object.keys(old.progress.completed);
+  assert.equal(ids.length,108);
+  assert.deepEqual(D.lessons.filter(l=>ids.includes(l.id)).map(l=>l.id),ids);
 });
 
 test('three complete levels exercise every supported log-analysis command',()=>{
@@ -14,11 +15,13 @@ test('three complete levels exercise every supported log-analysis command',()=>{
   const actual=new Set();
   for(const level of D.levels){
     const lessons=D.lessons.filter(l=>l.level===level.id);
-    assert.equal(lessons.length,36,level.id);
+    assert.equal(lessons.length,level.id === 'applied' ? 47 : 36,level.id);
     for(const l of lessons){
       const s=E.createSession(l.id);
       for(const c of l.solution){const r=E.run(s,c);for(const stage of r.trace)actual.add(stage.command);}
       assert.equal(E.check(s).passed,true,l.id);
+      const example=E.createSession(l.id);
+      for(const stage of E.run(example,l.example.command).trace)actual.add(stage.command);
     }
   }
   const supported=new LogLabShell().supportedCommands;
@@ -30,9 +33,9 @@ test('v0.1 saves preserve36 completions, work files, assistance, and current les
   const old=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v0.1-progress.json'),'utf8'));
   const progress=E.hydrate(old.progress);
   assert.deepEqual(E.stats(progress,'beginner'),{completed:36,total:36,percent:100});
-  assert.deepEqual(E.stats(progress,'applied'),{completed:0,total:36,percent:0});
+  assert.deepEqual(E.stats(progress,'applied'),{completed:0,total:47,percent:0});
   assert.deepEqual(E.stats(progress,'advanced'),{completed:0,total:36,percent:0});
-  assert.equal(E.stats(progress).total,108);
+  assert.equal(E.stats(progress).total,119);
   assert.equal(progress.currentId,'27-append');
   assert.equal(progress.completed['01-echo'].assisted,true);
   assert.equal(progress.hints['01-echo'],2);

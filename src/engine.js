@@ -2,7 +2,7 @@
 (function (root) {
   'use strict';
   const VERSION = 1, MAX_SAVE = 8 * 1024 * 1024, MAX_TEXT = 524288;
-  const META = new Set(['help', 'history', 'clear']);
+  const META = new Set(['help', 'man', 'history', 'clear']);
   const data = () => root.LINUXROOM_DATA;
   const lessons = () => data().lessons;
   const lessonFor = id => lessons().find(lesson => lesson.id === id);
@@ -11,8 +11,9 @@
   const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
   const safeText = (value, max = MAX_TEXT) => typeof value === 'string' && value.length <= max;
   const canonical = path => safeText(path, 1024) && path.startsWith('/') && !path.includes('\0') && !path.split('/').some(x => x === '..' || x === '.');
-  const stageAccepted = (stage, lesson) => Boolean(stage && !stage.stderr && (stage.code === 0 ||
-    (lesson?.validation?.all || []).some(rule => rule.type === 'status' && rule.command === stage.command && rule.code === stage.code)));
+  const stageAccepted = (stage, lesson) => Boolean(stage && ((stage.code === 0 && !stage.stderr) ||
+    (lesson?.validation?.all || []).some(rule => rule.type === 'status' && rule.command === stage.command && rule.code === stage.code &&
+      (!stage.stderr || (rule.stderrRedirected === true && stage.stderrRedirected === true)))));
   const isSuccess = (result, lesson) => Boolean(result && !result.stderr &&
     (result.code === 0 || (result.trace.length && result.trace.at(-1).code === result.code && stageAccepted(result.trace.at(-1), lesson))) &&
     result.trace.every(stage => stageAccepted(stage, lesson)));
@@ -23,7 +24,7 @@
     const selected = lessonFor(lessonId);
     const fixture = selected ? data().datasets[selected.fixture] : Object.values(data().datasets)[0];
     if (!fixture) throw new Error('Lesson fixture is missing');
-    const shell = new root.LogLabShell(fixture.files);
+    const shell = new root.LogLabShell(fixture.files, {metadata: fixture.metadata, now: fixture.now});
     shell.cwd = shell.resolve(selected && selected.cwd || fixture.cwd || '/home/analyst');
     shell.oldcwd = shell.cwd;
     shell.directories.add(shell.cwd); shell.addParents(shell.cwd + '/.placeholder');
@@ -35,7 +36,8 @@
     const error = result.stderr || result.trace.find(stage => stage.stderr)?.stderr;
     let feedback = '';
     if (error) {
-      if (/no such file|no such directory/.test(error)) feedback = '指定した場所が見つかりません。pwd で現在地、ls でファイル名を確認できます。';
+      if (/no such file|no such directory/i.test(error)) feedback = '指定した場所が見つかりません。pwd で現在地、ls でファイル名を確認できます。';
+      else if (/is a directory/i.test(error)) feedback = '指定した名前はディレクトリです。ls で中のファイルを確認しましょう。';
       else if (/quote/.test(error)) feedback = '引用符が閉じていない可能性があります。開始と終わりの引用符を確認しましょう。';
       else if (/unsupported|command not found|利用できません/.test(error)) feedback = 'この学習用ターミナルが扱うコマンドには範囲があります。help で対応内容を確認できます。';
       else feedback = 'エラーの行を確認して、コマンド・引数・オプションを見直しましょう。';
@@ -90,6 +92,20 @@
     return actual.trim() === expected.trim();
   }
 
+  function outputDifference(actual, expected, mode) {
+    const tidy = value => mode === 'exact' ? String(value) : String(value).trim();
+    const lines = value => tidy(value).split('\n').map(line => mode === 'lines' ? line.trim().replace(/\s+/g, ' ') : line);
+    const shown = value => value.length > 70 ? value.slice(0, 67) + '…' : value;
+    if (mode === 'contains') return '必要な文字列「' + shown(String(expected).trim()) + '」が見つかりません。';
+    const got = lines(actual), wanted = lines(expected);
+    const remaining = got.slice();
+    const missing = [];
+    for (const line of wanted) { const at = remaining.indexOf(line); if (at >= 0) remaining.splice(at, 1); else missing.push(line); }
+    if (!missing.length && !remaining.length) return '行の順序が異なります。並べ方を確認しましょう。';
+    if (mode === 'exact' && String(actual).trimEnd() === String(expected).trimEnd()) return '末尾の改行または空白が異なります。';
+    return [missing.length ? '足りない行:「' + shown(missing[0]) + '」' : '', remaining.length ? '余分な行:「' + shown(remaining[0]) + '」' : ''].filter(Boolean).join(' / ');
+  }
+
   // These are parsed argument tokens from real executions, never a regex on input.
   function flagsFor(stage) {
     const found = new Set();
@@ -119,13 +135,23 @@
       let passed = false, message = '';
       const stages = condition.scope === 'any' ? session.evidence : result.trace;
       switch (condition.type) {
-        case 'output': passed = matches(result.stdout, condition.value, condition.match); message = '表示された結果がミッションの条件に合っている'; break;
+        case 'output': passed = matches(result.stdout, condition.value, condition.match); message = passed ? '表示された結果がミッションの条件に合っている' : outputDifference(result.stdout, condition.value, condition.match); break;
         case 'cwd': passed = session.shell.cwd === condition.value; message = '指定されたディレクトリへ移動している'; break;
         case 'directory': passed = session.shell.isDir(session.shell.resolve(condition.path)); message = '指定されたディレクトリを用意している'; break;
         case 'absent': {const path = session.shell.resolve(condition.path); passed = !session.shell.isFile(path) && !session.shell.isDir(path); message = '指定された作業用ファイル・ディレクトリを削除している'; break;}
         case 'file': { const path = session.shell.resolve(condition.path); passed = session.shell.isFile(path) && matches(session.shell.files[path], condition.value, condition.match); message = '保存したファイルの内容が条件に合っている'; break; }
         case 'used': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && (!condition.args || condition.args.every(arg => stage.args.includes(arg))) && (!condition.flags || [...condition.flags].every(flag => flagsFor(stage).has(flag)))); message = condition.command + ' を使って今回の操作を実行している'; break;
-        case 'status': passed = stages.some(stage => !stage.stderr && stage.command === condition.command && stage.code === condition.code); message = condition.command + ' の終了コード ' + condition.code + ' を確認している'; break;
+        case 'status': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && stage.code === condition.code && (!condition.stderrRedirected || stage.stderrRedirected === true)); message = condition.command + ' の終了コード ' + condition.code + ' を確認している'; break;
+        case 'redirect': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.redirections.some(r => r.op === condition.op && r.target === condition.path && (condition.fd === undefined || r.fd === condition.fd))); message = condition.op + ' で指定された入力・出力の向きを設定している'; break;
+        case 'connector': passed = condition.afterCommand || condition.skipped !== undefined
+          ? (result.flow || []).some(flow => flow.connector === condition.value && (condition.skipped === undefined || flow.executed === !condition.skipped) &&
+            (!condition.afterCommand || result.trace.filter(stage => stage.pipeline === flow.pipeline - 1).at(-1)?.command === condition.afterCommand))
+          : (result.connectors || []).includes(condition.value);
+          message = (condition.afterCommand ? condition.afterCommand + ' の後を ' : '') + condition.value + ' でつなぎ' + (condition.skipped ? '、条件に応じて次の実行を飛ばしている' : '、実行条件を設定している'); break;
+        case 'variable': passed = stages.some((stage, index) => stageAccepted(stage, lesson) && (!condition.command || stage.command === condition.command) &&
+          (condition.context === 'arguments' ? stage.argumentVariables || [] : stage.variables || []).includes(condition.name) &&
+          (!condition.afterCommand || stages[index - 1]?.command === condition.afterCommand));
+          message = '$' + condition.name + ' を' + (condition.context === 'arguments' ? '引数として展開して値を確認している' : '展開して値を確認している'); break;
         case 'pipeline': { const counts = new Map(); for (const stage of result.trace) counts.set(stage.pipeline, (counts.get(stage.pipeline) || 0) + 1); passed = [...counts.values()].some(count => count >= condition.minStages); message = '必要な段階をパイプでつないでいる'; break; }
         case 'pagerClosed': passed = session.pagerOpened && session.pagerClosed && !session.pagerOpen; message = 'ファイルを開き、q で表示を閉じている'; break;
         case 'source': { const sourceStages = condition.scope === 'last' ? result.trace : session.evidence; passed = sourceStages.some(stage => stageAccepted(stage, lesson) && stage.reads.includes(condition.path)); message = '指定された元ファイルを実際に読み込んでいる'; break; }
@@ -139,20 +165,23 @@
 
   function cleanStage(value) {
     if (!object(value) || !safeText(value.command, 100) || !Array.isArray(value.args) || value.args.length > 128 || !value.args.every(x => safeText(x, 8192)) || !['stdin', 'stdout', 'stderr'].every(key => safeText(value[key])) || !Number.isInteger(value.code) || !canonical(value.cwdBefore) || !canonical(value.cwdAfter) || !Number.isInteger(value.pipeline) || !Number.isInteger(value.index)) return null;
-    const redirections = Array.isArray(value.redirections) ? value.redirections.filter(r => object(r) && ['<', '>', '>>'].includes(r.op) && canonical(r.target)).map(r => ({op: r.op, target: r.target})) : [];
+    const redirections = Array.isArray(value.redirections) ? value.redirections.filter(r => object(r) && (r.fd === undefined || [0, 1, 2].includes(r.fd)) &&
+      ((['<', '>', '>>'].includes(r.op) && canonical(r.target)) || (r.op === '>&' && ['1', '2'].includes(r.target))))
+      .map(r => ({op: r.op, target: r.target, ...(r.fd !== undefined ? {fd: r.fd} : {})})) : [];
     const reads = Array.isArray(value.reads) ? value.reads.filter(canonical).slice(0, 128) : [];
-    return {command: value.command, args: value.args.slice(), stdin: value.stdin, stdout: value.stdout, stderr: value.stderr, code: value.code, cwdBefore: value.cwdBefore, cwdAfter: value.cwdAfter, pipeline: value.pipeline, index: value.index, connector: [';', '&&', '||'].includes(value.connector) ? value.connector : ';', redirections, reads};
+    return {command: value.command, args: value.args.slice(), stdin: value.stdin, stdout: value.stdout, stderr: value.stderr, code: value.code, cwdBefore: value.cwdBefore, cwdAfter: value.cwdAfter, pipeline: value.pipeline, index: value.index, connector: [';', '&&', '||'].includes(value.connector) ? value.connector : ';', redirections, stderrRedirected: value.stderrRedirected === true, variables: Array.isArray(value.variables) && value.variables.includes('?') ? ['?'] : [], argumentVariables: Array.isArray(value.argumentVariables) && value.argumentVariables.includes('?') ? ['?'] : [], reads};
   }
 
   function cleanResult(value) {
     if (!object(value) || !safeText(value.stdout) || !safeText(value.stderr) || !Number.isInteger(value.code) || !Array.isArray(value.trace) || value.trace.length > 32) return null;
     const trace = value.trace.map(cleanStage);
     if (trace.some(stage => !stage)) return null;
-    return decorate({stdout: value.stdout, stderr: value.stderr, code: value.code, trace, ...(value.pager === true ? {pager: true} : {})});
+    const flow = Array.isArray(value.flow) ? value.flow.filter(item => object(item) && [';', '&&', '||'].includes(item.connector) && Number.isInteger(item.pipeline) && item.pipeline >= 0 && Number.isInteger(item.codeBefore) && typeof item.executed === 'boolean').slice(0, 32).map(({connector, pipeline, codeBefore, executed}) => ({connector, pipeline, codeBefore, executed})) : [];
+    return decorate({stdout: value.stdout, stderr: value.stderr, code: value.code, trace, flow, connectors: Array.isArray(value.connectors) ? value.connectors.filter(x => [';', '&&', '||'].includes(x)).slice(0, 64) : [], ...(value.pager === true ? {pager: true} : {})});
   }
 
   function serializeSession(session) {
-    return {version: VERSION, lessonId: session.lessonId, shell: {files: {...session.shell.files}, directories: [...session.shell.directories], cwd: session.shell.cwd, oldcwd: session.shell.oldcwd, history: session.shell.history.slice(-128)}, events: session.events.slice(-128), lastResult: session.lastResult, evidence: session.evidence.slice(-128), pagerOpen: session.pagerOpen, pagerOpened: session.pagerOpened, pagerClosed: session.pagerClosed};
+    return {version: VERSION, fixtureRevision: lessonFor(session.lessonId)?.fixtureRevision || 1, lessonId: session.lessonId, shell: {files: {...session.shell.files}, directories: [...session.shell.directories], cwd: session.shell.cwd, oldcwd: session.shell.oldcwd, history: session.shell.history.slice(-128), metadata: {...session.shell.metadata}, snapshotTime: session.shell.snapshotTime, lastExitCode: session.shell.lastExitCode}, events: session.events.slice(-128), lastResult: session.lastResult, evidence: session.evidence.slice(-128), pagerOpen: session.pagerOpen, pagerOpened: session.pagerOpened, pagerClosed: session.pagerClosed};
   }
 
   function restoreSession(snapshot) {
@@ -162,7 +191,18 @@
       if (JSON.stringify(snapshot).length > MAX_SAVE) return session;
       const state = snapshot.shell;
       if (!object(state) || !object(state.files) || Object.keys(state.files).length > 256 || !Object.entries(state.files).every(([path, content]) => canonical(path) && safeText(content, 2097152)) || !Array.isArray(state.directories) || state.directories.length > 512 || !state.directories.every(canonical) || !canonical(state.cwd) || !canonical(state.oldcwd)) return session;
-      const shell = new root.LogLabShell(state.files);
+      const metadata = Object.create(null);
+      if (object(state.metadata)) for (const [path, entry] of Object.entries(state.metadata).slice(0, 768)) {
+        if (canonical(path) && object(entry) && Number.isFinite(entry.mtime) && Math.abs(entry.mtime) <= 8640000000000000) metadata[path] = {mtime: entry.mtime};
+      }
+      const files = {...state.files}, selected = lessonFor(snapshot.lessonId);
+      if ((snapshot.fixtureRevision || 1) < (selected?.fixtureRevision || 1)) {
+        const fixture = data().datasets[selected.fixture];
+        for (const path of selected.fixtureAdditions || []) {
+          if (canonical(path) && !own(files, path) && own(fixture.files, path) && !state.directories.includes(path)) files[path] = fixture.files[path];
+        }
+      }
+      const shell = new root.LogLabShell(files, {metadata, now: data().datasets[selected?.fixture]?.now, snapshotTime: Number.isFinite(state.snapshotTime) && Math.abs(state.snapshotTime) <= 8640000000000000 ? state.snapshotTime : undefined, lastExitCode: Number.isInteger(state.lastExitCode) && state.lastExitCode >= 0 && state.lastExitCode <= 255 ? state.lastExitCode : 0});
       shell.directories = new Set(state.directories);
       shell.directories.add('/');
       for (const path of Object.keys(shell.files)) shell.addParents(path);

@@ -88,8 +88,8 @@
 
   lesson({ id: '01-echo', chapter: 'start', title: '最初のコマンドを打つ', mode: 'guide', fixture: 'basics',
     goal: '文字を入力して、Enterで実行できる。',
-    explanation: ['ターミナルは、文字で操作をお願いする場所です。入力欄にコマンドを打ち、Enterで実行します。', 'echoは、後ろに書いた文字を表示します。画面の「$」は入力待ちの印です。$を含めず、echoから入力してください。'],
-    concepts: [{ term: 'コマンド', text: '実行したい操作の名前。ここではechoです。' }, { term: '引数', text: 'コマンドに渡す情報。ここでは表示したい文字です。' }],
+    explanation: ['ターミナルは、文字で操作をお願いする場所です。入力欄にコマンドを打ち、Enterで実行します。', 'echoは、後ろに書いた文字を表示します。analyst@linuxroom:~$ は入力待ちのプロンプトです。analystはユーザー名、linuxroomはホスト名、~は自分のホームです。プロンプトを写さずechoから入力してください。'],
+    concepts: [{ term: 'プロンプトの$と#', text: '多くのLinuxでは$は一般ユーザー、#は管理者rootの目印です。表示は環境で変えられます。この教材は一般ユーザーの$を使います。' }, { term: 'コマンド', text: '実行したい操作の名前。ここではechoです。' }, { term: '引数', text: 'コマンドに渡す情報。ここでは表示したい文字です。' }],
     example: { command: 'echo hello', note: 'helloと表示されます。コマンドと引数の間には半角スペースを入れます。' },
     task: 'echoを使って、ready と表示してください。',
     hints: ['コマンドの名前はechoです。', 'echoのあとに、半角スペースと表示したい文字を書きます。', 'echo ready を入力してEnterを押します。'],
@@ -108,7 +108,7 @@
   });
   lesson({ id: '03-pwd', chapter: 'browse', title: '現在地を確かめる', mode: 'guide', fixture: 'basics',
     goal: 'pwdで今いるディレクトリを確認できる。',
-    explanation: ['ディレクトリは、ファイルをまとめるフォルダのことです。コマンドを実行するときにも「今いる場所」があります。', 'pwdは、現在地を/から始まる道順で表示します。この道順をパスと呼びます。'],
+    explanation: ['ディレクトリは、ファイルをまとめるフォルダのことです。コマンドを実行するときにも「今いる場所」があります。', 'pwdは、現在地を/から始まる道順で表示します。この道順をパスと呼びます。プロンプトの~は/home/analystの省略です。cdで移動するとプロンプトの現在地も変わります。'],
     concepts: [{ term: '現在のディレクトリ', text: '相対パスの出発点になる場所です。' }, { term: 'パス', text: 'ディレクトリやファイルの場所を示す文字列です。/は区切りです。' }],
     example: { command: 'pwd', note: 'pwdには、今回は引数を付けません。' },
     task: 'pwdを実行し、現在地を表示してください。',
@@ -118,10 +118,10 @@
   });
   lesson({ id: '04-ls', chapter: 'browse', title: 'あるものを一覧にする', fixture: 'basics',
     goal: 'lsでディレクトリの中身を確認できる。',
-    explanation: ['lsは、ファイルやディレクトリの名前を一覧にします。引数を省略すると、現在地の中身を表示します。', 'この教材では、名前を1行ずつ表示します。実際のLinuxでは画面幅や設定により、複数列に並ぶこともあります。'],
+    explanation: ['lsは、ファイルやディレクトリの名前を一覧にします。引数を省略すると、現在地の中身を表示します。', '実機の端末ではinbox  logs  notesのように横に並ぶことがあります。ls -1（数字の1）は必ず1行1項目にする指定です。この教材は途中結果を比べやすいよう、lsだけでも1列で表示します。パイプに渡す実機のlsも通常は1列になります。'],
     concepts: [{ term: 'ls', text: '名前を一覧にするコマンド。ファイルの本文を読むコマンドではありません。' }],
     example: { command: 'ls notes', note: '現在地にあるnotesディレクトリの中を表示します。' },
-    task: '引数を付けずにlsを実行し、現在地の中身を表示してください。',
+    task: 'lsを実行し、現在地の中身を表示してください。ls .や、1行1項目を明示するls -1でも構いません。',
     hints: ['現在地を確認するなら、lsの後ろにパスは不要です。', '一覧にはinbox、logs、notes、welcome.txtがあります。', 'ls と入力します。'],
     solution: ['ls'], success: 'logsは記録ファイルの置き場、welcome.txtは本文を持つファイルです。', bridge: '次はlogsへ移動します。',
     validation: { all: [used('ls'), out('inbox\nlogs\nnotes\nwelcome.txt')] }
@@ -249,7 +249,7 @@
   });
   lesson({ id: '17-awk', chapter: 'columns', title: '空白で区切られた列を選ぶ', mode: 'guide', minutes: 4,
     goal: 'awkで番号を指定し、必要な列を取り出せる。',
-    explanation: ['awkは、行を列に分けて処理できます。今回のような空白区切りでは、左から$1、$2、$3…と列を指定します。', "'{print $3}'は「3列目を表示する」という処理です。中の$をそのまま渡すため、全体を半角のシングルクォートで囲みます。"],
+    explanation: ['awkは、行を列に分けて処理できます。今回のような空白区切りでは、左から$1、$2、$3…と列を指定します。', "'{print $3}'は「3列目を表示する」という処理です。中の$をそのまま渡すため、全体を半角のシングルクォートで囲みます。", "このファイルならcut -d ' ' -f 3でも同じ結果です。ただし空白が連続するとcutは空の列も数えます。awkの標準の空白区切りは連続する空白をまとめて扱うので、その場合は差が出ます。"],
     concepts: [{ term: '列・フィールド', text: '1行を区切った中の項目です。app.logでは時刻が$1、種類が$2、名前が$3、操作が$4です。' }, { term: 'print', text: 'awkの中で、指定した値を表示する命令です。' }],
     example: { command: "awk '{print $2}' app.log", note: '2列目のINFOやERRORだけが表示されます。' },
     task: 'app.logの全10行から、3列目の名前だけを表示してください。',
@@ -301,7 +301,7 @@
     goal: 'grep → awkの後ろへ、sortを一段だけ追加できる。',
     explanation: ['ここから、同じコマンドを一段ずつ伸ばします。まず「ERRORの行を選ぶ → 名前を取る」の結果にsortを加えます。', '各段階の表示で、6行の記録が6個の名前になり、名前順になる変化を確かめてください。'],
     concepts: [{ term: 'パイプライン', text: '複数のコマンドをパイプでつないだものです。一段ずつ目的を説明できれば、長くても読み解けます。' }],
-    example: { command: 'cat names.txt | sort', note: '受け取った名前を並べ替える形です。sortにファイル名は要りません。' },
+    example: { command: 'sort names.txt', note: 'sortはファイル名を直接指定できます。前の処理結果を並べ替えるときに、パイプでsortへ渡します。' },
     starter: selectNames, newPart: '| sort', task: 'ERRORの行から名前を取り出すコマンドの後ろにsortを追加し、名前順に表示してください。',
     hints: ['前の段階を入力すると、grepとawkまでのコマンドを使えます。', 'その後ろに | sort を追加します。', groupNames + ' と入力します。'],
     solution: [groupNames], success: '3段の処理になりました。選ぶ → 取り出す → 並べる、の順です。', bridge: '今度は、並べた名前を数える段階を追加します。',
@@ -440,12 +440,12 @@
   });
   lesson({ id: '36-final-ranking', chapter: 'final', title: '卒業実習② 集計を完成させる', mode: 'challenge', fixture: 'basics', minutes: 7,
     goal: '新しい記録の抽出・集計・保存を自分で組み立てられる。',
-    explanation: ['最後の練習は/home/analystから始まります。reportsはまだないので、必要な置き場を作ってください。', '何段に分けても構いません。途中結果を確かめ、目的を満たすコマンドを組み立てましょう。モデル解答と同じ書き方である必要はありません。'],
+    explanation: ['最後の練習は/home/analystから始まります。reportsはまだないので、必要な置き場を作ってください。mkdir -p reportsなら、やり直し時に既に存在してもエラーにせず続けられます。', '何段に分けても構いません。途中結果を確かめ、目的を満たすコマンドを組み立てましょう。モデル解答と同じ書き方である必要はありません。'],
     concepts: [{ term: '今回の完成形', text: 'ERRORだけを選ぶ → 名前を取る → 同じ名前を並べる → 数える → 多い順にする → 保存する。' }],
     example: { command: 'cat inbox/shift.log', note: 'まず元の記録を確認できます。列番号や選ぶ条件を確かめましょう。' },
     task: 'inbox/shift.logの大文字のERRORについて、名前別の件数を多い順に表示してください。同じ結果を/home/analyst/reports/ranking.txtに保存してください。',
-    hints: ['名前は3列目です。まずgrepとawkをつなぎ、名前だけ取り出せるか確かめます。', 'sort → uniq -c → sort -nrで集計できます。mkdirでreportsを作り、最後にteeで保存できます。', "mkdir reports を実行し、grep 'ERROR' inbox/shift.log | awk '{print $3}' | sort | uniq -c | sort -nr | tee reports/ranking.txt と入力します。"],
-    solution: ['mkdir reports', "grep 'ERROR' inbox/shift.log | awk '{print $3}' | sort | uniq -c | sort -nr | tee reports/ranking.txt"],
+    hints: ['名前は3列目です。まずgrepとawkをつなぎ、名前だけ取り出せるか確かめます。', 'sort → uniq -c → sort -nrで集計できます。mkdir -pでreportsを作り、最後にteeで保存できます。', "mkdir -p reports を実行し、grep 'ERROR' inbox/shift.log | awk '{print $3}' | sort | uniq -c | sort -nr | tee reports/ranking.txt と入力します。"],
+    solution: ['mkdir -p reports', "grep 'ERROR' inbox/shift.log | awk '{print $3}' | sort | uniq -c | sort -nr | tee reports/ranking.txt"],
     success: '卒業です。新しい記録からsora 3件、yui 2件、naoki 1件を求めて保存できました。長いコマンドも、役割のある小さな操作の組み合わせです。',
     bridge: '次はSOCroom-easyでログの意味や読み方を学び、その後Logroomでコマンドを使ったログ分析に進みましょう。',
     validation: { all: [{ type: 'source', path: home + '/inbox/shift.log' }, { type: 'directory', path: home + '/reports' }, out(finalRanking, 'lines'), saved(home + '/reports/ranking.txt', finalRanking, 'lines')] }
@@ -453,7 +453,7 @@
 
   const glossary = [
     { term: 'コマンド', text: '文字で指定する操作の名前。後ろに引数やオプションを付けます。', example: "grep 'ERROR' app.log" },
-    { term: 'プロンプト', text: '入力待ちを示す印です。画面にある$は入力しません。', example: 'echo ready' },
+    { term: 'プロンプト', text: 'analyst@linuxroom:~$はユーザー名・ホスト名・現在地・入力待ちの印。~はホーム、$は通常のユーザー、#はよく管理者に使われる表示です。プロンプトは入力しません。', example: 'echo ready' },
     { term: '引数', text: 'コマンドに渡す情報。検索語やファイル名などです。', example: 'cat app.log' },
     { term: 'オプション', text: 'コマンドの動きを調整する指定。同じ文字でもコマンドによって意味が異なります。', example: 'head -n 3 app.log' },
     { term: '引用符', text: '空白や記号を含む文字列をひとまとまりにします。awkの処理には半角のシングルクォートを使います。', example: "awk '{print $3}' app.log" },
@@ -462,7 +462,7 @@
     { term: '絶対パス', text: '/から始まり、場所を全部指定した道順です。', example: 'cd /home/analyst/logs' },
     { term: '相対パス', text: '現在地からたどる道順。..は一つ上、.は現在地です。', example: 'cat ../welcome.txt' },
     { term: 'パイプ |', text: '左の標準出力を、右の標準入力に渡します。右側に元ファイルを指定すると、届いた結果を使わない場合があります。', example: "grep 'ERROR' app.log | wc -l" },
-    { term: '標準入力・標準出力', text: 'コマンドが文字を受け取る入口と、結果を出す出口。パイプでつなげられます。', example: 'cat names.txt | sort' },
+    { term: '標準入力・標準出力', text: 'コマンドが文字を受け取る入口と、結果を出す出口。パイプでつなげられます。', example: 'sort < names.txt' },
     { term: 'grep', text: '条件に合う行を選びます。-nは行番号、-iは大文字小文字を区別しない、-vは除外、-Fは検索語を正規表現でなく文字列として扱います。', example: "grep -n 'ERROR' app.log" },
     { term: '一致しない検索', text: 'grepで見つからないと、出力は空になります。見つからないことを示す終了コード1は、構文エラーとは違います。', example: "grep 'NOT_FOUND' app.log" },
     { term: '列・フィールド', text: '行を区切った項目。awkでは通常、空白区切りの左から$1、$2…です。$0は行全体、$NFは最後の列です。', example: "awk '{print $3}' app.log" },
@@ -474,7 +474,7 @@
     { term: 'JSONとJSON Lines', text: 'JSONはキーと値を持つデータ形式。JSON Linesは1行に一つずつJSONを置く形式です。', example: "jq -r '.user' events.jsonl" },
     { term: 'jqのselect', text: 'JSONのキーの値を条件に、入力を選びます。引用符内の|はjqのフィルターをつなぎます。', example: "jq -r 'select(.level == \"ERROR\") | .user' events.jsonl" },
     { term: '操作の補助', text: '↑・↓で入力履歴、Tabで名前の補完、Ctrl+Lで表示を整理できます。lessはqで閉じます。', example: 'less app.log' },
-    { term: 'この教材のhelp', text: '学習用シェルが対応するコマンドを案内します。一般のLinuxの外部コマンドを調べるmanとは別の、この教材の機能です。', example: 'help grep' }
+    { term: 'この教材のhelp', text: '学習用シェルが対応するコマンドを案内します。この教材のmanもhelpへつながる簡易案内です。実機のmanはより詳しいマニュアルを開きます。', example: 'help grep' }
   ];
   root.LINUXROOM_DATA = { version: 1, chapters, datasets, lessons, glossary };
 })(typeof globalThis !== 'undefined' ? globalThis : window);

@@ -6,8 +6,8 @@ const D = globalThis.LINUXROOM_DATA;
 
 test('a complete, uniquely identified curriculum and coherent fixtures', () => {
   assert.equal(D.version, 1);
-  assert.equal(D.lessons.length, 108);
-  for (const level of D.levels) assert.equal(D.lessons.filter(l => l.level === level.id).length, 36);
+  assert.equal(D.lessons.length, 119);
+  for (const level of D.levels) assert.equal(D.lessons.filter(l => l.level === level.id).length, level.id === 'applied' ? 47 : 36);
   assert.equal(new Set(D.lessons.map(x => x.id)).size, D.lessons.length);
   const chapters = new Set(D.chapters.map(x => x.id));
   assert.equal(chapters.size, D.chapters.length);

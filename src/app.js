@@ -36,6 +36,12 @@
     return result;
   }
 
+  function promptFor(cwd) {
+    const home = '/home/analyst';
+    const location = cwd === home ? '~' : cwd.startsWith(home + '/') ? '~' + cwd.slice(home.length) : cwd;
+    return 'analyst@linuxroom:' + location + '$';
+  }
+
   function validId(id) { return id === 'sandbox' || byId.has(id); }
   function safeUI(raw) {
     const clean = { started: false, drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
@@ -52,7 +58,8 @@
       const entries = raw.transcripts && Object.prototype.hasOwnProperty.call(raw.transcripts, id) ? raw.transcripts[id] : null;
       if (Array.isArray(entries)) clean.transcripts[id] = entries.slice(-60).filter(entry => entry && typeof entry === 'object' && typeof entry.input === 'string').map(entry => ({
         input: entry.input.slice(0, 8192), stdout: String(entry.stdout || '').slice(0, 24000), stderr: String(entry.stderr || '').slice(0, 12000),
-        code: Number.isFinite(entry.code) ? entry.code : 0, note: typeof entry.note === 'string' ? entry.note.slice(0, 1000) : ''
+        code: Number.isFinite(entry.code) ? entry.code : 0, note: typeof entry.note === 'string' ? entry.note.slice(0, 1000) : '',
+        cwd: typeof entry.cwd === 'string' && entry.cwd.startsWith('/') && !/[\x00-\x1f\x7f]/.test(entry.cwd) ? entry.cwd.slice(0, 4096) : null
       }));
     }
     return clean;
@@ -118,6 +125,8 @@
     $('map-overall').textContent = '全体 ' + s.completed + ' / ' + s.total + ' レッスン修了';
     $('welcome-progress').textContent = s.completed ? '全体 ' + s.completed + ' / ' + s.total + ' レッスン修了。今日も一歩ずつ。' : '';
     $('course-summary').textContent = levels.length + ' 段階 · 全 ' + s.total + ' レッスン';
+    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.3');
+    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.3');
     $('start-learning').replaceChildren(document.createTextNode(ui.started ? '続きから学ぶ ' : '最初のレッスンをはじめる '), node('span', '', '→'));
     renderLevelCards();
   }
@@ -225,7 +234,7 @@
     $('lesson-mode').textContent = currentLesson ? modeLabels[currentLesson.mode] || '一歩ずつ練習' : '自分のペースで';
     $('lesson-minutes').textContent = currentLesson ? '約 ' + currentLesson.minutes + ' 分' : '時間制限なし';
     $('lesson-goal').textContent = currentLesson ? currentLesson.goal : '習ったコマンドを、何度でも。';
-    $('lesson-explanation').replaceChildren(...(currentLesson ? currentLesson.explanation : ['ファイルを開いたり、探したり、パイプでつないだり。自由に操作してみましょう。', '下の「この課題で使えるファイル」でファイル名を確認できます。迷ったら help やコマンド帳を使ってください。']).map(text => node('p', '', text)));
+    $('lesson-explanation').replaceChildren(...(currentLesson ? currentLesson.explanation : ['ファイルを開いたり、探したり、パイプでつないだり。自由に操作してみましょう。', 'パイプでつないだら、「コマンドが、結果になるまで」で各段を選んでみよう。その段が受け取った入力と、次へ渡した出力を見比べられます。', '下の「この課題で使えるファイル」でファイル名を確認できます。迷ったら help やコマンド帳を使ってください。']).map(text => node('p', '', text)));
     const concepts = node('dl');
     (currentLesson ? currentLesson.concepts : [{ term: 'help', text: 'この教材で使えるコマンドを表示します。' }]).forEach(concept => {
       const row = node('div', 'concept-item');
@@ -362,7 +371,7 @@
     const output = $('terminal-output');
     output.replaceChildren();
     const entries = ui.transcripts[currentSession.lessonId] || [];
-    if (!entries.length) output.append(node('div', 'terminal-welcome', 'Linuxroom · virtual terminal\n\n$ は入力せず、コマンドだけを打ちます。\n入力したら Enter。迷ったら、左の見本やヒントを見てみよう。'));
+    if (!entries.length) output.append(node('div', 'terminal-welcome', 'Linuxroom · virtual terminal\n\nanalyst@linuxroom:~$ はプロンプトの例です。\nユーザー名@ホスト名:現在地 のあとに、入力を待つ $ が付きます。\nプロンプトは入力せず、コマンドだけを打って Enter。'));
     entries.forEach(entry => output.append(transcriptNode(entry)));
     output.scrollTop = output.scrollHeight;
   }
@@ -370,7 +379,9 @@
   function transcriptNode(entry) {
     const row = node('div', 'terminal-entry');
     const command = node('div', 'terminal-command');
-    command.append(node('span', '', '$'), node('span', '', entry.input));
+    const prompt = node('span', 'history-prompt', entry.cwd ? promptFor(entry.cwd) : '$');
+    prompt.title = entry.cwd ? '実行前の現在地: ' + entry.cwd : '旧版の履歴には実行前の現在地が保存されていません。';
+    command.append(prompt, node('span', '', entry.input));
     row.append(command);
     if (entry.stdout) row.append(node('pre', '', entry.stdout));
     if (entry.stderr) row.append(node('pre', 'error', entry.stderr));
@@ -385,16 +396,18 @@
     checkpoint();
   }
 
-  function appendTranscript(input, result, note) {
+  function appendTranscript(input, result, note, cwdBefore) {
     const id = currentSession.lessonId;
     const entries = ui.transcripts[id] || (ui.transcripts[id] = []);
-    entries.push({ input, stdout: String(result.stdout || '').slice(0, 24000), stderr: String(result.stderr || '').slice(0, 12000), code: result.code || 0, note: note || '' });
+    entries.push({ input, cwd: cwdBefore || currentSession.shell.cwd, stdout: String(result.stdout || '').slice(0, 24000), stderr: String(result.stderr || '').slice(0, 12000), code: result.code || 0, note: note || '' });
     if (entries.length > 60) entries.splice(0, entries.length - 60);
     renderTranscript();
   }
 
   function updateShellView() {
-    $('terminal-cwd').textContent = currentSession.shell.cwd;
+    $('terminal-cwd').textContent = '現在地: ' + currentSession.shell.cwd;
+    $('terminal-prompt').textContent = promptFor(currentSession.shell.cwd);
+    $('terminal-prompt').title = 'analyst はユーザー名、linuxroom はホスト名。: の後ろは現在地、~ はホームフォルダ。$ は一般ユーザーの入力待ちです。プロンプトは入力しません。';
     const files = Object.keys(currentSession.shell.files || {}).sort();
     $('file-count').textContent = files.length + ' files';
     $('file-list').replaceChildren(...files.slice(0, 100).map(path => {
@@ -414,6 +427,7 @@
     const input = $('command-input').value;
     if (!input.trim()) { $('command-input').focus(); return; }
     if (currentSession.pagerOpen) { if (input.trim() === 'q') closePager(); return; }
+    const cwdBefore = currentSession.shell.cwd;
     let result;
     try { result = Engine.run(currentSession, input); }
     catch (_) {
@@ -425,10 +439,10 @@
     historyDraft = '';
     const noOutput = !result.stdout && !result.stderr;
     const lastStage = Array.isArray(result.trace) && result.trace[result.trace.length - 1];
-    const fallback = result.code === 1 && lastStage && lastStage.command === 'diff' ? '差分が見つかりました。diff の終了状態 1 は、二つの内容が異なることを表します。' : result.code === 1 && noOutput ? '一致する行がありませんでした。検索語や大文字・小文字を確認してみよう。' : noOutput && result.code === 0 ? '実行しました。画面に何も表示しないコマンドもあります。' : '';
+    const fallback = result.code === 1 && lastStage && lastStage.command === 'diff' ? '差分が見つかりました。diff の終了状態 1 は、二つの内容が異なることを表します。' : result.code === 1 && noOutput && lastStage && ['grep', 'rg'].includes(lastStage.command) ? '一致する行がありませんでした。検索語や大文字・小文字を確認してみよう。' : noOutput && result.code !== 0 ? '終了状態 ' + result.code + ' です。画面に何も表示されなくても、コマンドが成功したとは限りません。' : noOutput && result.code === 0 ? '実行しました。画面に何も表示しないコマンドもあります。' : '';
     const feedback = result.feedback || fallback;
     if (result.clear) clearTerminal();
-    else appendTranscript(input, result, result.pager ? '閲覧画面を開きました。q で閉じます。' : fallback);
+    else appendTranscript(input, result, result.pager ? '閲覧画面を開きました。q で閉じます。' : fallback, cwdBefore);
     $('run-feedback').textContent = feedback;
     $('run-feedback').className = 'run-feedback' + (result.stderr && !result.expectedStatus ? ' error' : '');
     if (Array.isArray(result.trace) && result.trace.length) {
@@ -471,7 +485,7 @@
       }
       const button = node('button', 'stage-button');
       button.setAttribute('aria-pressed', String(i === traceIndex));
-      button.setAttribute('aria-label', '処理 ' + (i + 1) + ': ' + stageCommand(stage) + ' の出力を見る');
+      button.setAttribute('aria-label', '処理 ' + (i + 1) + ': ' + stageCommand(stage) + ' の入力と出力を見る');
       button.title = stageCommand(stage);
       button.append(node('strong', '', 'STEP ' + (i + 1)), document.createTextNode(stage.command));
       button.addEventListener('click', () => { traceIndex = i; renderTrace(); });
@@ -481,9 +495,12 @@
     if (!stage) return;
     $('trace-detail-title').textContent = stageCommand(stage);
     $('trace-line-count').textContent = '出力 ' + lineCount(stage.stdout) + ' 行';
+    $('trace-input-count').textContent = lineCount(stage.stdin) + ' 行';
+    $('trace-input').textContent = stage.stdin || '（標準入力は空です。ファイル名を引数で渡す処理は、そのファイルを直接読みます）';
+    $('trace-input-details').open = Boolean(stage.stdin);
     $('trace-output').textContent = stage.stdout || (stage.stderr ? stage.stderr : '（表示する出力はありません）');
     let note = stage.stderr ? 'この処理でエラーが発生しました。エラー文と入力を確認してみよう。' : stage.code === 1 && stage.command === 'diff' ? '終了状態 1 は「差分あり」を表します。diff では、違いが見つかると 1 を返します。' : stage.code === 1 && ['grep', 'rg'].includes(stage.command) ? '終了状態 1 は「一致する行なし」を表します。検索語や大文字・小文字を確認してみよう。' : stage.code ? '終了状態 ' + stage.code + ' です。このコマンドの説明と結果を確認しましょう。' : '';
-    if (stage.redirections && stage.redirections.length) note += (note ? ' ' : '') + 'この欄は保存・リダイレクト前の実際の出力です。' + stage.redirections.map(redir => redir.op + ' ' + redir.target).join(' / ');
+    if (stage.redirections && stage.redirections.length) note += (note ? ' ' : '') + 'この欄は保存・リダイレクト前の実際の出力です。' + stage.redirections.map(redir => (redir.fd === 2 ? '2' : '') + redir.op + ' ' + redir.target).join(' / ');
     if (Number(stage.index) > 0 && latestTrace[traceIndex - 1] && stage.pipeline === latestTrace[traceIndex - 1].pipeline) note += (note ? ' ' : '') + '前の処理から ' + lineCount(stage.stdin) + ' 行を受け取りました。';
     else if (!stage.stdin) note += (note ? ' ' : '') + '最初の処理です。必要な入力は、ファイルや引数から受け取ります。';
     if (stage.cwdAfter && stage.cwdBefore !== stage.cwdAfter) note += (note ? ' ' : '') + '現在地: ' + stage.cwdBefore + ' → ' + stage.cwdAfter;
@@ -608,25 +625,31 @@
   }
 
   const builtInReferences = [
+    { term: 'プロンプト / analyst@linuxroom:~$', text: 'コマンドの入力を待つ表示。analyst はユーザー名、linuxroom はホスト名（コンピューター名）、: の後ろが現在地。~ はホームフォルダ。$ は一般ユーザー、# は管理者の目印としてよく使われる。この教材では一般ユーザーで操作する。表示は環境ごとに異なる。プロンプト自体は入力しない。', example: 'analyst@linuxroom:~$ pwd\n/home/analyst\nanalyst@linuxroom:~$ cd logs\nanalyst@linuxroom:~/logs$' },
     { term: 'pwd', text: '今いるフォルダの場所を表示する。', example: 'pwd' },
-    { term: 'ls / cd', text: 'ls は中身の一覧。cd はフォルダを移動する。.. は一つ上のフォルダ。', example: 'ls\ncd logs\ncd ..' },
-    { term: 'cat / head / tail / less', text: '順に、全体・先頭・末尾・閲覧画面で読む。less は q で終了。', example: 'cat app.log\nhead -n 3 app.log\ntail -n 5 app.log\nless app.log' },
+    { term: 'ls / cd / ~', text: 'ls は中身の一覧。実機の端末では横に並ぶこともあり、ls -1 なら1行1項目。cd はフォルダを移動する。.. は一つ上、~ はホームフォルダ。移動するとプロンプトの現在地も変わる。', example: 'ls -1\ncd logs\ncd ..\ncd ~' },
+    { term: 'ls -l / -lh / -lt', text: '-l は権限・サイズ・更新日時などの詳細、-h は読みやすいサイズ単位、-t は更新日時の新しい順。更新日時やサイズの表記は実機の環境でも異なる。', example: 'ls -lh logs\nls -lt logs' },
+    { term: 'cat / head / tail / less', text: '順に、全体・先頭・末尾・閲覧画面で読む。head -c は先頭のバイト数、tail -n +2 は2行目から最後まで。less は q で終了。', example: 'cat app.log\nhead -n 3 app.log\nhead -c 20 app.log\ntail -n +2 members.csv\nless app.log' },
     { term: 'grep', text: '指定した文字を含む行を探す。-F は文字をそのまま検索、-n は行番号、-i は大文字と小文字を区別しない、-v は一致しない行。', example: "grep -n 'ERROR' app.log" },
     { term: '| / wc -l', text: '|（パイプ）は左の出力を右の入力へ渡す。wc -l は改行の数を数える。', example: "grep 'ERROR' app.log | wc -l" },
     { term: 'cut / awk', text: '必要な列を取り出す。cut -d は区切り文字、-f は列番号。awk の $1 は1列目、$NF は最後の列。', example: "cut -d ',' -f 2 members.csv\nawk '{print $2}' app.log" },
-    { term: 'sort / uniq -c', text: 'sort で並べ、uniq -c で隣り合う同じ行を数える。sort -nr は数字として大きい順に並べる。', example: 'sort names.txt | uniq -c | sort -nr' },
-    { term: 'mkdir / cp / mv', text: 'フォルダを作る・ファイルをコピーする・移動や名前の変更をする。', example: 'mkdir work\ncp app.log work/copy.log\nmv work/copy.log work/backup.log' },
+    { term: 'sort / sort -u / uniq -c', text: 'sort で並べ、uniq -c で隣り合う同じ行を数える。sort -nr は数字として大きい順に並べる。sort -u は並べ替えて重複を取り除く。', example: 'sort names.txt | uniq -c | sort -nr\nsort -u names.txt' },
+    { term: 'mkdir / cp / mv', text: 'フォルダを作る・ファイルをコピーする・移動や名前の変更をする。mkdir -p はフォルダが存在していても成功し、必要な親フォルダも作る。', example: 'mkdir -p work\ncp app.log work/copy.log\nmv work/copy.log work/backup.log' },
+    { term: '< / 標準入力', text: '< はファイルをコマンドの標準入力へ渡す。tr はファイル名を引数に取らないので、この書き方が使える。cat file | command と同じ入力を渡せる。wc -l < file はファイル名を付けずに行数だけを出す。', example: "tr '[:upper:]' '[:lower:]' < names.txt\nwc -l < app.log" },
+    { term: '&& / ; / 終了状態', text: '&& は左のコマンドが成功（終了状態 0）したときだけ次を実行する。; は左の成否にかかわらず次を実行する。準備に失敗したら止めたいときは && を使う。', example: 'mkdir -p work && cp app.log work/copy.log\npwd; ls' },
+    { term: '2>/dev/null / 標準エラー出力', text: '2> はエラーメッセージの出力先を変える。/dev/null は受け取った内容を捨てる特殊な出力先。エラーを非表示にしても、終了状態は変わらない。原因を調べるときは表示を戻そう。', example: 'ls missing.txt 2>/dev/null' },
+    { term: '$? / 終了状態', text: '$? は直前のコマンドの終了状態。通常は 0 が成功、0 以外が失敗や特別な状態を表す。grep の 1 は一致なし、diff の 1 は差分あり。echo $? 自体は成功するので、確認は直後に行う。', example: "grep 'ERROR' app.log\necho $?" },
     { term: '> / >> / tee', text: '> はファイルを上書き、>> は末尾に追記。tee は画面とファイルの両方へ出力。', example: "grep 'ERROR' app.log > errors.txt\ncat errors.txt | tee copy.txt" },
     { term: 'jq', text: 'JSON の項目を取り出す。select は条件で絞り込む。-r は文字列の引用符を外す。', example: 'jq -r \'select(.level == "ERROR") | .user\' events.jsonl' },
-    { term: 'help / history / clear', text: 'help はこの教材専用のヘルプ。history は入力履歴、clear は画面の表示を消す。ファイルや修了記録は消えない。', example: 'help grep\nhistory\nclear' },
+    { term: 'help / man / history / clear', text: '実機でコマンドのマニュアルを読むときは man grep などを使う。この教材の man は学習用 help と同じ案内を表示する。history は入力履歴、clear は画面の表示を消す。ファイルや修了記録は消えない。', example: 'man grep\nhelp grep\nhistory\nclear' },
     { term: 'echo / printf', text: '文字を出力する。printf では書式を指定できる。%s は文字列、\\n は改行。', example: "echo ready\nprintf '%s\\n' alice bob" },
     { term: 'tac / more', text: 'tac は行を逆の順番で表示する。more はファイルを閲覧する。この教材では less と同じ閲覧画面で、q で終了する。', example: 'tac app.log\nmore app.log' },
     { term: 'rg / find', text: 'rg はファイル内の文字を検索する。find は名前などの条件でファイルを探す。find の名前パターンは引用符で囲む。', example: "rg 'ERROR' logs\nfind logs -name '*.log'" },
     { term: 'grep -E / -A / -B / -C', text: '-E は拡張正規表現。^ は行頭、$ は行末、| はいずれかに一致。-A は後ろ、-B は前、-C は前後の行も表示する。', example: "grep -E '^(ERROR|WARN)' app.log\ngrep -C 1 'ERROR' app.log" },
-    { term: 'tr / sed / nl / column', text: 'tr は文字を変換する。sed は置換や行の抽出。nl は行番号を付け、column は列を見やすく整える。', example: "cat names.txt | tr 'A-Z' 'a-z'\nsed 's/ERROR/error/g' app.log\nnl app.log\ncolumn -t app.log" },
+    { term: 'tr / sed / nl / column', text: 'tr は文字を変換する。sed は置換や行の抽出。nl は行番号を付け、column は列を見やすく整える。', example: "tr '[:upper:]' '[:lower:]' < names.txt\nsed 's/ERROR/error/g' app.log\nnl app.log\ncolumn -t app.log" },
     { term: 'touch / rm / rmdir', text: 'touch は空ファイルの作成などに使う。rm はファイルを削除し、rmdir は空フォルダを削除する。この教材では課題内の仮想ファイルだけが変わる。', example: 'touch memo.txt\nrm memo.txt\nmkdir empty\nrmdir empty' },
     { term: 'diff / comm', text: 'diff は二つのファイルの違いを表示する。終了状態 1 は差分あり。comm は並べ替え済みの二つのファイルの、共通・片方だけの行を調べる。', example: 'diff before.txt after.txt\ncomm -12 sorted-a.txt sorted-b.txt' },
-    { term: 'join / paste / xargs', text: 'join は共通のキーで行を結合し、paste は行を横に並べる。xargs は入力から次のコマンドの引数を組み立てる。', example: 'join users.txt roles.txt\npaste names.txt counts.txt\ncat paths.txt | xargs wc -l' },
+    { term: 'join / paste / xargs', text: 'join は共通のキーで行を結合し、paste は行を横に並べる。xargs は入力から次のコマンドの引数を組み立てる。', example: 'join users.txt roles.txt\npaste names.txt counts.txt\nxargs wc -l < paths.txt' },
     { term: 'base64 / strings / rev', text: 'base64 は文字データの符号化・復号。strings は表示可能な文字の並びを抽出する。rev は各行の文字順を逆にする。', example: 'base64 -d encoded.txt\nstrings sample.bin\nrev names.txt' },
     { term: 'basename / dirname / realpath', text: 'パスのファイル名部分・親フォルダ部分・絶対パスを調べる。', example: 'basename /var/log/app.log\ndirname /var/log/app.log\nrealpath app.log' },
     { term: 'file / stat / du / date', text: 'file は種類、stat は詳細情報、du は使用量、date は日時を調べる。ファイル情報は学習用の仮想情報。date -u はブラウザの現在時刻を UTC で表示する。', example: 'file app.log\nstat app.log\ndu app.log\ndate -u' }
@@ -704,6 +727,7 @@
 
   function importWasPreserved(raw, restored) {
     const sameKeys = (a, b) => JSON.stringify(Object.keys(a || {}).sort()) === JSON.stringify(Object.keys(b || {}).sort());
+    const own = (value, key) => Object.prototype.hasOwnProperty.call(value || {}, key);
     if (raw.currentId !== restored.currentId || !sameKeys(raw.completed, restored.completed) || !sameKeys(raw.sessions, restored.sessions) || !sameKeys(raw.hints, restored.hints)) return false;
     for (const id of Object.keys(raw.hints || {})) if (raw.hints[id] !== restored.hints[id]) return false;
     for (const id of Object.keys(raw.sessions)) {
@@ -711,8 +735,24 @@
       const after = restored.sessions[id];
       if (!before || !before.shell || !after || !after.shell) return false;
       const a = before.shell, b = after.shell;
-      if (!sameKeys(a.files, b.files) || Object.keys(a.files || {}).some(path => a.files[path] !== b.files[path]) || a.cwd !== b.cwd || a.oldcwd !== b.oldcwd) return false;
-      if (!Array.isArray(a.directories) || JSON.stringify(a.directories.slice().sort()) !== JSON.stringify(b.directories.slice().sort())) return false;
+      if (Object.keys(a.files || {}).some(path => !own(b.files, path) || a.files[path] !== b.files[path]) || a.cwd !== b.cwd || a.oldcwd !== b.oldcwd) return false;
+      const lesson = byId.get(id);
+      const fixture = lesson && DATA.datasets[lesson.fixture];
+      const allowedFiles = new Set((before.fixtureRevision || 1) < (lesson && lesson.fixtureRevision || 1) ? lesson.fixtureAdditions || [] : []);
+      const additions = Object.keys(b.files || {}).filter(path => !own(a.files, path));
+      if (additions.some(path => !allowedFiles.has(path) || !fixture || !own(fixture.files, path) || b.files[path] !== fixture.files[path])) return false;
+      const allowedDirectories = new Set();
+      for (const path of additions) {
+        let parent = path.slice(0, path.lastIndexOf('/')) || '/';
+        while (true) {
+          allowedDirectories.add(parent);
+          if (parent === '/') break;
+          parent = parent.slice(0, parent.lastIndexOf('/')) || '/';
+        }
+      }
+      if (!Array.isArray(a.directories) || !Array.isArray(b.directories) || a.directories.some(path => !b.directories.includes(path)) || b.directories.some(path => !a.directories.includes(path) && !allowedDirectories.has(path))) return false;
+      if (own(a, 'lastExitCode') && a.lastExitCode !== b.lastExitCode || own(a, 'snapshotTime') && a.snapshotTime !== b.snapshotTime) return false;
+      if (own(a, 'metadata') && (!a.metadata || typeof a.metadata !== 'object' || Array.isArray(a.metadata) || Object.keys(a.metadata).some(path => JSON.stringify(a.metadata[path]) !== JSON.stringify(b.metadata && b.metadata[path])))) return false;
       if (!Array.isArray(a.history) || JSON.stringify(a.history) !== JSON.stringify(b.history)) return false;
       if (!Array.isArray(before.events) || JSON.stringify(before.events) !== JSON.stringify(after.events)) return false;
       if (!Array.isArray(before.evidence) || before.evidence.length !== after.evidence.length) return false;
@@ -758,7 +798,12 @@
     $('start-learning').addEventListener('click', () => renderLesson(ui.started && validId(progress.currentId) ? progress.currentId : lessons[0].id, { focus: true }));
     ['map-button', 'welcome-map-button'].forEach(id => $(id).addEventListener('click', renderMap));
     ['sandbox-button', 'welcome-sandbox-button'].forEach(id => $(id).addEventListener('click', () => renderLesson('sandbox', { focus: true })));
-    ['reference-button', 'terminal-help'].forEach(id => $(id).addEventListener('click', showReference));
+    $('reference-button').addEventListener('click', showReference);
+    $('terminal-help').addEventListener('click', () => {
+      $('reference-search').value = '';
+      showReference();
+      $('prompt-guide').scrollIntoView({ block: 'start' });
+    });
     $('save-button').addEventListener('click', () => { checkpoint(); openDialog('save-dialog'); });
     $('reference-search').addEventListener('input', renderReferences);
     document.querySelectorAll('.close-dialog').forEach(button => button.addEventListener('click', () => closeDialog(button.closest('dialog'))));

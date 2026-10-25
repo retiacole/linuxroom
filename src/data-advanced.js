@@ -125,7 +125,7 @@
 
   add({id:'ad-04-file',chapter:'ad-inspect',title:'内容の形式を確かめる',
     goal:'fileで内容の種類を確認してから読む道具を選べる。',
-    explanation:['拡張子は名前の一部です。fileは内容から種類を推測します。読み方を決める前に、テキストなのかJSONなのかを確認します。','この教材の判定は簡略版です。audit.jsonlは1行に一つのJSONが並ぶ形式で、普通の文章とは違う構造があります。'],
+    explanation:['拡張子は名前の一部です。fileは内容から種類を推測します。読み方を決める前に、テキストなのかJSONなのかを確認します。','この教材の判定は簡略版です。audit.jsonlは1行に一つのJSONが並ぶ形式です。実機ではfileの版や判定規則によりJSON Lines text data、JSON text data、ASCII textなど表記が変わることがあります。'],
     concepts:[{term:'JSON Lines',text:'各行が独立したJSONの記録。後半ではjqで項目を取り出します。'}],
     example:{command:'file ready.txt',note:'ready.txt: ASCII textと表示されます。ASCIIは英数字などの基本的な文字です。'},
     task:'fileを使ってaudit.jsonlの種類を表示してください。',
@@ -144,14 +144,14 @@
     validation:{all:[used('stat'),out('ready.txt 6')]}});
 
   add({id:'ad-06-du',chapter:'ad-inspect',title:'まとめた記録の大きさを調べる',
-    goal:'du -sbでディレクトリ内の合計サイズを確認できる。',
-    explanation:['duは指定した場所の大きさを集計します。-sは全体の合計だけ、-bはバイト単位の指定です。','この教材では仮想ファイル本文だけを合算します。bundle/a.logは10バイト、b.logは11バイトです。実Linuxのduにはディスク割当やディレクトリ自体の大きさも関係するため、同じ数になるとは限りません。'],
-    concepts:[{term:'du -sb',text:'合計をバイト単位で表示します。この教材では本文の論理サイズを学ぶための実装です。'}],
+    goal:'du -cbで選んだファイル本文の合計サイズを確認できる。',
+    explanation:['du -bは見かけのサイズをバイト単位で表示し、-cは最後に総計を加えます。bundle/*.logで対象をログファイルそのものに絞り、tail -n 1で総計の行を取り出します。','a.logは10バイト、b.logは11バイトで、本文は合計21バイトです。ディレクトリをdu -sb bundleで測ると、実機ではディレクトリ自身のサイズも含まれます。本文だけを知りたいときは今回のようにファイルを指定します。'],
+    concepts:[{term:'du -cb ファイル',text:'-cは総計、-bは見かけのサイズをバイト単位にします。*.logは該当するファイル名へ展開されます。'}],
     example:{command:'du -b ready.txt',note:'6とready.txtが表示されます。ファイル一つにも使えます。'},
-    task:'duでbundleディレクトリをまとめて調べ、合計21バイトを表示してください。',
-    hints:['個々のファイルの一覧ではなく、合計だけを出す-sを使います。','-sと-bは-sbとまとめて書けます。','du -sb bundle と入力します。'],
-    solution:['du -sb bundle'],success:'調査対象をまとめた大きさを確認できました。',bridge:'ファイル情報に続き、時刻の表し方をそろえます。',
-    validation:{all:[used('du'),out('21\tbundle','lines')]}});
+    task:'du -cbでbundle/*.logの本文サイズを集計し、tailで総計の21 totalの行だけを表示してください。',
+    hints:['duに-cbを付け、対象をbundle/*.logにします。','総計は最後の行なのでtail -n 1へ渡します。','穴埋め：du -cb bundle/*.log | tail -n ___。最後の1行だけを表示します。'],
+    solution:['du -cb bundle/*.log | tail -n 1'],success:'調査対象をまとめた大きさを確認できました。',bridge:'ファイル情報に続き、時刻の表し方をそろえます。',
+    validation:{all:[used('du'),used('tail'),out('21\ttotal','lines')]}});
 
   add({id:'ad-07-date-utc',chapter:'ad-transform',title:'タイムゾーンをUTCにそろえる',mode:'guide',
     goal:'オフセット付きの時刻をUTCで表示できる。',
@@ -190,22 +190,22 @@
     example:{command:'base64 -d sample.b64',note:'readyと改行が復元されます。payload.b64も同じ操作で本文を確認できます。'},
     starter:'base64 -d payload.b64',newPart:"| jq -r '.request_id'",task:'payload.b64をデコードし、jqでrequest_idの値req-02だけを表示してください。',
     hints:['まずbase64 -d payload.b64でJSONが見えるか確認します。','その右にjq -rをつなぎ、.request_idを指定します。',"base64 -d payload.b64 | jq -r '.request_id' と入力します。"],
-    solution:["base64 -d payload.b64 | jq -r '.request_id'"],success:'表現を戻す処理から、構造を読む処理へつなげられました。',bridge:'文字の向きを変える小さな道具も、抽出の助けになります。',
+    solution:["base64 -d payload.b64 | jq -r '.request_id'"],success:'表現を戻す処理から、構造を読む処理へつなげられました。',bridge:'次は、区切りの数に依存せず末尾の項目を取り出します。',
     validation:{all:[used('base64'),used('jq'),pipe(2),out('req-02')]}});
 
   add({id:'ad-11-rev',chapter:'ad-transform',title:'末尾の区切りから取り出す',
-    goal:'revとcutを組み合わせて最後の拡張子を取り出せる。',
-    explanation:['revは各行の文字を逆順にします。tacが行の順を逆にするのとは異なります。','object-names.txtにはgateway.access.logなど、ピリオドが複数ある名前が並びます。文字を逆順にすると末尾の拡張子が先頭になります。cutで最初の区切りまでを選び、もう一度revで向きを戻します。'],
-    concepts:[{term:'rev → cut → rev',text:'右端の区切りを左端へ移し、取り出してから元の向きに戻す組み合わせです。'}],
-    example:{command:"echo 'gateway.access.log' | rev | cut -d '.' -f 1",note:'途中結果はgolです。ここへrevを足すとlogへ戻せます。'},
-    starter:"rev object-names.txt | cut -d '.' -f 1",newPart:'| rev',task:'object-names.txtから最後の拡張子を取り出し、log、json、logの順に表示してください。',
-    hints:['各行をrevで逆にしてから、cutの1列目を選びます。','区切りはピリオドです。最後にもう一度revします。',"rev object-names.txt | cut -d '.' -f 1 | rev と入力します。"],
-    solution:["rev object-names.txt | cut -d '.' -f 1 | rev"],success:'小さな道具を3段つなぎ、末尾の項目を取り出せました。',bridge:'次は、二つの記録の違いを調べます。',
-    validation:{all:[used('rev'),used('cut'),pipe(3),out('log\njson\nlog')]}});
+    goal:'awkの区切りとNFで、最後の拡張子を取り出せる。',
+    explanation:['object-names.txtにはgateway.access.logなど、ピリオドが複数ある名前が並びます。awk -F.でピリオド区切りにし、$NFで最後の列を選ぶと拡張子を取り出せます。','参考として、revで各行の文字を逆にし、cutで先頭の項目を取り、再度revで戻す方法もあります。revは文字の逆順、tacは行の逆順です。今回は短く書けるawkを本線にします。'],
+    concepts:[{term:'$NF',text:'その行の最後のフィールドです。区切りの数が行ごとに違っても末尾を選べます。'}],
+    example:{command:"rev object-names.txt | cut -d '.' -f 1 | rev",note:'revを使う別解です。同じ結果をawk -F.と$NFなら一つのコマンドで取り出せます。'},
+    starter:"awk -F. '{print $1}' object-names.txt",newPart:'$NF',task:'object-names.txtから最後の拡張子を取り出し、log、json、logの順に表示してください。awkでもrevを使う別解でも構いません。',
+    hints:['区切りはピリオドです。awkの-F.で指定します。','最後のフィールドの番号はNFです。値として読むときは$NFにします。',"穴埋め：awk -F. '{print ___}' object-names.txt。最後のフィールドを指定します。"],
+    solution:["awk -F. '{print $NF}' object-names.txt"],success:'行ごとに区切りの数が違っても、末尾の項目を取り出せました。',bridge:'次は、二つの記録の違いを調べます。',
+    validation:{all:[source('object-names.txt','last'),out('log\njson\nlog')]}});
 
   add({id:'ad-12-diff',chapter:'ad-compare',title:'基準と現在の差を見る',mode:'guide',
     goal:'diff -uの追加・削除の記号と、差がある終了コード1を理解する。',
-    explanation:['baseline.confは基準、current.confは現在の設定です。retentionは保存日数、formatは出力形式です。diff -uは2ファイルの違いと周辺の行を表示します。','---は比較元、+++は比較先の見出しです。本文の-は元にだけある行、+は先にだけある行、空白は共通行です。@@は比較した行の範囲です。diffの終了コードは0が同じ、1が差あり、2以上がエラーです。この課題では差ありの1が正しい結果です。'],
+    explanation:['baseline.confは基準、current.confは現在の設定です。retentionは保存日数、formatは出力形式です。diff -uは2ファイルの違いと周辺の行を表示します。','---は比較元、+++は比較先の見出しです。実機ではファイル名に更新日時も付きますが、この教材では日時を省略します。本文の-は元にだけある行、+は先にだけある行、空白は共通行です。@@は比較した行の範囲です。diffの終了コードは0が同じ、1が差あり、2以上がエラーです。この課題では差ありの1が正しい結果です。'],
     concepts:[{term:'統一形式の差分',text:'変わった行を-と+で示し、周囲の共通行も載せる形式です。差があるだけでは異常と断定できません。'}],
     example:{command:'diff -u baseline.conf baseline.conf',note:'同じものを比較するので出力は空、終了コードは0です。'},
     task:'diff -uでbaseline.confからcurrent.confへの違いを表示してください。保存日数が7から14へ変わっています。',
@@ -275,23 +275,23 @@
 
   add({id:'ad-19-xargs-info',chapter:'ad-link',title:'ファイル名を引数として渡す',
     goal:'標準入力の文字をxargsでコマンドの引数に変換できる。',
-    explanation:['selected-files.txtにはbundle/a.logとbundle/b.logのパスが1行ずつあります。fileはパスを引数として受け取るため、catからの標準入力をそのまま渡しても目的の形になりません。','xargsは入力の文字を引数に変えます。-n 1は1引数ずつコマンドを呼び出す指定です。ここでは空白を含まない教材用パスを使います。一般の任意の名前には区切り方の設計が必要です。'],
+    explanation:['selected-files.txtにはbundle/a.logとbundle/b.logのパスが1行ずつあります。fileはパスを引数として受け取るため、一覧の本文を標準入力としてそのまま渡しても目的の形になりません。','xargsは標準入力の文字を引数に変えます。< selected-files.txtで一覧を読み込め、cat selected-files.txt | xargs ...でも同じです。-n 1は1引数ずつコマンドを呼び出す指定です。ここでは空白を含まない教材用パスを使います。一般の任意の名前には区切り方の設計が必要です。'],
     concepts:[{term:'標準入力と引数',text:'パイプは文字データを渡します。xargsは、その文字を後ろのコマンドの引数にする橋渡しです。'}],
-    example:{command:'cat selected-files.txt | xargs -n 1 basename',note:'各パスにbasenameが呼ばれ、a.log、b.logが表示されます。'},
-    starter:'cat selected-files.txt',newPart:'| xargs -n 1 file',task:'selected-files.txtを読み、xargsからfileを1ファイルずつ呼び出して、両方の形式を表示してください。',
-    hints:['一覧を読み込むcatの後ろにxargsを置きます。','呼び出すコマンドはfile、1回の引数は-n 1です。','cat selected-files.txt | xargs -n 1 file と入力します。'],
-    solution:['cat selected-files.txt | xargs -n 1 file'],success:'一覧の文字を、コマンドへの引数として使えました。',bridge:'次は、一覧に載ったファイルの中身を連続して読みます。',
-    validation:{all:[used('xargs'),source('selected-files.txt','last'),pipe(2),out('bundle/a.log: ASCII text\nbundle/b.log: ASCII text')]}});
+    example:{command:'xargs -n 1 basename < selected-files.txt',note:'各パスにbasenameが呼ばれ、a.log、b.logが表示されます。'},
+    starter:'xargs -n 1 basename < selected-files.txt',newPart:'file',task:'selected-files.txtを読み、xargsからfileを1ファイルずつ呼び出して、両方の形式を表示してください。',
+    hints:['xargsへ< selected-files.txtで一覧を入力します。catからパイプで渡しても構いません。','呼び出すコマンドはfile、1回の引数は-n 1です。','cat selected-files.txt | xargs -n 1 file と入力します。'],
+    solution:['xargs -n 1 file < selected-files.txt'],success:'一覧の文字を、コマンドへの引数として使えました。',bridge:'次は、一覧に載ったファイルの中身を連続して読みます。',
+    validation:{all:[used('xargs'),source('selected-files.txt','last'),out('bundle/a.log: ASCII text\nbundle/b.log: ASCII text')]}});
 
   add({id:'ad-20-xargs-read',chapter:'ad-link',title:'対象一覧から本文を集めて絞る',
     goal:'一覧→引数→本文→抽出を一つのパイプにできる。',
     explanation:['xargsの後ろのコマンドをcatにすると、一覧に載った各ファイルの本文を読みます。その後にgrepをつなげれば、集めた本文を絞れます。','bundle/a.logはINFO boot、b.logはWARN retryの記録です。ここでは出所のファイル名を付けず、本文のWARN行だけを取り出します。出所を残したい場面では応用編のgrep -Hなどを選びます。'],
-    concepts:[{term:'一覧から本文へ',text:'最初のcatが読むのはパス一覧、xargsが呼ぶcatが読むのは各ログの本文です。'}],
-    example:{command:'cat selected-files.txt | xargs cat',note:'INFO bootとWARN retryが順番に表示されます。'},
-    starter:'cat selected-files.txt | xargs cat',newPart:"| grep 'WARN'",task:'対象一覧から両方の本文を読み、WARNを含む行だけを表示してください。',
+    concepts:[{term:'一覧から本文へ',text:'<で読むのはパス一覧、xargsが呼ぶcatが読むのは各ログの本文です。'}],
+    example:{command:'xargs cat < selected-files.txt',note:'INFO bootとWARN retryが順番に表示されます。'},
+    starter:'xargs cat < selected-files.txt',newPart:"| grep 'WARN'",task:'対象一覧から両方の本文を読み、WARNを含む行だけを表示してください。',
     hints:['前の段階で本文が集まっているため、最後は普通のgrepです。','grep側にファイル名を追加せず、標準入力を検索します。',"cat selected-files.txt | xargs cat | grep 'WARN' と入力します。"],
-    solution:["cat selected-files.txt | xargs cat | grep 'WARN'"],success:'対象の一覧を出発点にして本文の抽出までつながりました。',bridge:'次は、ログの列数や数値を使った集計に取り組みます。',
-    validation:{all:[used('xargs'),used('grep'),source('selected-files.txt','last'),pipe(3),out('WARN retry')]}});
+    solution:["xargs cat < selected-files.txt | grep 'WARN'"],success:'対象の一覧を出発点にして本文の抽出までつながりました。',bridge:'次は、ログの列数や数値を使った集計に取り組みます。',
+    validation:{all:[used('xargs'),used('grep'),source('selected-files.txt','last'),out('WARN retry')]}});
 
   add({id:'ad-21-awk-nf',chapter:'ad-awk',title:'末尾から列の位置を数える',mode:'guide',minutes:5,
     goal:'行の長さが違うログから、NFを使って共通の項目を抽出できる。',
@@ -468,6 +468,7 @@
     bridge:'次はSOCroom-easyで記録の意味を学び、LogroomでLinuxコマンドを使った調査へ進みましょう。既に読解を学んだ方はLogroomで実践できます。',
     validation:{all:[source('final/audit.jsonl'),source('final/access.log'),{type:'directory',path:base+'/final/reports'},saved('final/reports/failed.txt','job-02 yui 503 90\njob-03 sora 500 60\njob-04 sora 503 150','lines'),saved('final/reports/ranking.txt','2 sora\n1 yui','lines'),saved('final/reports/bytes.txt','300'),out('300')]}});
 
+  lessons.forEach(D.practiceHint);
   D.lessons.push(...lessons);
   D.glossary.push(
     {term:'パスを加工する道具',text:'basenameは末尾の名前、dirnameは親の場所、realpathは整理した絶対パスを表示します。ファイルの改名や移動はしません。',example:'realpath -e bundle/../access.log'},

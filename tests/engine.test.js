@@ -93,7 +93,7 @@ test('trace does not repeat side effects and shows stdout before redirection', (
   assert.equal(shell.read('notes'), 'start\nnext\n');
   assert.equal(result.stdout, '');
   assert.equal(result.trace[0].stdout, 'next\n');
-  assert.deepEqual(result.trace[0].redirections, [{op: '>>', target: '/home/analyst/notes'}]);
+  assert.deepEqual(result.trace[0].redirections, [{op: '>>', fd: 1, target: '/home/analyst/notes'}]);
   result = shell.run('cat < notes | tee copy | wc -l');
   assert.equal(shell.read('copy'), 'start\nnext\n');
   assert.equal(result.trace[0].stdin, 'start\nnext\n');

@@ -1,0 +1,1397 @@
+{
+  "format": "linuxroom-export",
+  "version": 1,
+  "progress": {
+    "version": 1,
+    "currentId": "ap-05-more",
+    "completed": {
+      "01-echo": {
+        "at": "2026-10-25T13:46:54.112Z",
+        "assisted": false
+      },
+      "02-quotes": {
+        "at": "2026-10-25T13:46:54.113Z",
+        "assisted": false
+      },
+      "03-pwd": {
+        "at": "2026-10-25T13:46:54.113Z",
+        "assisted": false
+      },
+      "04-ls": {
+        "at": "2026-10-25T13:46:54.113Z",
+        "assisted": false
+      },
+      "05-cd": {
+        "at": "2026-10-25T13:46:54.114Z",
+        "assisted": false
+      },
+      "06-paths": {
+        "at": "2026-10-25T13:46:54.114Z",
+        "assisted": false
+      },
+      "07-cat": {
+        "at": "2026-10-25T13:46:54.114Z",
+        "assisted": false
+      },
+      "08-head": {
+        "at": "2026-10-25T13:46:54.114Z",
+        "assisted": false
+      },
+      "09-tail": {
+        "at": "2026-10-25T13:46:54.114Z",
+        "assisted": false
+      },
+      "10-less": {
+        "at": "2026-10-25T13:46:54.114Z",
+        "assisted": false
+      },
+      "11-grep": {
+        "at": "2026-10-25T13:46:54.115Z",
+        "assisted": false
+      },
+      "12-grep-number": {
+        "at": "2026-10-25T13:46:54.115Z",
+        "assisted": false
+      },
+      "13-grep-case": {
+        "at": "2026-10-25T13:46:54.115Z",
+        "assisted": false
+      },
+      "14-grep-invert": {
+        "at": "2026-10-25T13:46:54.115Z",
+        "assisted": false
+      },
+      "15-pipe-count": {
+        "at": "2026-10-25T13:46:54.115Z",
+        "assisted": false
+      },
+      "16-pipe-head": {
+        "at": "2026-10-25T13:46:54.115Z",
+        "assisted": false
+      },
+      "17-awk": {
+        "at": "2026-10-25T13:46:54.116Z",
+        "assisted": false
+      },
+      "18-grep-awk": {
+        "at": "2026-10-25T13:46:54.116Z",
+        "assisted": false
+      },
+      "19-cut": {
+        "at": "2026-10-25T13:46:54.116Z",
+        "assisted": false
+      },
+      "20-sort": {
+        "at": "2026-10-25T13:46:54.116Z",
+        "assisted": false
+      },
+      "21-uniq": {
+        "at": "2026-10-25T13:46:54.116Z",
+        "assisted": false
+      },
+      "22-pipeline-sort": {
+        "at": "2026-10-25T13:46:54.116Z",
+        "assisted": false
+      },
+      "23-pipeline-uniq": {
+        "at": "2026-10-25T13:46:54.116Z",
+        "assisted": false
+      },
+      "24-pipeline-rank": {
+        "at": "2026-10-25T13:46:54.116Z",
+        "assisted": false
+      },
+      "25-mkdir": {
+        "at": "2026-10-25T13:46:54.116Z",
+        "assisted": false
+      },
+      "26-redirect": {
+        "at": "2026-10-25T13:46:54.117Z",
+        "assisted": false
+      },
+      "27-append": {
+        "at": "2026-10-25T13:46:54.117Z",
+        "assisted": false
+      },
+      "28-tee": {
+        "at": "2026-10-25T13:46:54.117Z",
+        "assisted": false
+      },
+      "29-copy": {
+        "at": "2026-10-25T13:46:54.117Z",
+        "assisted": false
+      },
+      "30-move": {
+        "at": "2026-10-25T13:46:54.117Z",
+        "assisted": false
+      },
+      "31-jq-read": {
+        "at": "2026-10-25T13:46:54.117Z",
+        "assisted": false
+      },
+      "32-jq-field": {
+        "at": "2026-10-25T13:46:54.117Z",
+        "assisted": false
+      },
+      "33-jq-select": {
+        "at": "2026-10-25T13:46:54.117Z",
+        "assisted": false
+      },
+      "34-jq-compose": {
+        "at": "2026-10-25T13:46:54.117Z",
+        "assisted": false
+      },
+      "35-final-extract": {
+        "at": "2026-10-25T13:46:54.118Z",
+        "assisted": false
+      },
+      "36-final-ranking": {
+        "at": "2026-10-25T13:46:54.118Z",
+        "assisted": false
+      },
+      "ap-01-help": {
+        "at": "2026-10-25T13:46:54.118Z",
+        "assisted": false
+      },
+      "ap-02-history": {
+        "at": "2026-10-25T13:46:54.118Z",
+        "assisted": false
+      },
+      "ap-03-clear": {
+        "at": "2026-10-25T13:46:54.118Z",
+        "assisted": false
+      },
+      "ap-04-tac": {
+        "at": "2026-10-25T13:46:54.118Z",
+        "assisted": false
+      },
+      "ap-05-more": {
+        "at": "2026-10-25T13:46:54.118Z",
+        "assisted": false
+      },
+      "ap-06-nl": {
+        "at": "2026-10-25T13:46:54.118Z",
+        "assisted": false
+      },
+      "ap-07-grep-fixed": {
+        "at": "2026-10-25T13:46:54.118Z",
+        "assisted": false
+      },
+      "ap-08-grep-alternation": {
+        "at": "2026-10-25T13:46:54.118Z",
+        "assisted": false
+      },
+      "ap-09-grep-anchors": {
+        "at": "2026-10-25T13:46:54.118Z",
+        "assisted": false
+      },
+      "ap-10-grep-before-after": {
+        "at": "2026-10-25T13:46:54.119Z",
+        "assisted": false
+      },
+      "ap-11-grep-context": {
+        "at": "2026-10-25T13:46:54.119Z",
+        "assisted": false
+      },
+      "ap-12-grep-recursive": {
+        "at": "2026-10-25T13:46:54.119Z",
+        "assisted": false
+      },
+      "ap-13-rg": {
+        "at": "2026-10-25T13:46:54.119Z",
+        "assisted": false
+      },
+      "ap-14-rg-glob": {
+        "at": "2026-10-25T13:46:54.119Z",
+        "assisted": false
+      },
+      "ap-15-find": {
+        "at": "2026-10-25T13:46:54.119Z",
+        "assisted": false
+      },
+      "ap-16-awk-condition": {
+        "at": "2026-10-25T13:46:54.119Z",
+        "assisted": false
+      },
+      "ap-17-awk-separator": {
+        "at": "2026-10-25T13:46:54.119Z",
+        "assisted": false
+      },
+      "ap-18-awk-combined": {
+        "at": "2026-10-25T13:46:54.120Z",
+        "assisted": false
+      },
+      "ap-19-sort-key": {
+        "at": "2026-10-25T13:46:54.120Z",
+        "assisted": false
+      },
+      "ap-20-tr-case": {
+        "at": "2026-10-25T13:46:54.120Z",
+        "assisted": false
+      },
+      "ap-21-tr-squeeze": {
+        "at": "2026-10-25T13:46:54.120Z",
+        "assisted": false
+      },
+      "ap-22-uniq-duplicates": {
+        "at": "2026-10-25T13:46:54.120Z",
+        "assisted": false
+      },
+      "ap-23-column": {
+        "at": "2026-10-25T13:46:54.120Z",
+        "assisted": false
+      },
+      "ap-24-sed-range": {
+        "at": "2026-10-25T13:46:54.121Z",
+        "assisted": false
+      },
+      "ap-25-sed-substitute": {
+        "at": "2026-10-25T13:46:54.121Z",
+        "assisted": false
+      },
+      "ap-26-sed-delete": {
+        "at": "2026-10-25T13:46:54.121Z",
+        "assisted": false
+      },
+      "ap-27-printf": {
+        "at": "2026-10-25T13:46:54.121Z",
+        "assisted": false
+      },
+      "ap-28-touch": {
+        "at": "2026-10-25T13:46:54.121Z",
+        "assisted": false
+      },
+      "ap-29-rm": {
+        "at": "2026-10-25T13:46:54.121Z",
+        "assisted": false
+      },
+      "ap-30-rmdir": {
+        "at": "2026-10-25T13:46:54.121Z",
+        "assisted": false
+      },
+      "ap-31-flow-filter": {
+        "at": "2026-10-25T13:46:54.121Z",
+        "assisted": false
+      },
+      "ap-32-flow-extract": {
+        "at": "2026-10-25T13:46:54.121Z",
+        "assisted": false
+      },
+      "ap-33-flow-normalize": {
+        "at": "2026-10-25T13:46:54.122Z",
+        "assisted": false
+      },
+      "ap-34-flow-count": {
+        "at": "2026-10-25T13:46:54.122Z",
+        "assisted": false
+      },
+      "ap-35-flow-rank": {
+        "at": "2026-10-25T13:46:54.122Z",
+        "assisted": false
+      },
+      "ap-36-flow-save": {
+        "at": "2026-10-25T13:46:54.122Z",
+        "assisted": false
+      },
+      "ad-01-basename": {
+        "at": "2026-10-25T13:46:54.122Z",
+        "assisted": false
+      },
+      "ad-02-dirname": {
+        "at": "2026-10-25T13:46:54.123Z",
+        "assisted": false
+      },
+      "ad-03-realpath": {
+        "at": "2026-10-25T13:46:54.123Z",
+        "assisted": false
+      },
+      "ad-04-file": {
+        "at": "2026-10-25T13:46:54.123Z",
+        "assisted": false
+      },
+      "ad-05-stat": {
+        "at": "2026-10-25T13:46:54.123Z",
+        "assisted": false
+      },
+      "ad-06-du": {
+        "at": "2026-10-25T13:46:54.123Z",
+        "assisted": false
+      },
+      "ad-07-date-utc": {
+        "at": "2026-10-25T13:46:54.123Z",
+        "assisted": false
+      },
+      "ad-08-date-epoch": {
+        "at": "2026-10-25T13:46:54.123Z",
+        "assisted": false
+      },
+      "ad-09-strings": {
+        "at": "2026-10-25T13:46:54.123Z",
+        "assisted": false
+      },
+      "ad-10-base64": {
+        "at": "2026-10-25T13:46:54.124Z",
+        "assisted": false
+      },
+      "ad-11-rev": {
+        "at": "2026-10-25T13:46:54.124Z",
+        "assisted": false
+      },
+      "ad-12-diff": {
+        "at": "2026-10-25T13:46:54.124Z",
+        "assisted": false
+      },
+      "ad-13-set-prepare": {
+        "at": "2026-10-25T13:46:54.124Z",
+        "assisted": false
+      },
+      "ad-14-comm-new": {
+        "at": "2026-10-25T13:46:54.124Z",
+        "assisted": false
+      },
+      "ad-15-comm-common": {
+        "at": "2026-10-25T13:46:54.124Z",
+        "assisted": false
+      },
+      "ad-16-paste": {
+        "at": "2026-10-25T13:46:54.124Z",
+        "assisted": false
+      },
+      "ad-17-join": {
+        "at": "2026-10-25T13:46:54.124Z",
+        "assisted": false
+      },
+      "ad-18-join-filter": {
+        "at": "2026-10-25T13:46:54.124Z",
+        "assisted": false
+      },
+      "ad-19-xargs-info": {
+        "at": "2026-10-25T13:46:54.125Z",
+        "assisted": false
+      },
+      "ad-20-xargs-read": {
+        "at": "2026-10-25T13:46:54.125Z",
+        "assisted": false
+      },
+      "ad-21-awk-nf": {
+        "at": "2026-10-25T13:46:54.125Z",
+        "assisted": false
+      },
+      "ad-22-awk-count": {
+        "at": "2026-10-25T13:46:54.125Z",
+        "assisted": false
+      },
+      "ad-23-awk-sum": {
+        "at": "2026-10-25T13:46:54.125Z",
+        "assisted": false
+      },
+      "ad-24-awk-groups": {
+        "at": "2026-10-25T13:46:54.125Z",
+        "assisted": false
+      },
+      "ad-25-awk-save": {
+        "at": "2026-10-25T13:46:54.125Z",
+        "assisted": false
+      },
+      "ad-26-jq-nested": {
+        "at": "2026-10-25T13:46:54.125Z",
+        "assisted": false
+      },
+      "ad-27-jq-array": {
+        "at": "2026-10-25T13:46:54.125Z",
+        "assisted": false
+      },
+      "ad-28-jq-select": {
+        "at": "2026-10-25T13:46:54.125Z",
+        "assisted": false
+      },
+      "ad-29-jq-tsv": {
+        "at": "2026-10-25T13:46:54.125Z",
+        "assisted": false
+      },
+      "ad-30-jq-slurp": {
+        "at": "2026-10-25T13:46:54.126Z",
+        "assisted": false
+      },
+      "ad-31-jq-group": {
+        "at": "2026-10-25T13:46:54.126Z",
+        "assisted": false
+      },
+      "ad-32-jq-group-count": {
+        "at": "2026-10-25T13:46:54.126Z",
+        "assisted": false
+      },
+      "ad-33-final-join": {
+        "at": "2026-10-25T13:46:54.126Z",
+        "assisted": false
+      },
+      "ad-34-final-missing": {
+        "at": "2026-10-25T13:46:54.126Z",
+        "assisted": false
+      },
+      "ad-35-final-auth": {
+        "at": "2026-10-25T13:46:54.126Z",
+        "assisted": false
+      },
+      "ad-36-final-crosslog": {
+        "at": "2026-10-25T13:46:54.126Z",
+        "assisted": false
+      }
+    },
+    "hints": {},
+    "sessions": {
+      "04-ls": {
+        "version": 1,
+        "lessonId": "04-ls",
+        "shell": {
+          "files": {
+            "/home/analyst/welcome.txt": "Linuxroomへようこそ。\nコマンドを一つずつ試しましょう。\n失敗しても、練習をやり直せます。\n",
+            "/home/analyst/notes/commands.txt": "pwd: 現在地を表示\nls: 名前の一覧を表示\ncd: ディレクトリを移動\n",
+            "/home/analyst/logs/app.log": "09:00 INFO aki login\n09:01 ERROR ren upload\n09:02 ERROR aki download\n09:03 INFO mei logout\n09:04 ERROR ren upload\n09:05 WARN aki retry\n09:06 ERROR mei download\n09:07 ERROR ren upload\n09:08 ERROR aki preview\n09:09 error aki export\n",
+            "/home/analyst/logs/names.txt": "ren\naki\nren\nmei\nren\naki\n",
+            "/home/analyst/logs/sorted-names.txt": "aki\naki\nmei\nren\nren\nren\n",
+            "/home/analyst/logs/counts.txt": "2 aki\n10 ren\n1 mei\n",
+            "/home/analyst/logs/teams.csv": "aki,blue\nren,red\nmei,blue\n",
+            "/home/analyst/logs/profile.json": "{\"user\":\"aki\",\"team\":\"blue\",\"active\":true}\n",
+            "/home/analyst/logs/events.jsonl": "{\"time\":\"09:00\",\"level\":\"INFO\",\"user\":\"aki\",\"action\":\"login\"}\n{\"time\":\"09:01\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:02\",\"level\":\"ERROR\",\"user\":\"aki\",\"action\":\"download\"}\n{\"time\":\"09:03\",\"level\":\"INFO\",\"user\":\"mei\",\"action\":\"logout\"}\n{\"time\":\"09:04\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:05\",\"level\":\"WARN\",\"user\":\"aki\",\"action\":\"retry\"}\n{\"time\":\"09:06\",\"level\":\"ERROR\",\"user\":\"mei\",\"action\":\"download\"}\n{\"time\":\"09:07\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:08\",\"level\":\"ERROR\",\"user\":\"aki\",\"action\":\"preview\"}\n{\"time\":\"09:09\",\"level\":\"error\",\"user\":\"aki\",\"action\":\"export\"}\n",
+            "/home/analyst/inbox/shift.log": "12:00 INFO sora open\n12:01 ERROR sora export\n12:02 ERROR yui save\n12:03 ERROR sora save\n12:04 WARN naoki retry\n12:05 ERROR naoki export\n12:06 ERROR yui save\n12:07 ERROR sora export\n12:08 INFO yui close\n"
+          },
+          "directories": [
+            "/",
+            "/home",
+            "/home/analyst",
+            "/tmp",
+            "/home/analyst/notes",
+            "/home/analyst/logs",
+            "/home/analyst/inbox"
+          ],
+          "cwd": "/home/analyst",
+          "oldcwd": "/home/analyst",
+          "history": [
+            "ls"
+          ]
+        },
+        "events": [
+          {
+            "type": "command",
+            "input": "ls"
+          }
+        ],
+        "lastResult": {
+          "stdout": "inbox\nlogs\nnotes\nwelcome.txt\n",
+          "stderr": "",
+          "code": 0,
+          "trace": [
+            {
+              "command": "ls",
+              "args": [],
+              "stdin": "",
+              "stdout": "inbox\nlogs\nnotes\nwelcome.txt\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst",
+              "cwdAfter": "/home/analyst",
+              "pipeline": 0,
+              "index": 0,
+              "connector": ";",
+              "redirections": [],
+              "reads": []
+            }
+          ],
+          "feedback": "",
+          "noMatch": false,
+          "expectedStatus": false
+        },
+        "evidence": [
+          {
+            "command": "ls",
+            "args": [],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst",
+            "cwdAfter": "/home/analyst",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          }
+        ],
+        "pagerOpen": false,
+        "pagerOpened": false,
+        "pagerClosed": false
+      },
+      "ap-05-more": {
+        "version": 1,
+        "lessonId": "ap-05-more",
+        "shell": {
+          "files": {
+            "/home/analyst/applied/session.log": "10:00 INFO api-1 session=start user=AKI\n10:01 WARN api-1 retry user=AKI\n10:02 ERROR api-1 failed user=AKI\n10:03 INFO api-1 session=end user=AKI\n10:04 INFO api-2 session=start user=REN\n10:05 ERROR api-2 failed user=REN\n10:06 WARN api-2 retry user=REN\n10:07 INFO api-2 session=end user=REN\n",
+            "/home/analyst/applied/labels.log": "ERROR disk-full\nINFO warm\nWARN queue\nDETAIL previous ERROR\nERROR cache-miss\n",
+            "/home/analyst/applied/notes.txt": "start\n\nreview\nfinish\n",
+            "/home/analyst/applied/peers.log": "peer=192.0.2.10 state=ok\npeer=192x0x2x10 state=ignore\npeer=192.0.2.11 state=ok\n",
+            "/home/analyst/applied/archive/day1/app.log": "08:00 INFO start\n08:01 ERROR upload\n08:02 INFO end\n",
+            "/home/analyst/applied/archive/day1/readme.txt": "ERROR is an example label.\n",
+            "/home/analyst/applied/archive/day2/app.log": "09:00 INFO start\n09:01 INFO end\n",
+            "/home/analyst/applied/archive/day2/proxy.log": "09:00 INFO connect\n09:01 ERROR timeout\n",
+            "/home/analyst/applied/metrics.csv": "time,level,user,service,duration\n10:00,INFO,Aki,portal,40\n10:01,ERROR,REN,portal,120\n10:02,ERROR,aki,portal,250\n10:03,WARN,Mei,api,80\n10:04,ERROR,REN,api,300\n10:05,ERROR,Aki,portal,150\n10:06,ERROR,mei,portal,90\n10:07,INFO,Ren,portal,30\n10:08,ERROR,REN,portal,200\n10:09,ERROR,ren,portal,180\n",
+            "/home/analyst/applied/timings.csv": "q01,aki,9\nq02,ren,120\nq03,mei,30\nq04,aki,100\n",
+            "/home/analyst/applied/names.txt": "REN\naki\nAki\nmei\nREN\nren\n",
+            "/home/analyst/applied/spaces.txt": "10:00   INFO   aki\n10:01     ERROR   ren\n10:02  WARN    mei\n",
+            "/home/analyst/applied/repeated.txt": "ren\naki\nren\nmei\naki\nren\n",
+            "/home/analyst/applied/table.csv": "user,status,ms\naki,OK,9\nren,FAIL,120\nmei,OK,30\n",
+            "/home/analyst/applied/tags.txt": "ERROR first ERROR repeated\nWARN retry\nERROR last\n",
+            "/home/analyst/applied/annotated.txt": "# collected at 10:00\n\naki OK\nren FAIL\n# end\n",
+            "/home/analyst/applied/reports/.keep": "",
+            "/home/analyst/applied/reports/existing.txt": "保存済みの記録\n",
+            "/home/analyst/applied/trash/example.tmp": "練習用の一時ファイル\n",
+            "/home/analyst/applied/trash/draft.txt": "削除する下書き\n",
+            "/home/analyst/applied/trash/final.txt": "残す完成版\n"
+          },
+          "directories": [
+            "/",
+            "/home",
+            "/home/analyst",
+            "/tmp",
+            "/home/analyst/applied",
+            "/home/analyst/applied/archive/day1",
+            "/home/analyst/applied/archive",
+            "/home/analyst/applied/archive/day2",
+            "/home/analyst/applied/reports",
+            "/home/analyst/applied/trash"
+          ],
+          "cwd": "/home/analyst/applied",
+          "oldcwd": "/home/analyst/applied",
+          "history": [
+            "more session.log"
+          ]
+        },
+        "events": [
+          {
+            "type": "command",
+            "input": "more session.log"
+          },
+          {
+            "type": "pagerClose"
+          }
+        ],
+        "lastResult": {
+          "stdout": "10:00 INFO api-1 session=start user=AKI\n10:01 WARN api-1 retry user=AKI\n10:02 ERROR api-1 failed user=AKI\n10:03 INFO api-1 session=end user=AKI\n10:04 INFO api-2 session=start user=REN\n10:05 ERROR api-2 failed user=REN\n10:06 WARN api-2 retry user=REN\n10:07 INFO api-2 session=end user=REN\n",
+          "stderr": "",
+          "code": 0,
+          "trace": [
+            {
+              "command": "more",
+              "args": [
+                "session.log"
+              ],
+              "stdin": "",
+              "stdout": "10:00 INFO api-1 session=start user=AKI\n10:01 WARN api-1 retry user=AKI\n10:02 ERROR api-1 failed user=AKI\n10:03 INFO api-1 session=end user=AKI\n10:04 INFO api-2 session=start user=REN\n10:05 ERROR api-2 failed user=REN\n10:06 WARN api-2 retry user=REN\n10:07 INFO api-2 session=end user=REN\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst/applied",
+              "cwdAfter": "/home/analyst/applied",
+              "pipeline": 0,
+              "index": 0,
+              "connector": ";",
+              "redirections": [],
+              "reads": [
+                "/home/analyst/applied/session.log"
+              ]
+            }
+          ],
+          "pager": true,
+          "feedback": "",
+          "noMatch": false,
+          "expectedStatus": false
+        },
+        "evidence": [
+          {
+            "command": "more",
+            "args": [
+              "session.log"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/applied",
+            "cwdAfter": "/home/analyst/applied",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": [
+              "/home/analyst/applied/session.log"
+            ]
+          }
+        ],
+        "pagerOpen": false,
+        "pagerOpened": true,
+        "pagerClosed": true
+      },
+      "ap-20-tr-case": {
+        "version": 1,
+        "lessonId": "ap-20-tr-case",
+        "shell": {
+          "files": {
+            "/home/analyst/applied/session.log": "10:00 INFO api-1 session=start user=AKI\n10:01 WARN api-1 retry user=AKI\n10:02 ERROR api-1 failed user=AKI\n10:03 INFO api-1 session=end user=AKI\n10:04 INFO api-2 session=start user=REN\n10:05 ERROR api-2 failed user=REN\n10:06 WARN api-2 retry user=REN\n10:07 INFO api-2 session=end user=REN\n",
+            "/home/analyst/applied/labels.log": "ERROR disk-full\nINFO warm\nWARN queue\nDETAIL previous ERROR\nERROR cache-miss\n",
+            "/home/analyst/applied/notes.txt": "start\n\nreview\nfinish\n",
+            "/home/analyst/applied/peers.log": "peer=192.0.2.10 state=ok\npeer=192x0x2x10 state=ignore\npeer=192.0.2.11 state=ok\n",
+            "/home/analyst/applied/archive/day1/app.log": "08:00 INFO start\n08:01 ERROR upload\n08:02 INFO end\n",
+            "/home/analyst/applied/archive/day1/readme.txt": "ERROR is an example label.\n",
+            "/home/analyst/applied/archive/day2/app.log": "09:00 INFO start\n09:01 INFO end\n",
+            "/home/analyst/applied/archive/day2/proxy.log": "09:00 INFO connect\n09:01 ERROR timeout\n",
+            "/home/analyst/applied/metrics.csv": "time,level,user,service,duration\n10:00,INFO,Aki,portal,40\n10:01,ERROR,REN,portal,120\n10:02,ERROR,aki,portal,250\n10:03,WARN,Mei,api,80\n10:04,ERROR,REN,api,300\n10:05,ERROR,Aki,portal,150\n10:06,ERROR,mei,portal,90\n10:07,INFO,Ren,portal,30\n10:08,ERROR,REN,portal,200\n10:09,ERROR,ren,portal,180\n",
+            "/home/analyst/applied/timings.csv": "q01,aki,9\nq02,ren,120\nq03,mei,30\nq04,aki,100\n",
+            "/home/analyst/applied/names.txt": "REN\naki\nAki\nmei\nREN\nren\n",
+            "/home/analyst/applied/spaces.txt": "10:00   INFO   aki\n10:01     ERROR   ren\n10:02  WARN    mei\n",
+            "/home/analyst/applied/repeated.txt": "ren\naki\nren\nmei\naki\nren\n",
+            "/home/analyst/applied/table.csv": "user,status,ms\naki,OK,9\nren,FAIL,120\nmei,OK,30\n",
+            "/home/analyst/applied/tags.txt": "ERROR first ERROR repeated\nWARN retry\nERROR last\n",
+            "/home/analyst/applied/annotated.txt": "# collected at 10:00\n\naki OK\nren FAIL\n# end\n",
+            "/home/analyst/applied/reports/.keep": "",
+            "/home/analyst/applied/reports/existing.txt": "保存済みの記録\n",
+            "/home/analyst/applied/trash/example.tmp": "練習用の一時ファイル\n",
+            "/home/analyst/applied/trash/draft.txt": "削除する下書き\n",
+            "/home/analyst/applied/trash/final.txt": "残す完成版\n"
+          },
+          "directories": [
+            "/",
+            "/home",
+            "/home/analyst",
+            "/tmp",
+            "/home/analyst/applied",
+            "/home/analyst/applied/archive/day1",
+            "/home/analyst/applied/archive",
+            "/home/analyst/applied/archive/day2",
+            "/home/analyst/applied/reports",
+            "/home/analyst/applied/trash"
+          ],
+          "cwd": "/home/analyst/applied",
+          "oldcwd": "/home/analyst/applied",
+          "history": [
+            "cat names.txt | tr '[:upper:]' '[:lower:]'"
+          ]
+        },
+        "events": [
+          {
+            "type": "command",
+            "input": "cat names.txt | tr '[:upper:]' '[:lower:]'"
+          }
+        ],
+        "lastResult": {
+          "stdout": "ren\naki\naki\nmei\nren\nren\n",
+          "stderr": "",
+          "code": 0,
+          "trace": [
+            {
+              "command": "cat",
+              "args": [
+                "names.txt"
+              ],
+              "stdin": "",
+              "stdout": "REN\naki\nAki\nmei\nREN\nren\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst/applied",
+              "cwdAfter": "/home/analyst/applied",
+              "pipeline": 0,
+              "index": 0,
+              "connector": ";",
+              "redirections": [],
+              "reads": [
+                "/home/analyst/applied/names.txt"
+              ]
+            },
+            {
+              "command": "tr",
+              "args": [
+                "[:upper:]",
+                "[:lower:]"
+              ],
+              "stdin": "REN\naki\nAki\nmei\nREN\nren\n",
+              "stdout": "ren\naki\naki\nmei\nren\nren\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst/applied",
+              "cwdAfter": "/home/analyst/applied",
+              "pipeline": 0,
+              "index": 1,
+              "connector": ";",
+              "redirections": [],
+              "reads": []
+            }
+          ],
+          "feedback": "",
+          "noMatch": false,
+          "expectedStatus": false
+        },
+        "evidence": [
+          {
+            "command": "cat",
+            "args": [
+              "names.txt"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/applied",
+            "cwdAfter": "/home/analyst/applied",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": [
+              "/home/analyst/applied/names.txt"
+            ]
+          },
+          {
+            "command": "tr",
+            "args": [
+              "[:upper:]",
+              "[:lower:]"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/applied",
+            "cwdAfter": "/home/analyst/applied",
+            "pipeline": 0,
+            "index": 1,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          }
+        ],
+        "pagerOpen": false,
+        "pagerOpened": false,
+        "pagerClosed": false
+      },
+      "ad-06-du": {
+        "version": 1,
+        "lessonId": "ad-06-du",
+        "shell": {
+          "files": {
+            "/home/analyst/advanced/ready.txt": "ready\n",
+            "/home/analyst/advanced/bundle/a.log": "INFO boot\n",
+            "/home/analyst/advanced/bundle/b.log": "WARN retry\n",
+            "/home/analyst/advanced/selected-files.txt": "bundle/a.log\nbundle/b.log\n",
+            "/home/analyst/advanced/collector.bin": "LR\u0000collector=v1\u0000request_id=req-02\u0000state=queued\u0000",
+            "/home/analyst/advanced/sample.b64": "cmVhZHkK\n",
+            "/home/analyst/advanced/payload.b64": "eyJyZXF1ZXN0X2lkIjoicmVxLTAyIiwicmVzdWx0IjoiZmFpbGVkIn0K\n",
+            "/home/analyst/advanced/object-names.txt": "gateway.access.log\ncollector.audit.json\nservice.error.log\n",
+            "/home/analyst/advanced/baseline.conf": "retention=7\nformat=json\n",
+            "/home/analyst/advanced/current.conf": "retention=14\nformat=json\n",
+            "/home/analyst/advanced/baseline-users.txt": "aki\nmei\nren\n",
+            "/home/analyst/advanced/observed-users.txt": "ren\naki\nren\nmei\nsota\n",
+            "/home/analyst/advanced/current-users.sorted": "aki\nmei\nren\nsota\n",
+            "/home/analyst/advanced/request-ids.txt": "req-01\nreq-02\nreq-03\n",
+            "/home/analyst/advanced/request-times.txt": "00:00\n00:01\n00:02\n",
+            "/home/analyst/advanced/status-by-id.txt": "req-01 200\nreq-02 503\nreq-03 200\nreq-04 500\n",
+            "/home/analyst/advanced/actors-by-id.txt": "req-01 aki\nreq-02 ren\nreq-03 aki\nreq-04 mei\n",
+            "/home/analyst/advanced/expected-ids.txt": "req-01\nreq-02\nreq-03\nreq-04\n",
+            "/home/analyst/advanced/received-ids.txt": "req-01\nreq-03\nreq-04\n",
+            "/home/analyst/advanced/auth.log": "Oct 25 09:00:00 gateway sshd[101]: Failed password for ren from 192.0.2.20 port 42001 ssh2\nOct 25 09:01:00 gateway sshd[102]: Accepted password for aki from 192.0.2.10 port 42002 ssh2\nOct 25 09:02:00 gateway sshd[103]: Failed password for invalid user guest from 192.0.2.20 port 42003 ssh2\nOct 25 09:03:00 gateway sshd[104]: Failed password for mei from 192.0.2.30 port 42004 ssh2\nOct 25 09:04:00 gateway sshd[105]: Failed password for ren from 192.0.2.20 port 42005 ssh2\nOct 25 09:05:00 gateway sshd[106]: Accepted password for mei from 192.0.2.30 port 42006 ssh2\n",
+            "/home/analyst/advanced/access.log": "2026-10-25T00:00:00Z req-01 200 300\n2026-10-25T00:01:00Z req-02 503 80\n2026-10-25T00:02:00Z req-03 200 250\n2026-10-25T00:03:00Z req-04 500 40\n2026-10-25T00:04:00Z req-05 503 120\n2026-10-25T00:05:00Z req-06 200 150\n",
+            "/home/analyst/advanced/manifest.json": "{\"collector\":{\"name\":\"edge-01\",\"zone\":\"UTC\"},\"files\":[\"access.log\",\"audit.jsonl\"],\"events\":[{\"time\":\"2026-10-25T00:00:00Z\",\"request\":{\"id\":\"req-01\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"},{\"time\":\"2026-10-25T00:01:00Z\",\"request\":{\"id\":\"req-02\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"},{\"time\":\"2026-10-25T00:02:00Z\",\"request\":{\"id\":\"req-03\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"},{\"time\":\"2026-10-25T00:03:00Z\",\"request\":{\"id\":\"req-04\"},\"actor\":{\"name\":\"mei\"},\"result\":\"failed\"},{\"time\":\"2026-10-25T00:04:00Z\",\"request\":{\"id\":\"req-05\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"},{\"time\":\"2026-10-25T00:05:00Z\",\"request\":{\"id\":\"req-06\"},\"actor\":{\"name\":\"ren\"},\"result\":\"success\"}]}\n",
+            "/home/analyst/advanced/audit.jsonl": "{\"time\":\"2026-10-25T00:00:00Z\",\"request\":{\"id\":\"req-01\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"}\n{\"time\":\"2026-10-25T00:01:00Z\",\"request\":{\"id\":\"req-02\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T00:02:00Z\",\"request\":{\"id\":\"req-03\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"}\n{\"time\":\"2026-10-25T00:03:00Z\",\"request\":{\"id\":\"req-04\"},\"actor\":{\"name\":\"mei\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T00:04:00Z\",\"request\":{\"id\":\"req-05\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T00:05:00Z\",\"request\":{\"id\":\"req-06\"},\"actor\":{\"name\":\"ren\"},\"result\":\"success\"}\n",
+            "/home/analyst/advanced/final/access.log": "2026-10-25T02:00:00Z job-01 200 300\n2026-10-25T02:01:00Z job-02 503 90\n2026-10-25T02:02:00Z job-03 500 60\n2026-10-25T02:03:00Z job-04 503 150\n2026-10-25T02:04:00Z job-05 200 240\n",
+            "/home/analyst/advanced/final/audit.jsonl": "{\"time\":\"2026-10-25T02:00:00Z\",\"request\":{\"id\":\"job-01\"},\"actor\":{\"name\":\"sora\"},\"result\":\"success\"}\n{\"time\":\"2026-10-25T02:01:00Z\",\"request\":{\"id\":\"job-02\"},\"actor\":{\"name\":\"yui\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T02:02:00Z\",\"request\":{\"id\":\"job-03\"},\"actor\":{\"name\":\"sora\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T02:03:00Z\",\"request\":{\"id\":\"job-04\"},\"actor\":{\"name\":\"sora\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T02:04:00Z\",\"request\":{\"id\":\"job-05\"},\"actor\":{\"name\":\"yui\"},\"result\":\"success\"}\n"
+          },
+          "directories": [
+            "/",
+            "/home",
+            "/home/analyst",
+            "/tmp",
+            "/home/analyst/advanced",
+            "/home/analyst/advanced/bundle",
+            "/home/analyst/advanced/final"
+          ],
+          "cwd": "/home/analyst/advanced",
+          "oldcwd": "/home/analyst/advanced",
+          "history": [
+            "du -sb bundle"
+          ]
+        },
+        "events": [
+          {
+            "type": "command",
+            "input": "du -sb bundle"
+          }
+        ],
+        "lastResult": {
+          "stdout": "21\tbundle\n",
+          "stderr": "",
+          "code": 0,
+          "trace": [
+            {
+              "command": "du",
+              "args": [
+                "-sb",
+                "bundle"
+              ],
+              "stdin": "",
+              "stdout": "21\tbundle\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst/advanced",
+              "cwdAfter": "/home/analyst/advanced",
+              "pipeline": 0,
+              "index": 0,
+              "connector": ";",
+              "redirections": [],
+              "reads": []
+            }
+          ],
+          "feedback": "",
+          "noMatch": false,
+          "expectedStatus": false
+        },
+        "evidence": [
+          {
+            "command": "du",
+            "args": [
+              "-sb",
+              "bundle"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced",
+            "cwdAfter": "/home/analyst/advanced",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          }
+        ],
+        "pagerOpen": false,
+        "pagerOpened": false,
+        "pagerClosed": false
+      },
+      "ad-12-diff": {
+        "version": 1,
+        "lessonId": "ad-12-diff",
+        "shell": {
+          "files": {
+            "/home/analyst/advanced/ready.txt": "ready\n",
+            "/home/analyst/advanced/bundle/a.log": "INFO boot\n",
+            "/home/analyst/advanced/bundle/b.log": "WARN retry\n",
+            "/home/analyst/advanced/selected-files.txt": "bundle/a.log\nbundle/b.log\n",
+            "/home/analyst/advanced/collector.bin": "LR\u0000collector=v1\u0000request_id=req-02\u0000state=queued\u0000",
+            "/home/analyst/advanced/sample.b64": "cmVhZHkK\n",
+            "/home/analyst/advanced/payload.b64": "eyJyZXF1ZXN0X2lkIjoicmVxLTAyIiwicmVzdWx0IjoiZmFpbGVkIn0K\n",
+            "/home/analyst/advanced/object-names.txt": "gateway.access.log\ncollector.audit.json\nservice.error.log\n",
+            "/home/analyst/advanced/baseline.conf": "retention=7\nformat=json\n",
+            "/home/analyst/advanced/current.conf": "retention=14\nformat=json\n",
+            "/home/analyst/advanced/baseline-users.txt": "aki\nmei\nren\n",
+            "/home/analyst/advanced/observed-users.txt": "ren\naki\nren\nmei\nsota\n",
+            "/home/analyst/advanced/current-users.sorted": "aki\nmei\nren\nsota\n",
+            "/home/analyst/advanced/request-ids.txt": "req-01\nreq-02\nreq-03\n",
+            "/home/analyst/advanced/request-times.txt": "00:00\n00:01\n00:02\n",
+            "/home/analyst/advanced/status-by-id.txt": "req-01 200\nreq-02 503\nreq-03 200\nreq-04 500\n",
+            "/home/analyst/advanced/actors-by-id.txt": "req-01 aki\nreq-02 ren\nreq-03 aki\nreq-04 mei\n",
+            "/home/analyst/advanced/expected-ids.txt": "req-01\nreq-02\nreq-03\nreq-04\n",
+            "/home/analyst/advanced/received-ids.txt": "req-01\nreq-03\nreq-04\n",
+            "/home/analyst/advanced/auth.log": "Oct 25 09:00:00 gateway sshd[101]: Failed password for ren from 192.0.2.20 port 42001 ssh2\nOct 25 09:01:00 gateway sshd[102]: Accepted password for aki from 192.0.2.10 port 42002 ssh2\nOct 25 09:02:00 gateway sshd[103]: Failed password for invalid user guest from 192.0.2.20 port 42003 ssh2\nOct 25 09:03:00 gateway sshd[104]: Failed password for mei from 192.0.2.30 port 42004 ssh2\nOct 25 09:04:00 gateway sshd[105]: Failed password for ren from 192.0.2.20 port 42005 ssh2\nOct 25 09:05:00 gateway sshd[106]: Accepted password for mei from 192.0.2.30 port 42006 ssh2\n",
+            "/home/analyst/advanced/access.log": "2026-10-25T00:00:00Z req-01 200 300\n2026-10-25T00:01:00Z req-02 503 80\n2026-10-25T00:02:00Z req-03 200 250\n2026-10-25T00:03:00Z req-04 500 40\n2026-10-25T00:04:00Z req-05 503 120\n2026-10-25T00:05:00Z req-06 200 150\n",
+            "/home/analyst/advanced/manifest.json": "{\"collector\":{\"name\":\"edge-01\",\"zone\":\"UTC\"},\"files\":[\"access.log\",\"audit.jsonl\"],\"events\":[{\"time\":\"2026-10-25T00:00:00Z\",\"request\":{\"id\":\"req-01\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"},{\"time\":\"2026-10-25T00:01:00Z\",\"request\":{\"id\":\"req-02\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"},{\"time\":\"2026-10-25T00:02:00Z\",\"request\":{\"id\":\"req-03\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"},{\"time\":\"2026-10-25T00:03:00Z\",\"request\":{\"id\":\"req-04\"},\"actor\":{\"name\":\"mei\"},\"result\":\"failed\"},{\"time\":\"2026-10-25T00:04:00Z\",\"request\":{\"id\":\"req-05\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"},{\"time\":\"2026-10-25T00:05:00Z\",\"request\":{\"id\":\"req-06\"},\"actor\":{\"name\":\"ren\"},\"result\":\"success\"}]}\n",
+            "/home/analyst/advanced/audit.jsonl": "{\"time\":\"2026-10-25T00:00:00Z\",\"request\":{\"id\":\"req-01\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"}\n{\"time\":\"2026-10-25T00:01:00Z\",\"request\":{\"id\":\"req-02\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T00:02:00Z\",\"request\":{\"id\":\"req-03\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"}\n{\"time\":\"2026-10-25T00:03:00Z\",\"request\":{\"id\":\"req-04\"},\"actor\":{\"name\":\"mei\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T00:04:00Z\",\"request\":{\"id\":\"req-05\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T00:05:00Z\",\"request\":{\"id\":\"req-06\"},\"actor\":{\"name\":\"ren\"},\"result\":\"success\"}\n",
+            "/home/analyst/advanced/final/access.log": "2026-10-25T02:00:00Z job-01 200 300\n2026-10-25T02:01:00Z job-02 503 90\n2026-10-25T02:02:00Z job-03 500 60\n2026-10-25T02:03:00Z job-04 503 150\n2026-10-25T02:04:00Z job-05 200 240\n",
+            "/home/analyst/advanced/final/audit.jsonl": "{\"time\":\"2026-10-25T02:00:00Z\",\"request\":{\"id\":\"job-01\"},\"actor\":{\"name\":\"sora\"},\"result\":\"success\"}\n{\"time\":\"2026-10-25T02:01:00Z\",\"request\":{\"id\":\"job-02\"},\"actor\":{\"name\":\"yui\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T02:02:00Z\",\"request\":{\"id\":\"job-03\"},\"actor\":{\"name\":\"sora\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T02:03:00Z\",\"request\":{\"id\":\"job-04\"},\"actor\":{\"name\":\"sora\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T02:04:00Z\",\"request\":{\"id\":\"job-05\"},\"actor\":{\"name\":\"yui\"},\"result\":\"success\"}\n"
+          },
+          "directories": [
+            "/",
+            "/home",
+            "/home/analyst",
+            "/tmp",
+            "/home/analyst/advanced",
+            "/home/analyst/advanced/bundle",
+            "/home/analyst/advanced/final"
+          ],
+          "cwd": "/home/analyst/advanced",
+          "oldcwd": "/home/analyst/advanced",
+          "history": [
+            "diff -u baseline.conf current.conf"
+          ]
+        },
+        "events": [
+          {
+            "type": "command",
+            "input": "diff -u baseline.conf current.conf"
+          }
+        ],
+        "lastResult": {
+          "stdout": "--- baseline.conf\n+++ current.conf\n@@ -1,2 +1,2 @@\n-retention=7\n+retention=14\n format=json\n",
+          "stderr": "",
+          "code": 1,
+          "trace": [
+            {
+              "command": "diff",
+              "args": [
+                "-u",
+                "baseline.conf",
+                "current.conf"
+              ],
+              "stdin": "",
+              "stdout": "--- baseline.conf\n+++ current.conf\n@@ -1,2 +1,2 @@\n-retention=7\n+retention=14\n format=json\n",
+              "stderr": "",
+              "code": 1,
+              "cwdBefore": "/home/analyst/advanced",
+              "cwdAfter": "/home/analyst/advanced",
+              "pipeline": 0,
+              "index": 0,
+              "connector": ";",
+              "redirections": [],
+              "reads": [
+                "/home/analyst/advanced/baseline.conf",
+                "/home/analyst/advanced/current.conf"
+              ]
+            }
+          ],
+          "feedback": "",
+          "noMatch": false,
+          "expectedStatus": true
+        },
+        "evidence": [
+          {
+            "command": "diff",
+            "args": [
+              "-u",
+              "baseline.conf",
+              "current.conf"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 1,
+            "cwdBefore": "/home/analyst/advanced",
+            "cwdAfter": "/home/analyst/advanced",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": [
+              "/home/analyst/advanced/baseline.conf",
+              "/home/analyst/advanced/current.conf"
+            ]
+          }
+        ],
+        "pagerOpen": false,
+        "pagerOpened": false,
+        "pagerClosed": false
+      },
+      "ad-36-final-crosslog": {
+        "version": 1,
+        "lessonId": "ad-36-final-crosslog",
+        "shell": {
+          "files": {
+            "/home/analyst/advanced/ready.txt": "ready\n",
+            "/home/analyst/advanced/bundle/a.log": "INFO boot\n",
+            "/home/analyst/advanced/bundle/b.log": "WARN retry\n",
+            "/home/analyst/advanced/selected-files.txt": "bundle/a.log\nbundle/b.log\n",
+            "/home/analyst/advanced/collector.bin": "LR\u0000collector=v1\u0000request_id=req-02\u0000state=queued\u0000",
+            "/home/analyst/advanced/sample.b64": "cmVhZHkK\n",
+            "/home/analyst/advanced/payload.b64": "eyJyZXF1ZXN0X2lkIjoicmVxLTAyIiwicmVzdWx0IjoiZmFpbGVkIn0K\n",
+            "/home/analyst/advanced/object-names.txt": "gateway.access.log\ncollector.audit.json\nservice.error.log\n",
+            "/home/analyst/advanced/baseline.conf": "retention=7\nformat=json\n",
+            "/home/analyst/advanced/current.conf": "retention=14\nformat=json\n",
+            "/home/analyst/advanced/baseline-users.txt": "aki\nmei\nren\n",
+            "/home/analyst/advanced/observed-users.txt": "ren\naki\nren\nmei\nsota\n",
+            "/home/analyst/advanced/current-users.sorted": "aki\nmei\nren\nsota\n",
+            "/home/analyst/advanced/request-ids.txt": "req-01\nreq-02\nreq-03\n",
+            "/home/analyst/advanced/request-times.txt": "00:00\n00:01\n00:02\n",
+            "/home/analyst/advanced/status-by-id.txt": "req-01 200\nreq-02 503\nreq-03 200\nreq-04 500\n",
+            "/home/analyst/advanced/actors-by-id.txt": "req-01 aki\nreq-02 ren\nreq-03 aki\nreq-04 mei\n",
+            "/home/analyst/advanced/expected-ids.txt": "req-01\nreq-02\nreq-03\nreq-04\n",
+            "/home/analyst/advanced/received-ids.txt": "req-01\nreq-03\nreq-04\n",
+            "/home/analyst/advanced/auth.log": "Oct 25 09:00:00 gateway sshd[101]: Failed password for ren from 192.0.2.20 port 42001 ssh2\nOct 25 09:01:00 gateway sshd[102]: Accepted password for aki from 192.0.2.10 port 42002 ssh2\nOct 25 09:02:00 gateway sshd[103]: Failed password for invalid user guest from 192.0.2.20 port 42003 ssh2\nOct 25 09:03:00 gateway sshd[104]: Failed password for mei from 192.0.2.30 port 42004 ssh2\nOct 25 09:04:00 gateway sshd[105]: Failed password for ren from 192.0.2.20 port 42005 ssh2\nOct 25 09:05:00 gateway sshd[106]: Accepted password for mei from 192.0.2.30 port 42006 ssh2\n",
+            "/home/analyst/advanced/access.log": "2026-10-25T00:00:00Z req-01 200 300\n2026-10-25T00:01:00Z req-02 503 80\n2026-10-25T00:02:00Z req-03 200 250\n2026-10-25T00:03:00Z req-04 500 40\n2026-10-25T00:04:00Z req-05 503 120\n2026-10-25T00:05:00Z req-06 200 150\n",
+            "/home/analyst/advanced/manifest.json": "{\"collector\":{\"name\":\"edge-01\",\"zone\":\"UTC\"},\"files\":[\"access.log\",\"audit.jsonl\"],\"events\":[{\"time\":\"2026-10-25T00:00:00Z\",\"request\":{\"id\":\"req-01\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"},{\"time\":\"2026-10-25T00:01:00Z\",\"request\":{\"id\":\"req-02\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"},{\"time\":\"2026-10-25T00:02:00Z\",\"request\":{\"id\":\"req-03\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"},{\"time\":\"2026-10-25T00:03:00Z\",\"request\":{\"id\":\"req-04\"},\"actor\":{\"name\":\"mei\"},\"result\":\"failed\"},{\"time\":\"2026-10-25T00:04:00Z\",\"request\":{\"id\":\"req-05\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"},{\"time\":\"2026-10-25T00:05:00Z\",\"request\":{\"id\":\"req-06\"},\"actor\":{\"name\":\"ren\"},\"result\":\"success\"}]}\n",
+            "/home/analyst/advanced/audit.jsonl": "{\"time\":\"2026-10-25T00:00:00Z\",\"request\":{\"id\":\"req-01\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"}\n{\"time\":\"2026-10-25T00:01:00Z\",\"request\":{\"id\":\"req-02\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T00:02:00Z\",\"request\":{\"id\":\"req-03\"},\"actor\":{\"name\":\"aki\"},\"result\":\"success\"}\n{\"time\":\"2026-10-25T00:03:00Z\",\"request\":{\"id\":\"req-04\"},\"actor\":{\"name\":\"mei\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T00:04:00Z\",\"request\":{\"id\":\"req-05\"},\"actor\":{\"name\":\"ren\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T00:05:00Z\",\"request\":{\"id\":\"req-06\"},\"actor\":{\"name\":\"ren\"},\"result\":\"success\"}\n",
+            "/home/analyst/advanced/final/access.log": "2026-10-25T02:00:00Z job-01 200 300\n2026-10-25T02:01:00Z job-02 503 90\n2026-10-25T02:02:00Z job-03 500 60\n2026-10-25T02:03:00Z job-04 503 150\n2026-10-25T02:04:00Z job-05 200 240\n",
+            "/home/analyst/advanced/final/audit.jsonl": "{\"time\":\"2026-10-25T02:00:00Z\",\"request\":{\"id\":\"job-01\"},\"actor\":{\"name\":\"sora\"},\"result\":\"success\"}\n{\"time\":\"2026-10-25T02:01:00Z\",\"request\":{\"id\":\"job-02\"},\"actor\":{\"name\":\"yui\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T02:02:00Z\",\"request\":{\"id\":\"job-03\"},\"actor\":{\"name\":\"sora\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T02:03:00Z\",\"request\":{\"id\":\"job-04\"},\"actor\":{\"name\":\"sora\"},\"result\":\"failed\"}\n{\"time\":\"2026-10-25T02:04:00Z\",\"request\":{\"id\":\"job-05\"},\"actor\":{\"name\":\"yui\"},\"result\":\"success\"}\n",
+            "/home/analyst/advanced/final/failed-users.txt": "job-02\tyui\njob-03\tsora\njob-04\tsora\n",
+            "/home/analyst/advanced/final/request-status.txt": "job-01 200 300\njob-02 503 90\njob-03 500 60\njob-04 503 150\njob-05 200 240\n",
+            "/home/analyst/advanced/final/reports/failed.txt": "job-02 yui 503 90\njob-03 sora 500 60\njob-04 sora 503 150\n",
+            "/home/analyst/advanced/final/reports/ranking.txt": "      2 sora\n      1 yui\n",
+            "/home/analyst/advanced/final/reports/bytes.txt": "300\n"
+          },
+          "directories": [
+            "/",
+            "/home",
+            "/home/analyst",
+            "/tmp",
+            "/home/analyst/advanced",
+            "/home/analyst/advanced/bundle",
+            "/home/analyst/advanced/final",
+            "/home/analyst/advanced/final/reports"
+          ],
+          "cwd": "/home/analyst/advanced/final",
+          "oldcwd": "/home/analyst/advanced/final",
+          "history": [
+            "mkdir reports",
+            "jq -r 'select(.result == \"failed\") | [.request.id, .actor.name] | @tsv' audit.jsonl | sort > failed-users.txt",
+            "awk '{print $2, $3, $4}' access.log | sort > request-status.txt",
+            "join failed-users.txt request-status.txt | tee reports/failed.txt",
+            "awk '{print $2}' reports/failed.txt | sort | uniq -c | sort -nr | tee reports/ranking.txt",
+            "awk '{total += $4} END {print total}' reports/failed.txt | tee reports/bytes.txt"
+          ]
+        },
+        "events": [
+          {
+            "type": "command",
+            "input": "mkdir reports"
+          },
+          {
+            "type": "command",
+            "input": "jq -r 'select(.result == \"failed\") | [.request.id, .actor.name] | @tsv' audit.jsonl | sort > failed-users.txt"
+          },
+          {
+            "type": "command",
+            "input": "awk '{print $2, $3, $4}' access.log | sort > request-status.txt"
+          },
+          {
+            "type": "command",
+            "input": "join failed-users.txt request-status.txt | tee reports/failed.txt"
+          },
+          {
+            "type": "command",
+            "input": "awk '{print $2}' reports/failed.txt | sort | uniq -c | sort -nr | tee reports/ranking.txt"
+          },
+          {
+            "type": "command",
+            "input": "awk '{total += $4} END {print total}' reports/failed.txt | tee reports/bytes.txt"
+          }
+        ],
+        "lastResult": {
+          "stdout": "300\n",
+          "stderr": "",
+          "code": 0,
+          "trace": [
+            {
+              "command": "awk",
+              "args": [
+                "{total += $4} END {print total}",
+                "reports/failed.txt"
+              ],
+              "stdin": "",
+              "stdout": "300\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst/advanced/final",
+              "cwdAfter": "/home/analyst/advanced/final",
+              "pipeline": 0,
+              "index": 0,
+              "connector": ";",
+              "redirections": [],
+              "reads": [
+                "/home/analyst/advanced/final/reports/failed.txt"
+              ]
+            },
+            {
+              "command": "tee",
+              "args": [
+                "reports/bytes.txt"
+              ],
+              "stdin": "300\n",
+              "stdout": "300\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst/advanced/final",
+              "cwdAfter": "/home/analyst/advanced/final",
+              "pipeline": 0,
+              "index": 1,
+              "connector": ";",
+              "redirections": [],
+              "reads": []
+            }
+          ],
+          "feedback": "",
+          "noMatch": false,
+          "expectedStatus": false
+        },
+        "evidence": [
+          {
+            "command": "mkdir",
+            "args": [
+              "reports"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          },
+          {
+            "command": "jq",
+            "args": [
+              "-r",
+              "select(.result == \"failed\") | [.request.id, .actor.name] | @tsv",
+              "audit.jsonl"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": [
+              "/home/analyst/advanced/final/audit.jsonl"
+            ]
+          },
+          {
+            "command": "sort",
+            "args": [],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 1,
+            "connector": ";",
+            "redirections": [
+              {
+                "op": ">",
+                "target": "/home/analyst/advanced/final/failed-users.txt"
+              }
+            ],
+            "reads": []
+          },
+          {
+            "command": "awk",
+            "args": [
+              "{print $2, $3, $4}",
+              "access.log"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": [
+              "/home/analyst/advanced/final/access.log"
+            ]
+          },
+          {
+            "command": "sort",
+            "args": [],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 1,
+            "connector": ";",
+            "redirections": [
+              {
+                "op": ">",
+                "target": "/home/analyst/advanced/final/request-status.txt"
+              }
+            ],
+            "reads": []
+          },
+          {
+            "command": "join",
+            "args": [
+              "failed-users.txt",
+              "request-status.txt"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": [
+              "/home/analyst/advanced/final/failed-users.txt",
+              "/home/analyst/advanced/final/request-status.txt"
+            ]
+          },
+          {
+            "command": "tee",
+            "args": [
+              "reports/failed.txt"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 1,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          },
+          {
+            "command": "awk",
+            "args": [
+              "{print $2}",
+              "reports/failed.txt"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": [
+              "/home/analyst/advanced/final/reports/failed.txt"
+            ]
+          },
+          {
+            "command": "sort",
+            "args": [],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 1,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          },
+          {
+            "command": "uniq",
+            "args": [
+              "-c"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 2,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          },
+          {
+            "command": "sort",
+            "args": [
+              "-nr"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 3,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          },
+          {
+            "command": "tee",
+            "args": [
+              "reports/ranking.txt"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 4,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          },
+          {
+            "command": "awk",
+            "args": [
+              "{total += $4} END {print total}",
+              "reports/failed.txt"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": [
+              "/home/analyst/advanced/final/reports/failed.txt"
+            ]
+          },
+          {
+            "command": "tee",
+            "args": [
+              "reports/bytes.txt"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/advanced/final",
+            "cwdAfter": "/home/analyst/advanced/final",
+            "pipeline": 0,
+            "index": 1,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          }
+        ],
+        "pagerOpen": false,
+        "pagerOpened": false,
+        "pagerClosed": false
+      }
+    }
+  },
+  "ui": {
+    "started": true,
+    "drafts": {
+      "ap-05-more": "more session.log"
+    },
+    "transcripts": {},
+    "solutions": {}
+  }
+}

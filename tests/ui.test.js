@@ -65,8 +65,8 @@ test('all lessons can be completed through rendered UI, including pager and map'
       assert.equal(app.d.getElementById('success-box').hidden,false,lesson.id+' '+app.d.getElementById('lesson-feedback').textContent);
     }
     assert.equal(app.d.getElementById('graduation-link').hidden,false);
-    assert.equal(JSON.parse(app.w.localStorage.getItem(KEY)).completed && Object.keys(JSON.parse(app.w.localStorage.getItem(KEY)).completed).length,108);
-    assert.equal(app.d.getElementById('storage-warning').hidden,true,'all108 fits browser storage');
+    assert.equal(JSON.parse(app.w.localStorage.getItem(KEY)).completed && Object.keys(JSON.parse(app.w.localStorage.getItem(KEY)).completed).length,lessons.length);
+    assert.equal(app.d.getElementById('storage-warning').hidden,true,'the full curriculum fits browser storage');
     assert.deepEqual(app.errors,[]);
   }finally{app.dom.window.close();}
 });

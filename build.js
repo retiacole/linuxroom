@@ -4,7 +4,7 @@ const path = require('node:path');
 const root = __dirname;
 let html = fs.readFileSync(path.join(root, 'src/ui.html'), 'utf8');
 const license = fs.readFileSync(path.join(root, 'LICENSE'), 'utf8');
-html = html.replace(/<!doctype html>/i, value => `${value}\n<!--\nLinuxroom v0.2. Virtual shell derived from Logroom.\n${license.replace(/-->/g, '-- >')}\n-->`);
+html = html.replace(/<!doctype html>/i, value => `${value}\n<!--\nLinuxroom v0.3. Virtual shell derived from Logroom.\n${license.replace(/-->/g, '-- >')}\n-->`);
 for (const [marker, file] of Object.entries({CSS:'style.css', SHELL:'shell.js', DATA:'data.js', ENGINE:'engine.js', APP:'app.js'})) {
   const placeholder = `/*__${marker}__*/`;
   if (!html.includes(placeholder)) throw new Error(`Missing build placeholder ${placeholder}`);
