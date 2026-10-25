@@ -2,7 +2,7 @@
   <img src="docs/images/linuxroom-banner.png" width="960" alt="遺跡で炎の魔法を使うLinuxroomのキャラクターを描いたピクセルアート">
 </p>
 
-# Linuxroom v0.4
+# Linuxroom v0.4.1
 
 [English README](README.en.md) · 日本語
 

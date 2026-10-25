@@ -2,7 +2,7 @@
   <img src="docs/images/linuxroom-banner.png" width="960" alt="Pixel art of the Linuxroom character casting fire magic in ancient ruins">
 </p>
 
-# Linuxroom v0.4
+# Linuxroom v0.4.1
 
 English · [日本語](README.md)
 

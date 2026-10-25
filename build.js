@@ -4,7 +4,11 @@ const path = require('node:path');
 const root = __dirname;
 let html = fs.readFileSync(path.join(root, 'src/ui.html'), 'utf8');
 const license = fs.readFileSync(path.join(root, 'LICENSE'), 'utf8');
-html = html.replace(/<!doctype html>/i, value => `${value}\n<!--\nLinuxroom v0.4. Virtual shell derived from Logroom.\n${license.replace(/-->/g, '-- >')}\n-->`);
+html = html.replace(/<!doctype html>/i, value => `${value}\n<!--\nLinuxroom v0.4.1. Virtual shell derived from Logroom.\n${license.replace(/-->/g, '-- >')}\n-->`);
+const illustrationPlaceholder = '__WELCOME_ART_DATA_URI__';
+if (!html.includes(illustrationPlaceholder)) throw new Error('Missing welcome illustration placeholder');
+const illustration = fs.readFileSync(path.join(root, 'assets', 'linuxroom-journey.png'));
+html = html.replace(illustrationPlaceholder, () => `data:image/png;base64,${illustration.toString('base64')}`);
 for (const [marker, file] of Object.entries({CSS:'style.css', SHELL:'shell.js', DATA:'data.js', I18N:'i18n.js', ENGINE:'engine.js', APP:'app.js'})) {
   const placeholder = `/*__${marker}__*/`;
   if (!html.includes(placeholder)) throw new Error(`Missing build placeholder ${placeholder}`);

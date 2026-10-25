@@ -1,6 +1,6 @@
 {
   "name": "linuxroom",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "description": "短いコマンドからパイプを組み立てる、ブラウザ完結のLinuxコマンド入門教材",
   "license": "MIT",

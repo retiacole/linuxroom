@@ -1,5 +1,10 @@
 # 更新履歴
 
+## v0.4.1 — 2026-10-26
+
+- ホームの教材紹介の末尾に、仲間と歩く集合イラストを追加しました。画面幅に合わせて表示し、画像も単一HTMLに同梱するためオフラインで利用できます。
+- Added the party's journey illustration at the end of the home introduction. The image scales to the screen and is embedded in the standalone HTML for offline use.
+
 ## v0.3.0 — 2026-10-25
 
 Fableのレビューを受け、実機との違いで誤解しやすい教材・シェルの挙動を修正しました。初級36・応用47・発展36の計119課題です。
