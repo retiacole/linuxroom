@@ -1,0 +1,472 @@
+/* Linuxroom 応用編: explicit fixtures and independently specified expected results. */
+(function (root) {
+  'use strict';
+  const D = root.LINUXROOM_DATA;
+  const base = '/home/analyst/applied';
+  const lines = values => values.join('\n') + '\n';
+  const session = lines([
+    '10:00 INFO api-1 session=start user=AKI',
+    '10:01 WARN api-1 retry user=AKI',
+    '10:02 ERROR api-1 failed user=AKI',
+    '10:03 INFO api-1 session=end user=AKI',
+    '10:04 INFO api-2 session=start user=REN',
+    '10:05 ERROR api-2 failed user=REN',
+    '10:06 WARN api-2 retry user=REN',
+    '10:07 INFO api-2 session=end user=REN'
+  ]);
+  const labels = lines(['ERROR disk-full', 'INFO warm', 'WARN queue', 'DETAIL previous ERROR', 'ERROR cache-miss']);
+  const notes = 'start\n\nreview\nfinish\n';
+  const metrics = lines([
+    'time,level,user,service,duration',
+    '10:00,INFO,Aki,portal,40',
+    '10:01,ERROR,REN,portal,120',
+    '10:02,ERROR,aki,portal,250',
+    '10:03,WARN,Mei,api,80',
+    '10:04,ERROR,REN,api,300',
+    '10:05,ERROR,Aki,portal,150',
+    '10:06,ERROR,mei,portal,90',
+    '10:07,INFO,Ren,portal,30',
+    '10:08,ERROR,REN,portal,200',
+    '10:09,ERROR,ren,portal,180'
+  ]);
+  const errorRows = lines([
+    '10:01,ERROR,REN,portal,120',
+    '10:02,ERROR,aki,portal,250',
+    '10:04,ERROR,REN,api,300',
+    '10:05,ERROR,Aki,portal,150',
+    '10:06,ERROR,mei,portal,90',
+    '10:08,ERROR,REN,portal,200',
+    '10:09,ERROR,ren,portal,180'
+  ]);
+  const tags = 'ERROR first ERROR repeated\nWARN retry\nERROR last\n';
+  const files = {
+    [base + '/session.log']: session,
+    [base + '/labels.log']: labels,
+    [base + '/notes.txt']: notes,
+    [base + '/peers.log']: 'peer=192.0.2.10 state=ok\npeer=192x0x2x10 state=ignore\npeer=192.0.2.11 state=ok\n',
+    [base + '/archive/day1/app.log']: '08:00 INFO start\n08:01 ERROR upload\n08:02 INFO end\n',
+    [base + '/archive/day1/readme.txt']: 'ERROR is an example label.\n',
+    [base + '/archive/day2/app.log']: '09:00 INFO start\n09:01 INFO end\n',
+    [base + '/archive/day2/proxy.log']: '09:00 INFO connect\n09:01 ERROR timeout\n',
+    [base + '/metrics.csv']: metrics,
+    [base + '/timings.csv']: 'q01,aki,9\nq02,ren,120\nq03,mei,30\nq04,aki,100\n',
+    [base + '/names.txt']: 'REN\naki\nAki\nmei\nREN\nren\n',
+    [base + '/spaces.txt']: '10:00   INFO   aki\n10:01     ERROR   ren\n10:02  WARN    mei\n',
+    [base + '/repeated.txt']: 'ren\naki\nren\nmei\naki\nren\n',
+    [base + '/table.csv']: 'user,status,ms\naki,OK,9\nren,FAIL,120\nmei,OK,30\n',
+    [base + '/tags.txt']: tags,
+    [base + '/annotated.txt']: '# collected at 10:00\n\naki OK\nren FAIL\n# end\n',
+    [base + '/reports/.keep']: '',
+    [base + '/reports/existing.txt']: '保存済みの記録\n',
+    [base + '/trash/example.tmp']: '練習用の一時ファイル\n',
+    [base + '/trash/draft.txt']: '削除する下書き\n',
+    [base + '/trash/final.txt']: '残す完成版\n'
+  };
+  D.datasets['ap-workbench'] = { cwd: base, files };
+  const chapters = [
+    ['ap-orient', '調べながら操作する', 'ヘルプ・履歴・画面の整理'],
+    ['ap-read', '読み方を選ぶ', '逆順・閲覧・行番号'],
+    ['ap-search', '検索条件を育てる', '固定文字 → 正規表現 → 前後の文脈'],
+    ['ap-locate', '複数ファイルを探す', '本文検索とファイル名検索'],
+    ['ap-fields', '列で選び、並べる', '条件・区切り・数値の順序'],
+    ['ap-normalize', '表記をそろえる', '文字の変換 → 重複確認 → 表示'],
+    ['ap-edit', '必要な部分を整える', 'sedで行の選択・置換・除外'],
+    ['ap-workspace', '作業用ファイルを扱う', '書式・空ファイル・片付け'],
+    ['ap-final', '応用実習：集計を組み立てる', '検索 → 列抽出 → 正規化 → 件数 → 保存']
+  ];
+  D.chapters.push(...chapters.map(([id, title, subtitle]) => ({ id, title, subtitle, level: 'applied' })));
+  const out = (value, match = 'trim') => ({ type: 'output', value, match });
+  const used = (command, options = {}) => ({ type: 'used', command, ...options });
+  const source = (name, scope = 'last') => ({ type: 'source', path: base + '/' + name, scope });
+  const saved = (name, value, match = 'trim') => ({ type: 'file', path: base + '/' + name, value, match });
+  const pipe = minStages => ({ type: 'pipeline', minStages });
+  const lessons = [];
+  function lesson(item) {
+    lessons.push({ level: 'applied', fixture: 'ap-workbench', minutes: 4, mode: 'practice', starter: '', newPart: '', ...item });
+  }
+
+  lesson({ id: 'ap-01-help', chapter: 'ap-orient', title: '対応するオプションを調べる', mode: 'guide', commands: ['help'],
+    goal: 'ヘルプで検索コマンドの指定方法を確かめられる。',
+    explanation: ['応用編では、覚えているコマンドに条件を少しずつ加えます。暗記できなくても、調べながら使えれば大丈夫です。', 'help コマンド名で、この教材が対応している書き方を表示できます。これはLinuxroom・Logroomの独自案内です。一般のLinuxではmanや各コマンドの--helpなどを使います。'],
+    concepts: [{ term: '対応構文', text: 'この学習用シェルで使える引数・オプションの組み合わせです。外部マニュアルの全機能があるわけではありません。' }],
+    example: { command: 'help head', note: '-nで行数、-cでバイト数を指定できることが確認できます。' },
+    task: 'helpを使ってgrepの対応構文を表示し、-Fと-Eの説明を見つけてください。',
+    hints: ['helpの後ろに、調べるコマンド名を置きます。', '今回はgrepの案内を表示します。', 'help grep と入力します。'],
+    solution: ['help grep'], success: '知らないオプションを調べる入口ができました。', bridge: '次は、自分が入力したコマンドを振り返ります。',
+    validation: { all: [used('help', { args: ['grep'] }), out('-F matches literal text.', 'contains')] }
+  });
+  lesson({ id: 'ap-02-history', chapter: 'ap-orient', title: '入力した手順を振り返る', commands: ['history'],
+    goal: 'historyで入力履歴を確認できる。',
+    explanation: ['historyは、この練習で入力したコマンドを番号付きで並べます。直前だけでなく、前に試した条件も振り返れます。', '履歴には失敗した入力も残ります。履歴にあることと、そのコマンドが成功したことは別です。↑キーで入力を呼び出して編集する操作も使えます。'],
+    concepts: [{ term: '履歴', text: 'このセッションで入力したコマンドの記録です。新しい課題は別のセッションから始まります。' }],
+    example: { command: 'echo sample', note: 'sampleと表示する入力を一つ残します。後からhistoryでこの入力も確認できます。' },
+    task: 'echo ready を実行した後、historyで履歴を表示し、echo ready が含まれることを確かめてください。',
+    hints: ['2回に分けて実行します。まずecho readyです。', 'そのあとhistoryだけを入力します。', 'echo ready を実行してから、history を実行します。'],
+    solution: ['echo ready', 'history'], success: '操作の手順を振り返れました。長いパイプも履歴から直せます。', bridge: '履歴を残したまま画面を整理する操作も覚えましょう。',
+    validation: { all: [used('echo', { args: ['ready'], scope: 'any' }), used('history'), out('echo ready', 'contains')] }
+  });
+  lesson({ id: 'ap-03-clear', chapter: 'ap-orient', title: '画面を整理して続ける', commands: ['clear'],
+    goal: 'clearの効果と、ファイルや履歴が残ることを理解する。',
+    explanation: ['clearは、ターミナルの表示を整理します。ファイルを消すコマンドではありません。現在地や入力履歴、課題の進捗も残ります。', '画面が長くなって読みにくいときに使えます。初期状態へ戻す「やり直し」とは効果が異なります。'],
+    concepts: [{ term: '画面とデータ', text: '表示を消す操作と、保存されたファイルを消す操作は別です。' }],
+    example: { command: 'cat notes.txt', note: '数行の記録を表示します。続く課題で画面だけ整理してみます。' },
+    task: 'clearを実行して、ターミナルの表示を整理してください。notes.txtは残しておきます。',
+    hints: ['表示だけを消すコマンドはclearです。', 'ファイル名は指定しません。', 'clear と入力します。'],
+    solution: ['clear'], success: '表示を整理できました。ファイルも履歴も引き続き使えます。', bridge: '次は、本文の読み方を増やします。',
+    validation: { all: [used('clear'), out('', 'exact'), saved('notes.txt', notes, 'exact')] }
+  });
+
+  lesson({ id: 'ap-04-tac', chapter: 'ap-read', title: '末尾側から逆順に読む', commands: ['tac', 'head'],
+    goal: 'tacとheadをつなぎ、最後の記録から順に読める。',
+    explanation: ['tacは、ファイルの行を逆順に表示します。文字そのものを逆にする操作ではありません。', 'session.logの各行は「時刻 種類 サーバー 出来事 利用者」です。時刻順に並べてあるので、tacで最後の時刻から読めます。'],
+    concepts: [{ term: '行の逆順', text: '最後の行、最後から2行目…の順です。tailは末尾を取り出しますが、取り出した行の順序を維持します。' }],
+    example: { command: 'tac notes.txt', note: 'finish、review、空行、startの順になります。' },
+    starter: 'tail -n 3 session.log', newPart: 'tac | head', task: 'session.logの最後の3行を、最も後の時刻から順に表示してください。tacとheadを使います。',
+    hints: ['tac session.logで全行を逆順にします。', 'その出力をhead -n 3に渡します。', 'tac session.log | head -n 3 と入力します。'],
+    solution: ['tac session.log | head -n 3'], success: '並び順を変えてから、読む量を制限できました。', bridge: '次は別の閲覧コマンドで、読む画面から戻る練習です。',
+    validation: { all: [used('tac'), used('head'), pipe(2), out('10:07 INFO api-2 session=end user=REN\n10:06 WARN api-2 retry user=REN\n10:05 ERROR api-2 failed user=REN')] }
+  });
+  lesson({ id: 'ap-05-more', chapter: 'ap-read', title: 'moreで開いて終了する', commands: ['more'],
+    goal: 'moreを使い、qでコマンド入力へ戻れる。',
+    explanation: ['moreも長い本文を閲覧するためのコマンドです。実際のLinuxではlessと機能が異なりますが、この教材では両方ともスクロールできる閲覧画面を開きます。', '本文を確認したらqで閉じます。開いている間は通常のコマンドを実行する状態ではありません。'],
+    concepts: [{ term: 'more', text: '文章を少しずつ読むためのページャーです。この教材ではqで閉じる操作を練習します。' }],
+    example: { command: 'more notes.txt', note: '短いメモを開く例です。qで閉じてから課題へ進みます。' },
+    task: 'moreでsession.logを開き、確認後にqで閉じてください。',
+    hints: ['moreの引数にsession.logを指定します。', '開いただけで終わらず、qで戻ります。', 'more session.log を実行し、qで閉じます。'],
+    solution: ['more session.log', 'q'], success: '別の閲覧コマンドでも、開く・読む・戻るを実行できました。', bridge: '次は、引用するときに便利な行番号を付けます。',
+    validation: { all: [used('more', { scope: 'any' }), { type: 'pagerClosed' }, out(session)] }
+  });
+  lesson({ id: 'ap-06-nl', chapter: 'ap-read', title: '空行にも行番号を付ける', commands: ['nl'],
+    goal: 'nlで行番号の付け方を指定できる。',
+    explanation: ['nlは本文に行番号を付けて表示します。初期設定では空行に番号を付けません。-baを付けると、空行を含む全行に番号を付けます。', '-wは番号欄の幅、-sは番号と本文の区切りです。元ファイルに番号を書き込む操作ではありません。'],
+    concepts: [{ term: '-ba', text: 'body numberingをallにする指定です。空行も1行として番号を付けます。' }],
+    example: { command: "nl -w 1 -s ': ' notes.txt", note: '空行は番号なしになり、reviewは2番になります。' },
+    newPart: '-ba', task: 'notes.txtの全行に番号を付けてください。番号欄は幅1、区切りは「: 」とし、空行を2番にします。',
+    hints: ['空行も数えるために-baを加えます。', "番号欄は-w 1、区切りは-s ': 'です。", "nl -ba -w 1 -s ': ' notes.txt と入力します。"],
+    solution: ["nl -ba -w 1 -s ': ' notes.txt"], success: '本文の位置を、空行も含めて示せました。', bridge: '次は、似た文字列を取り違えない検索です。',
+    validation: { all: [used('nl'), out('1: start\n2: \n3: review\n4: finish\n', 'exact'), saved('notes.txt', notes, 'exact')] }
+  });
+
+  lesson({ id: 'ap-07-grep-fixed', chapter: 'ap-search', title: 'ドットを文字として検索する', commands: ['grep'],
+    goal: 'grep -Fで記号を含む文字列をそのまま検索できる。',
+    explanation: ['grepの通常の検索では、.は「任意の1文字」という意味を持つ記号です。192.0.2.10をそのまま書くと、ドット以外の文字にも一致する場合があります。', '-Fは固定文字列の検索です。今回は説明用のIPアドレスが文字どおり一致する行を選びます。'],
+    concepts: [{ term: '固定文字列', text: '記号も含め、指定した文字の並びをそのまま探す方法です。' }],
+    example: { command: "grep -F 'peer=192.0.2.11' peers.log", note: 'ドットを含む指定どおりの1行だけが表示されます。' },
+    newPart: '-F', task: 'grep -Fで、peers.logから peer=192.0.2.10 を含む行だけを表示してください。',
+    hints: ['検索語の前に-Fを指定します。', '検索語を引用符で囲み、記号もそのまま書きます。', "grep -F 'peer=192.0.2.10' peers.log と入力します。"],
+    solution: ["grep -F 'peer=192.0.2.10' peers.log"], success: '似ている別の文字列を選ばず、指定した表記を探せました。', bridge: '次は、意図的に記号の意味を使った検索をします。',
+    validation: { all: [used('grep', { flags: 'F' }), out('peer=192.0.2.10 state=ok')] }
+  });
+  lesson({ id: 'ap-08-grep-alternation', chapter: 'ap-search', title: 'どちらかの語を含む行を選ぶ', commands: ['grep'],
+    goal: 'grep -Eで複数の候補を一度に検索できる。',
+    explanation: ['正規表現は、文字の並びの条件を表す書き方です。grep -Eでは、A|Bで「AまたはB」を表せます。', 'この|は引用符の内側なので、シェルのパイプではなく検索条件の一部です。labels.logは1行1件の短いメッセージです。'],
+    concepts: [{ term: '選択（|）', text: '拡張正規表現で「どちらかに一致」を表します。検索語全体を引用符で囲みます。' }],
+    example: { command: "grep -E 'INFO|DETAIL' labels.log", note: 'INFOかDETAILを含む2行を選びます。' },
+    newPart: '-E と |', task: 'labels.logから、ERRORまたはWARNを含む4行を、grep -Eで一度に表示してください。',
+    hints: ['候補の語を|でつなぎます。', "検索条件は'ERROR|WARN'です。", "grep -E 'ERROR|WARN' labels.log と入力します。"],
+    solution: ["grep -E 'ERROR|WARN' labels.log"], success: '2つの候補を、一つの検索条件にできました。', bridge: '本文の途中にあるERRORを除くため、行の位置も条件にします。',
+    validation: { all: [used('grep', { flags: 'E' }), out('ERROR disk-full\nWARN queue\nDETAIL previous ERROR\nERROR cache-miss')] }
+  });
+  lesson({ id: 'ap-09-grep-anchors', chapter: 'ap-search', title: '行頭と行末を条件にする', commands: ['grep'],
+    goal: '^と$を使い、文字の位置を指定できる。',
+    explanation: ['正規表現の^は行頭、$は行末を表します。^ERRORなら、文の途中のERRORは選びません。', '.*は「任意の文字が0文字以上」です。^ERROR.*full$なら、ERRORで始まりfullで終わる行を選べます。'],
+    concepts: [{ term: 'アンカー', text: '文字そのものではなく、行頭や行末などの位置を指定する記号です。' }, { term: '.*', text: '.は任意の1文字、*は直前の要素の0回以上の繰り返しです。' }],
+    example: { command: "grep -E '^WARN.*queue$' labels.log", note: 'WARNで始まりqueueで終わる行に一致します。' },
+    task: 'labels.logから、ERRORで始まりfullで終わる行だけを表示してください。^と$を使います。',
+    hints: ['始まりを^ERROR、終わりをfull$で指定します。', 'その間を.*でつなぎます。', "grep -E '^ERROR.*full$' labels.log と入力します。"],
+    solution: ["grep -E '^ERROR.*full$' labels.log"], success: '語の有無に加えて、行内の位置も条件にできました。', bridge: '見つけた行の前後を読むと、記録の流れを確認できます。',
+    validation: { all: [used('grep', { flags: 'E' }), out('ERROR disk-full')] }
+  });
+  lesson({ id: 'ap-10-grep-before-after', chapter: 'ap-search', title: '一致行の後と前を別々に読む', commands: ['grep'],
+    goal: 'grep -Aと-Bの方向を区別できる。',
+    explanation: ['-AはAfterで一致行の後、-BはBeforeで一致行の前を追加表示します。後ろの数字が追加する行数です。', '検索条件そのものに一致しない行も、周辺の記録として表示されます。これを文脈（context）と呼びます。'],
+    concepts: [{ term: '-A / -B', text: '-A 1は一致行と次の1行、-B 1は前の1行と一致行です。' }],
+    example: { command: "grep -A 1 '10:05' session.log", note: '10:05のERRORと、その後の10:06のWARNが表示されます。' },
+    task: 'session.logの10:02を検索し、まず-A 1で後の1行を表示してください。次に-B 1へ変更し、前の1行を表示してください。',
+    hints: ['最初はgrep -A 1で10:02を探します。', '2回目は-Aを-Bへ変更します。最後の表示は10:01と10:02です。', "grep -A 1 '10:02' session.log の後、grep -B 1 '10:02' session.log を実行します。"],
+    solution: ["grep -A 1 '10:02' session.log", "grep -B 1 '10:02' session.log"], success: '前後の方向を区別して、近くの行を確認できました。', bridge: '次は前後をまとめて表示し、元の行番号も添えます。',
+    validation: { all: [used('grep', { flags: 'A', args: ['10:02'], scope: 'any' }), used('grep', { flags: 'B', args: ['10:02'] }), out('10:01 WARN api-1 retry user=AKI\n10:02 ERROR api-1 failed user=AKI')] }
+  });
+  lesson({ id: 'ap-11-grep-context', chapter: 'ap-search', title: '前後の文脈に行番号を添える', commands: ['grep'],
+    goal: 'grep -n -Cで引用できる範囲を表示できる。',
+    explanation: ['-CはContextで、前と後の両側を同じ行数だけ追加します。-nと組み合わせると、元ファイルの位置も確認できます。', '行番号の後が:なら一致行、-なら周辺行です。一致した行と、参考として添えた行を区別できます。'],
+    concepts: [{ term: '-C 1', text: '一致行の前後1行ずつを追加します。ファイルの端では存在する行だけを表示します。' }],
+    example: { command: "grep -n -C 1 '10:05' session.log", note: '5-、6:、7-と表示され、6行目が検索に一致したことを確認できます。' },
+    starter: "grep -B 1 '10:02' session.log", newPart: '-n -C 1', task: '10:02の前後1行ずつを、元の行番号を付けて表示してください。',
+    hints: ['-Bを-Cへ変えると両側を指定できます。', '行番号の-nも付けます。', "grep -n -C 1 '10:02' session.log と入力します。"],
+    solution: ["grep -n -C 1 '10:02' session.log"], success: '一致行と周辺行を、位置が分かる形で抜き出せました。', bridge: '同じ検索を、フォルダ内の複数ファイルへ広げます。',
+    validation: { all: [used('grep', { flags: 'nC' }), out('2-10:01 WARN api-1 retry user=AKI\n3:10:02 ERROR api-1 failed user=AKI\n4-10:03 INFO api-1 session=end user=AKI')] }
+  });
+
+  lesson({ id: 'ap-12-grep-recursive', chapter: 'ap-locate', title: '条件に合うファイル名を集める', commands: ['grep'],
+    goal: 'grepの再帰検索と対象ファイル指定を組み合わせられる。',
+    explanation: ['-rはディレクトリの下までたどる再帰検索、-lは一致する行があるファイルの名前だけを表示する指定です。', "--include '*.log'は、末尾が.logのファイルに対象を絞ります。引用符で囲むと、*をgrepへそのまま渡せます。引用符がないとシェルが先に現在地の名前へ展開する場合があります。"],
+    concepts: [{ term: 'グロブ', text: '*.logのようなファイル名のパターン。*は任意の文字列です。正規表現とは書き方や用途が異なります。' }],
+    example: { command: "grep -rl --include '*.txt' 'ERROR' archive", note: '説明文にERRORを含むreadme.txtだけが対象になります。' },
+    task: 'archive以下を再帰的に調べ、ERRORを含む.logファイルの名前だけを表示してください。',
+    hints: ['本文ではなく名前を表示する-lと、下まで探す-rを組み合わせます。', "--include '*.log'で対象を絞ります。", "grep -rl --include '*.log' 'ERROR' archive と入力します。"],
+    solution: ["grep -rl --include '*.log' 'ERROR' archive"], success: '内容とファイル名の両方の条件で、対象を探せました。', bridge: '同じ探索に使えるrgの基本を試します。',
+    validation: { all: [used('grep', { flags: 'rl' }), out('archive/day1/app.log\narchive/day2/proxy.log')] }
+  });
+  lesson({ id: 'ap-13-rg', chapter: 'ap-locate', title: 'rgで行番号付きの検索をする', commands: ['rg'],
+    goal: 'rgの検索語・対象・行番号指定を使える。',
+    explanation: ['rg（ripgrep）も文字列を検索するコマンドです。-nで行番号を表示でき、基本の入力の形はgrepと似ています。', 'rgは通常、拡張正規表現を使います。文字をそのまま探したいときは-Fを指定できます。実際のLinux環境によっては別途インストールが必要です。'],
+    concepts: [{ term: 'rg', text: 'ファイルやディレクトリの本文を探す検索ツールです。この教材ではLogroomと同じ範囲の機能を使えます。' }],
+    example: { command: "rg -n 'INFO' archive/day1/app.log", note: '1行目と3行目が表示されます。' },
+    task: 'rgを使い、archive/day1/app.logのERRORを含む行を、行番号付きで表示してください。',
+    hints: ['コマンド名をrgにし、-nを付けます。', '検索語はERROR、対象はarchive/day1/app.logです。', "rg -n 'ERROR' archive/day1/app.log と入力します。"],
+    solution: ["rg -n 'ERROR' archive/day1/app.log"], success: 'rgの基本形で、一致する行と位置を表示できました。', bridge: '次はrgの対象をディレクトリへ広げます。',
+    validation: { all: [used('rg', { flags: 'n' }), out('2:08:01 ERROR upload')] }
+  });
+  lesson({ id: 'ap-14-rg-glob', chapter: 'ap-locate', title: 'rgで対象ファイルを絞る', commands: ['rg'],
+    goal: 'rgの-gでファイル名の条件を付けて再帰検索できる。',
+    explanation: ['rgにディレクトリを渡すと、その下も検索します。-gでファイル名のグロブを指定できます。', "-g '*.log'なら.logだけを検索します。このデータにはERRORという語を説明する.txtもあるため、対象を絞ると本文の記録だけを取り出せます。"],
+    concepts: [{ term: '-g', text: '検索対象をファイル名などのパターンで制限します。パターンは引用符で囲んでrgへ渡します。' }],
+    example: { command: "rg -g '*.txt' 'ERROR' archive", note: 'readme.txtの説明文だけが見つかります。' },
+    starter: "rg -n 'ERROR' archive/day1/app.log", newPart: "-g '*.log' archive", task: 'archive以下の.logファイルだけをrgで調べ、ERRORの行をファイル名付きで表示してください。行番号は不要です。',
+    hints: ['対象をファイルからarchiveディレクトリへ変えます。', "-g '*.log'を加えます。", "rg -g '*.log' 'ERROR' archive と入力します。"],
+    solution: ["rg -g '*.log' 'ERROR' archive"], success: '複数の記録から、出所が分かる形で行を集められました。', bridge: '次は本文ではなく、ファイルの存在そのものを調べます。',
+    validation: { all: [used('rg', { args: ['-g', '*.log'] }), out('archive/day1/app.log:08:01 ERROR upload\narchive/day2/proxy.log:09:01 ERROR timeout')] }
+  });
+  lesson({ id: 'ap-15-find', chapter: 'ap-locate', title: '本文を読まずにファイルを探す', commands: ['find'],
+    goal: 'findで種類と名前を条件にしてファイルを探せる。',
+    explanation: ['findはパスをたどり、名前や種類などの条件でファイルを探します。grepやrgと異なり、今回の条件では本文を読みません。', "-type fは通常のファイル、-name '*.log'は.logで終わる名前を指定します。*はfindに判断させるので引用符で囲みます。"],
+    concepts: [{ term: '-type f', text: 'ディレクトリではなくファイルを対象にする指定です。-type dならディレクトリです。' }],
+    example: { command: "find archive -type f -name '*.txt'", note: '本文の内容に関係なく、.txtファイルのパスを表示します。' },
+    task: 'findでarchive以下の.logファイルをすべて表示してください。ERRORがないファイルも含めます。',
+    hints: ['探し始める場所はarchiveです。', "-type fと-name '*.log'を付けます。", "find archive -type f -name '*.log' と入力します。"],
+    solution: ["find archive -type f -name '*.log'"], success: '検索で一致しなかったファイルも含めて、対象一覧を作れました。', bridge: '次は見つけた記録を、列の値で絞ります。',
+    validation: { all: [used('find'), out('archive/day1/app.log\narchive/day2/app.log\narchive/day2/proxy.log')] }
+  });
+
+  lesson({ id: 'ap-16-awk-condition', chapter: 'ap-fields', title: '列が一致した行から値を取る', commands: ['awk'],
+    goal: 'awkの条件とprintを組み合わせられる。',
+    explanation: ['awkは、条件に合う行だけで処理を実行できます。$2 == "ERROR"は「2列目がERRORと同じ」という条件です。', '条件の後ろの{print $3}は、条件に合った行の3列目を表示します。session.logは空白区切りで、2列目が種類、3列目がサーバーです。'],
+    concepts: [{ term: '==', text: '左右が等しいか比較する記号です。文字列はawkプログラムの中で二重引用符で囲みます。' }],
+    example: { command: "awk '$2 == \"INFO\" {print $3}' session.log", note: 'INFOの4行からサーバー名だけを取り出します。' },
+    task: 'awkを使い、session.logの2列目がERRORの行から、3列目のサーバー名を表示してください。',
+    hints: ['条件は$2 == "ERROR"です。', '取り出す列は{print $3}で指定します。', "awk '$2 == \"ERROR\" {print $3}' session.log と入力します。"],
+    solution: ["awk '$2 == \"ERROR\" {print $3}' session.log"], success: '行の選択と列の取り出しを、一つのawkで実行できました。', bridge: '空白以外を区切りにするデータへ進みます。',
+    validation: { all: [used('awk'), source('session.log'), out('api-1\napi-2')] }
+  });
+  lesson({ id: 'ap-17-awk-separator', chapter: 'ap-fields', title: 'カンマ区切りの列を取り出す', commands: ['awk'],
+    goal: 'awk -Fで区切りを変え、見出しを除いて列を取れる。',
+    explanation: ['metrics.csvは「時刻,種類,利用者,サービス,処理時間」の順です。処理時間の単位はミリ秒で、1行目は見出しです。', '-Fで区切りを変えられます。NRは読んだ行の番号なので、NR > 1を条件にすると見出しを除けます。今回は引用符内にカンマを含まない単純なCSVです。一般の複雑なCSVをawkだけで解析する練習ではありません。'],
+    concepts: [{ term: '-F', text: 'フィールドの区切りを指定します。今回はカンマです。' }, { term: 'NR', text: 'ここまでに読んだ行の数です。1ファイルなら先頭からの行番号になります。' }],
+    example: { command: "awk -F ',' 'NR > 1 {print $4}' metrics.csv", note: '見出しを除き、4列目のサービス名を取り出します。' },
+    task: 'metrics.csvの見出しを除き、3列目の利用者名を順番どおり表示してください。',
+    hints: ['-Fでカンマを区切りにします。', 'NR > 1で2行目以降を選び、$3を表示します。', "awk -F ',' 'NR > 1 {print $3}' metrics.csv と入力します。"],
+    solution: ["awk -F ',' 'NR > 1 {print $3}' metrics.csv"], success: '区切りと見出しを意識して、必要な列を取り出せました。', bridge: '次は複数の列を条件にします。',
+    validation: { all: [used('awk'), source('metrics.csv'), out('Aki\nREN\naki\nMei\nREN\nAki\nmei\nRen\nREN\nren')] }
+  });
+  lesson({ id: 'ap-18-awk-combined', chapter: 'ap-fields', title: '文字と数値の条件を組み合わせる', commands: ['awk'],
+    goal: 'awkの&&と数値比較で条件を重ねられる。',
+    explanation: ['&&は「両方の条件を満たす」という意味です。$4 == "portal" && $5 >= 150なら、portalかつ処理時間150ミリ秒以上の行を選べます。', 'printの後で列をカンマ区切りにすると、複数の値を標準の空白区切りで表示します。入力のカンマと、printの列指定のカンマは役割が違います。'],
+    concepts: [{ term: '&&', text: '左と右の条件がどちらも成立する行を選びます。awkの引用符の内側に書きます。' }, { term: '>=', text: '以上を表す比較です。150も条件に含まれます。' }],
+    example: { command: "awk -F ',' '$4 == \"portal\" && $5 < 50 {print $1, $3, $5}' metrics.csv", note: 'portalで50ミリ秒未満の2行から、時刻・利用者・処理時間を表示します。' },
+    task: 'portalかつ処理時間150ミリ秒以上の行から、時刻・利用者・処理時間を空白区切りで表示してください。',
+    hints: ['サービスは4列目、処理時間は5列目です。', '$4 == "portal"と$5 >= 150を&&でつなぎます。', "awk -F ',' '$4 == \"portal\" && $5 >= 150 {print $1, $3, $5}' metrics.csv と入力します。"],
+    solution: ["awk -F ',' '$4 == \"portal\" && $5 >= 150 {print $1, $3, $5}' metrics.csv"], success: '列の値を見ながら、必要な範囲を正確に絞れました。', bridge: '数値の大きい順に並べて、読みやすくします。',
+    validation: { all: [used('awk'), source('metrics.csv'), out('10:02 aki 250\n10:05 Aki 150\n10:08 REN 200\n10:09 ren 180')] }
+  });
+  lesson({ id: 'ap-19-sort-key', chapter: 'ap-fields', title: '指定した列の数値で並べる', commands: ['sort'],
+    goal: 'sort -tと-kを使い、先頭以外の列を数値順にできる。',
+    explanation: ['timings.csvは見出しなしで「リクエスト番号,利用者,処理時間」の順です。通常のsortでは先頭から文字として比べます。', "-t ','でカンマ区切り、-k3,3で比較する範囲を3列目だけに指定します。キーの後ろのnは数値、rは逆順なので、-k3,3nrで処理時間の大きい順になります。"],
+    concepts: [{ term: 'ソートキー', text: '並べ替えるときに比べる列や範囲です。-k3,3は3列目から3列目までです。' }],
+    example: { command: "sort -t ',' -k3,3n timings.csv", note: '9、30、100、120の数値が小さい順になります。' },
+    newPart: '-k3,3nr', task: 'timings.csvを、3列目の処理時間が大きい順に並べて表示してください。',
+    hints: ['区切り文字は-tで指定します。', '3列目を数値の逆順にする指定は-k3,3nrです。', "sort -t ',' -k3,3nr timings.csv と入力します。"],
+    solution: ["sort -t ',' -k3,3nr timings.csv"], success: '先頭のIDに引っ張られず、必要な数値の順にできました。', bridge: '集計の前に表記の違いをそろえる練習です。',
+    validation: { all: [used('sort'), source('timings.csv'), out('q02,ren,120\nq04,aki,100\nq03,mei,30\nq01,aki,9')] }
+  });
+
+  lesson({ id: 'ap-20-tr-case', chapter: 'ap-normalize', title: '利用者名の大小文字をそろえる', commands: ['tr'],
+    goal: '標準入力をtrへ渡して文字を変換できる。',
+    explanation: ['trは標準入力の文字を変換します。ファイル名を引数に渡す形ではなく、catや前の処理の出力をパイプで渡します。', "'[:upper:]'は大文字の集合、'[:lower:]'は小文字の集合です。ここでは利用者名の大小文字を同じ人として扱うという、このデータのルールに従って正規化します。"],
+    concepts: [{ term: '正規化', text: '比較や集計のために表記をそろえることです。大文字小文字が別の意味を持つデータには、同じ変換を無条件で使いません。' }],
+    example: { command: "echo 'Aki REN' | tr '[:lower:]' '[:upper:]'", note: '反対向きの変換例です。AKI RENになります。' },
+    task: 'names.txtをtrへ渡し、利用者名をすべて小文字にしてください。元ファイルは変更しません。',
+    hints: ['cat names.txtの出力をtrへ渡します。', "大文字の集合から小文字の集合へ変換します。", "cat names.txt | tr '[:upper:]' '[:lower:]' と入力します。"],
+    solution: ["cat names.txt | tr '[:upper:]' '[:lower:]'"], success: 'RENとren、Akiとakiを同じ表記にそろえられました。', bridge: '次は余分な空白を整えます。',
+    validation: { all: [used('tr'), pipe(2), source('names.txt'), out('ren\naki\naki\nmei\nren\nren')] }
+  });
+  lesson({ id: 'ap-21-tr-squeeze', chapter: 'ap-normalize', title: '連続する空白を一つにする', commands: ['tr', 'cut'],
+    goal: 'tr -sで連続する文字をまとめ、次の処理へ渡せる。',
+    explanation: ['spaces.txtは「時刻 種類 利用者」ですが、列の間の半角スペースの数が不ぞろいです。cut -dで指定する区切りは1文字なので、そのままでは空の列が数えられます。', "tr -s ' 'は、連続する半角スペースを一つにまとめます。整えた後ならcut -d ' ' -f 3で利用者名を取り出せます。"],
+    concepts: [{ term: '-s', text: 'squeeze。指定した文字が連続しているとき、一つへまとめます。ここでは改行は変えません。' }],
+    example: { command: "echo 'one    two' | tr -s ' '", note: 'oneとtwoの間が1個のスペースになります。' },
+    task: 'spaces.txtの連続する半角スペースをtr -sでまとめ、cutで3列目の利用者名を表示してください。',
+    hints: ['まずcat spaces.txtをtr -sへつなぎます。', "最後にcut -d ' ' -f 3を追加します。", "cat spaces.txt | tr -s ' ' | cut -d ' ' -f 3 と入力します。"],
+    solution: ["cat spaces.txt | tr -s ' ' | cut -d ' ' -f 3"], success: '次のコマンドが扱いやすい形へ、入力を整えられました。', bridge: 'そろえた値で、繰り返し現れる名前を探します。',
+    validation: { all: [used('tr', { flags: 's' }), used('cut'), pipe(3), out('aki\nren\nmei')] }
+  });
+  lesson({ id: 'ap-22-uniq-duplicates', chapter: 'ap-normalize', title: '繰り返し出る値だけを残す', commands: ['sort', 'uniq'],
+    goal: 'sortとuniq -dで、複数回現れる値を一覧にできる。',
+    explanation: ['uniq -dは、連続して同じ行が複数あるとき、その値を1回だけ表示します。件数を出す-cとは目的が異なります。', 'repeated.txtでは同じ名前が離れて現れます。先にsortで同じ名前を隣り合わせにしてからuniq -dを使います。'],
+    concepts: [{ term: '-d', text: '繰り返しがある値だけを表示します。2回以上現れる値でも、表示は1行です。' }],
+    example: { command: 'sort repeated.txt | uniq -u', note: '-uは反対に、1回だけの値を表示します。今回の例ではmeiです。' },
+    starter: 'sort repeated.txt', newPart: '| uniq -d', task: 'repeated.txtで2回以上出る利用者名だけを、名前順に1回ずつ表示してください。',
+    hints: ['最初にsortで同じ名前を集めます。', '件数の-cではなく、繰り返しだけの-dを付けます。', 'sort repeated.txt | uniq -d と入力します。'],
+    solution: ['sort repeated.txt | uniq -d'], success: '一度しか現れない値を除き、繰り返しのある値だけにできました。', bridge: '結果を人が読みやすい表にもしてみます。',
+    validation: { all: [used('sort'), used('uniq', { flags: 'd' }), pipe(2), out('aki\nren')] }
+  });
+  lesson({ id: 'ap-23-column', chapter: 'ap-normalize', title: '列の幅をそろえて読む', commands: ['column'],
+    goal: 'columnで区切りのあるテキストを見やすく表示できる。',
+    explanation: ['column -tは、各列の幅をそろえた表示を作ります。-sで入力の区切り文字を指定できます。', 'table.csvは「利用者,結果,処理時間」の3列です。この教材は単純な区切り形式を扱います。引用符で囲んだ値の中にカンマがある一般的なCSVには、この方法をそのまま使えません。'],
+    concepts: [{ term: '整形', text: '内容を読める形へ整えることです。表示のために加えた空白を、元の生データの区切りと混同しないようにします。' }],
+    example: { command: 'column -t spaces.txt', note: '空白区切りの各列をそろえます。' },
+    task: 'column -tを使い、table.csvをカンマで区切って、見出しを含む表として表示してください。',
+    hints: ['表の表示は-tです。', "入力のカンマを-s ','で指定します。", "column -t -s ',' table.csv と入力します。"],
+    solution: ["column -t -s ',' table.csv"], success: '値を変えずに、列の対応を読み取りやすくできました。', bridge: '次はsedで、表示する行や語を整えます。',
+    validation: { all: [used('column'), source('table.csv'), out('user status ms\naki OK 9\nren FAIL 120\nmei OK 30', 'lines')] }
+  });
+
+  lesson({ id: 'ap-24-sed-range', chapter: 'ap-edit', title: '行番号の範囲を抜き出す', commands: ['sed'],
+    goal: 'sed -nと範囲pで、途中の連続する行を表示できる。',
+    explanation: ['sedは行単位で選択や置換をするコマンドです。通常は各行を自動表示するので、指定した行だけを表示するときは-nを使います。', "'2,4p'は「2行目から4行目までをprintする」という指定です。元のファイルは書き換えません。"],
+    concepts: [{ term: 'アドレスと処理', text: '2,4が対象範囲、pが表示処理です。-nでその他の自動表示を止めます。' }],
+    example: { command: "sed -n '5,6p' session.log", note: '途中の5行目と6行目だけを表示します。' },
+    task: 'sedを使い、session.logの2行目から4行目だけを表示してください。',
+    hints: ['自動表示を止める-nを付けます。', '範囲は2,4、処理はpです。', "sed -n '2,4p' session.log と入力します。"],
+    solution: ["sed -n '2,4p' session.log"], success: '先頭や末尾に限らず、途中の範囲を抜き出せました。', bridge: '次は本文の中の語を置き換えます。',
+    validation: { all: [used('sed'), source('session.log'), out('10:01 WARN api-1 retry user=AKI\n10:02 ERROR api-1 failed user=AKI\n10:03 INFO api-1 session=end user=AKI')] }
+  });
+  lesson({ id: 'ap-25-sed-substitute', chapter: 'ap-edit', title: '各行の語をすべて置き換える', commands: ['sed'],
+    goal: 'sedのsとgで、同じ行の複数の一致を置換できる。',
+    explanation: ['s/元の語/置換後/は文字を置き換える指定です。末尾のgを付けると、各行にあるすべての一致を置き換えます。', 'gがないと各行の最初の一致だけを置き換えます。ここでは画面へ加工結果を出すだけで、元のtags.txtは変更しません。'],
+    concepts: [{ term: 'g', text: 'global。各行で最初の一致だけでなく、すべての一致へ置換を適用します。' }],
+    example: { command: "sed 's/ERROR/ERR/' tags.txt", note: '1行目にはERRORが2回ありますが、最初だけがERRになります。' },
+    newPart: 's/ERROR/FAIL/g', task: 'tags.txtのERRORをすべてFAILへ置き換えて表示してください。同じ行の2回目も置換し、元ファイルは保ちます。',
+    hints: ['s/ERROR/FAIL/で置換先を指定します。', '最後にgを加えて、各行の全一致を置き換えます。', "sed 's/ERROR/FAIL/g' tags.txt と入力します。"],
+    solution: ["sed 's/ERROR/FAIL/g' tags.txt"], success: '置換の範囲を意識して、表示用のコピーを加工できました。', bridge: '次はコメントや空行を除き、集計しやすくします。',
+    validation: { all: [used('sed'), out('FAIL first FAIL repeated\nWARN retry\nFAIL last'), saved('tags.txt', tags, 'exact')] }
+  });
+  lesson({ id: 'ap-26-sed-delete', chapter: 'ap-edit', title: 'コメントと空行を取り除く', commands: ['sed'],
+    goal: 'sedで複数の除外処理を順に適用できる。',
+    explanation: ['sedのdは、その行を出力から除く処理です。/^#/dは#で始まる行、/^$/dは何も文字がない行を除きます。', '-eを繰り返すと、複数の処理を順に指定できます。annotated.txtは#で始まる説明と空行、それ以外に「利用者 結果」の行があります。'],
+    concepts: [{ term: '^$', text: '行頭の直後が行末、つまり空行です。スペースだけがある行とは異なります。' }, { term: '-e', text: '実行するsedの処理を一つ指定します。繰り返して複数の処理を書けます。' }],
+    example: { command: "sed '/^#/d' annotated.txt", note: 'コメントは除かれますが、空行は残ります。' },
+    starter: "sed '/^#/d' annotated.txt", newPart: "-e '/^$/d'", task: 'annotated.txtから#で始まるコメントと空行を除き、利用者と結果の2行だけを表示してください。',
+    hints: ['1つ目の処理は/^#/dです。', '2つ目の処理/^$/dも-eで指定します。', "sed -e '/^#/d' -e '/^$/d' annotated.txt と入力します。"],
+    solution: ["sed -e '/^#/d' -e '/^$/d' annotated.txt"], success: '集計対象ではない行を、明示した条件で除けました。', bridge: '記録を保存するための作業用ファイルを扱います。',
+    validation: { all: [used('sed'), source('annotated.txt'), out('aki OK\nren FAIL\n', 'exact')] }
+  });
+
+  lesson({ id: 'ap-27-printf', chapter: 'ap-workspace', title: '書式を指定して要約を書く', commands: ['printf'],
+    goal: 'printfで文字列・整数・改行を指定して出力できる。',
+    explanation: ['printfは書式と値を分けて出力するコマンドです。%sは文字列、%dは整数の入る場所です。', 'echoと異なり、自動では末尾に改行しません。書式内の\\nが改行を表します。数値の結果を短い報告行へ整えるときに使えます。'],
+    concepts: [{ term: '書式', text: '出力のひな形です。%sや%dの場所へ、後ろの引数を順に入れます。' }],
+    example: { command: "printf 'user=%s count=%d\\n' aki 2", note: 'user=aki count=2と、末尾の改行を表示します。' },
+    task: 'printfを使い、user=ren count=3 と表示してください。%sと%dを使い、最後に改行を入れます。',
+    hints: ['書式の%sへren、%dへ3を渡します。', '書式の最後は\\nです。引用符の内側に書きます。', "printf 'user=%s count=%d\\n' ren 3 と入力します。"],
+    solution: ["printf 'user=%s count=%d\\n' ren 3"], success: '値を指定した形に当てはめ、改行も含めて出力できました。', bridge: '次は本文が空の作業ファイルを用意します。',
+    validation: { all: [used('printf', { args: ['user=%s count=%d\\n', 'ren', '3'] }), out('user=ren count=3\n', 'exact')] }
+  });
+  lesson({ id: 'ap-28-touch', chapter: 'ap-workspace', title: '空のファイルを用意する', commands: ['touch'],
+    goal: 'touchで新しい空ファイルを作れる。',
+    explanation: ['touchは、まだない名前なら空のファイルを作れます。親ディレクトリは先に存在している必要があります。今回はreportsが用意されています。', '実際のLinuxでは既存ファイルの時刻を更新する用途もあります。この教材は時刻更新を扱いませんが、既存ファイルの本文を消さない点は同じです。'],
+    concepts: [{ term: '空ファイル', text: '名前はありますが、本文の文字数が0のファイルです。ディレクトリとは別のものです。' }],
+    example: { command: 'touch reports/example.txt', note: '例用の空ファイルを作ります。既存のreports/existing.txtには触れません。' },
+    task: 'touchでreports/check.txtという空ファイルを作成してください。',
+    hints: ['touchの後ろに、新しいファイルのパスを書きます。', 'reportsディレクトリは作成済みです。', 'touch reports/check.txt と入力します。'],
+    solution: ['touch reports/check.txt'], success: '作業用ファイルを、本文を入れる前に用意できました。', bridge: '不要になった一時ファイルの削除を練習します。',
+    validation: { all: [used('touch'), saved('reports/check.txt', '', 'exact'), saved('reports/existing.txt', '保存済みの記録\n', 'exact')] }
+  });
+  lesson({ id: 'ap-29-rm', chapter: 'ap-workspace', title: '指定した下書きだけを片付ける', commands: ['rm'],
+    goal: '削除対象を指定し、残すファイルを保てる。',
+    explanation: ['rmは指定したファイルを削除します。内容を確認してから、必要な名前だけを指定します。この練習の操作は仮想ファイルだけに作用します。', 'trashにはdraft.txtという下書きとfinal.txtという完成版があります。広いワイルドカードではなく、下書きの名前を指定して片付けます。'],
+    concepts: [{ term: '削除対象', text: 'rmに渡したファイルが消えます。実際のLinuxでは通常、ゴミ箱には移動しません。' }],
+    example: { command: 'rm trash/example.tmp', note: '例専用の一時ファイル1個だけを削除します。' },
+    task: 'trash/draft.txtだけをrmで削除してください。trash/final.txtは内容ごと残します。',
+    hints: ['削除する名前を1個だけ指定します。', '完成版final.txtは引数に入れません。', 'rm trash/draft.txt と入力します。'],
+    solution: ['rm trash/draft.txt'], success: '残すものを保ちながら、指定の下書きだけを片付けられました。', bridge: 'ファイルがない空ディレクトリには、別のコマンドを使います。',
+    validation: { all: [used('rm'), { type: 'absent', path: base + '/trash/draft.txt' }, saved('trash/final.txt', '残す完成版\n', 'exact')] }
+  });
+  lesson({ id: 'ap-30-rmdir', chapter: 'ap-workspace', title: '空の作業ディレクトリを片付ける', commands: ['rmdir', 'mkdir'],
+    goal: 'rmdirが空のディレクトリを対象とすることを理解する。',
+    explanation: ['rmdirは空のディレクトリを削除します。ファイルが残っているディレクトリは削除できません。', 'ここでは作業用の空ディレクトリをmkdirで作り、使わなかったものとしてrmdirで削除します。reports本体には記録が入っているので残します。'],
+    concepts: [{ term: '空のディレクトリ', text: '中にファイルも子ディレクトリもない場所です。隠しファイルも中身に含まれます。' }],
+    example: { command: 'mkdir reports/example-empty && rmdir reports/example-empty', note: '例用の空ディレクトリを作成後、削除します。&&は最初が成功したときだけ次を実行する接続です。' },
+    task: 'mkdirでreports/emptyを作り、rmdirで削除してください。reportsと既存の記録は残します。',
+    hints: ['最初にmkdir reports/emptyを実行します。', '次に同じパスをrmdirへ渡します。', 'mkdir reports/empty の後、rmdir reports/empty を実行します。'],
+    solution: ['mkdir reports/empty', 'rmdir reports/empty'], success: 'ファイルと空ディレクトリの片付けを使い分けられました。', bridge: '最後は、同じ記録を材料にパイプを一段ずつ完成させます。',
+    validation: { all: [used('mkdir', { args: ['reports/empty'], scope: 'any' }), used('rmdir'), { type: 'absent', path: base + '/reports/empty' }, { type: 'directory', path: base + '/reports' }, saved('reports/existing.txt', '保存済みの記録\n', 'exact')] }
+  });
+
+  const filter = "grep -F ',ERROR,' metrics.csv";
+  const extract = filter + " | awk -F ',' '$4 == \"portal\" {print $3}'";
+  const normalize = extract + " | tr '[:upper:]' '[:lower:]'";
+  const count = normalize + ' | sort | uniq -c';
+  const rank = count + ' | sort -nr';
+  lesson({ id: 'ap-31-flow-filter', chapter: 'ap-final', title: '実習1：対象の種類を選ぶ', mode: 'guide', commands: ['grep'],
+    goal: '集計の出発点として、記録の種類を正確に選べる。',
+    explanation: ['これから6問で、portalサービスのERROR件数を利用者別に集計します。各問のファイルは独立していますが、同じコマンドを一段ずつ伸ばします。', 'metrics.csvの列は「時刻,種類,利用者,サービス,処理時間」です。まず前後のカンマも含む,ERROR,を固定文字列で探し、種類がERRORの7行を選びます。まだ他のサービスも含まれます。'],
+    concepts: [{ term: '段階ごとの確認', text: '一度に完成形を書かず、各段階で意図した行や列になったか確かめます。' }],
+    example: { command: "grep -F ',WARN,' metrics.csv", note: '種類がWARNの1行を選びます。見出しは一致しません。' },
+    starter: 'cat metrics.csv', newPart: "grep -F ',ERROR,'", task: 'metrics.csvから、種類がERRORの7行をgrep -Fで表示してください。',
+    hints: ['検索語の前後にカンマを含めます。', '固定文字列検索の-Fを付けます。', filter + ' と入力します。'],
+    solution: [filter], success: '集計の入力を、ERRORの記録へ絞れました。', bridge: '次の段階では、サービスを選んで利用者名だけを取り出します。',
+    validation: { all: [used('grep', { flags: 'F' }), source('metrics.csv'), out(errorRows)] }
+  });
+  lesson({ id: 'ap-32-flow-extract', chapter: 'ap-final', title: '実習2：サービスを選び、名前を取る', commands: ['grep', 'awk'],
+    goal: '検索結果に列の条件を重ね、集計する値を取り出せる。',
+    explanation: ['前の検索結果にはportalとapiの記録が混ざっています。4列目がportalの行だけを残し、3列目の利用者名を取り出します。', 'grepで行を減らしても、残った行の列番号は変わりません。awkに-Fでカンマ区切りを伝えます。'],
+    concepts: [{ term: '行の抽出と列の抽出', text: 'どの記録を残すか選んでから、各記録のどの値を使うか選びます。' }],
+    example: { command: filter + " | awk -F ',' '$4 == \"api\" {print $3}'", note: 'apiサービスのERROR記録からRENだけを取り出す例です。' },
+    starter: filter, newPart: "| awk -F ',' '$4 == \"portal\" {print $3}'", task: '前のgrepにawkをつなぎ、portalサービスの利用者名6行だけを表示してください。',
+    hints: ['4列目がportalという条件を付けます。', '表示するのは3列目の$3です。', extract + ' と入力します。'],
+    solution: [extract], success: '集計したいサービスの、集計したい列だけになりました。', bridge: 'このままではRENとrenが別の値です。表記をそろえます。',
+    validation: { all: [used('grep'), used('awk'), pipe(2), source('metrics.csv'), out('REN\naki\nAki\nmei\nREN\nren')] }
+  });
+  lesson({ id: 'ap-33-flow-normalize', chapter: 'ap-final', title: '実習3：集計前に表記をそろえる', commands: ['tr'],
+    goal: '抽出した値だけを正規化し、集計の入力を作れる。',
+    explanation: ['この実習では、利用者名の大文字小文字は同じ人を表すと定義しています。trで小文字へそろえると、RENとrenを一緒に数えられます。', 'ファイル全体ではなく、必要な名前を取り出してから変換しています。ERRORなどの別の列には影響しません。'],
+    concepts: [{ term: '変換する範囲', text: '取り出した値だけを変換すると、関係のない列を不用意に変えずに済みます。' }],
+    example: { command: "echo 'Mei' | tr '[:upper:]' '[:lower:]'", note: '名前1個を小文字へそろえる短い例です。' },
+    starter: extract, newPart: "| tr '[:upper:]' '[:lower:]'", task: '前のパイプへtrを追加し、portalのERROR利用者名6行をすべて小文字にしてください。',
+    hints: ['これまでのgrepとawkはそのまま使います。', '最後に大文字から小文字へ変換するtrを追加します。', normalize + ' と入力します。'],
+    solution: [normalize], success: '同じ利用者を同じ値として数える準備ができました。', bridge: '次は並べ替えとuniqで件数を作ります。',
+    validation: { all: [used('tr'), pipe(3), source('metrics.csv'), out('ren\naki\naki\nmei\nren\nren')] }
+  });
+  lesson({ id: 'ap-34-flow-count', chapter: 'ap-final', title: '実習4：同じ名前を集めて数える', commands: ['sort', 'uniq'],
+    goal: '正規化した値から、利用者ごとの件数を作れる。',
+    explanation: ['uniqは隣り合う同じ行を扱うので、正規化の後にsortで同じ名前を集めます。その結果をuniq -cへ渡すと利用者ごとの件数になります。', 'まず末尾に| sortだけを加えて並びを確認し、その後| uniq -cを加えると、それぞれの役割が見えます。'],
+    concepts: [{ term: '集計の順番', text: '表記をそろえる → 同じ値を隣り合わせにする → 件数を数える、の順です。' }],
+    example: { command: 'sort repeated.txt | uniq -c', note: '短い別ファイルで、同じ名前をまとめて数える復習です。' },
+    starter: normalize, newPart: '| sort | uniq -c', task: '前のパイプの末尾にsortとuniq -cを追加し、利用者名順の件数を表示してください。',
+    hints: ['まずsortを追加し、aki、mei、renがまとまることを確認します。', 'その後にuniq -cを追加します。', count + ' と入力します。'],
+    solution: [count], success: 'akiが2件、meiが1件、renが3件という件数になりました。', bridge: '次は利用者名順から、件数の多い順へ並べ替えます。',
+    validation: { all: [used('sort'), used('uniq', { flags: 'c' }), pipe(5), source('metrics.csv'), out('2 aki\n1 mei\n3 ren', 'lines')] }
+  });
+  lesson({ id: 'ap-35-flow-rank', chapter: 'ap-final', title: '実習5：件数の多い順にする', commands: ['sort'],
+    goal: 'パイプ内の2回のsortの役割を説明できる。',
+    explanation: ['件数が先頭の列になったので、sort -nrをつなぐと数値の大きい順になります。最初のsortと最後のsortは目的が異なります。', '最初は同じ利用者名を集めるため、最後は集計結果の件数順を変えるためです。途中結果の表示で、2か所を選んで見比べてください。'],
+    concepts: [{ term: '同じコマンドの再利用', text: '入力の形が変われば、同じsortでも別の役割を担えます。' }],
+    example: { command: "printf '%s\\n' '2 aki' '3 ren' | sort -nr", note: '件数付きの2行を、大きい順に並べる短い例です。' },
+    starter: count, newPart: '| sort -nr', task: '前の集計結果へsort -nrを追加し、件数の多い順に表示してください。',
+    hints: ['途中のsortは残します。', '最後へ数値の逆順のsort -nrを追加します。', rank + ' と入力します。'],
+    solution: [rank], success: '対象選びから順位付けまで、一つのパイプになりました。', bridge: '最後に保存まで含めた処理を、自分で仕上げます。',
+    validation: { all: [used('sort', { flags: 'nr' }), pipe(6), source('metrics.csv'), out('3 ren\n2 aki\n1 mei', 'lines')] }
+  });
+  lesson({ id: 'ap-36-flow-save', chapter: 'ap-final', title: '実習6：集計結果を表示して保存する', mode: 'challenge', minutes: 6, commands: ['tee'],
+    goal: '条件の定義から結果の保存まで、つながった処理を完成できる。',
+    explanation: ['依頼は「portalサービスのERRORを、利用者別に件数の多い順でまとめる」です。利用者名は大小文字を同じものとして扱います。', 'metrics.csvを読み、結果をreports/error-users.txtへ保存し、同時に画面にも表示してください。reportsは作成済みです。別の正しいコマンドの組み合わせでも、元データと結果が条件に合えば合格です。'],
+    concepts: [{ term: '結果を残す', text: '画面で確認できることに加えて、後から読み直せるファイルに同じ内容を保存します。' }],
+    example: { command: "printf '%s\\n' 'example output' | tee reports/example-summary.txt", note: '例用の別ファイルへ、表示と保存を同時に行います。' },
+    starter: rank, newPart: '| tee reports/error-users.txt', task: 'metrics.csvのportalのERRORを利用者別に集計してください。名前は小文字、件数は多い順にし、reports/error-users.txtへ保存して同じ内容を表示します。',
+    hints: ['ERRORを選ぶ → portalの利用者名を取る → 小文字にする → 同じ名前を集めて数える → 件数順、の流れです。', 'できた集計の末尾にteeを付けると、表示と保存を両方できます。', rank + ' | tee reports/error-users.txt と入力します。'],
+    solution: [rank + ' | tee reports/error-users.txt'], success: '応用編クリア！条件を分解し、結果を確かめながら集計と保存を組み立てられました。', bridge: '発展編では、複数の記録の比較・結合や、構造を持つJSONの処理へ進みます。',
+    validation: { all: [source('metrics.csv', 'any'), out('3 ren\n2 aki\n1 mei', 'lines'), saved('reports/error-users.txt', '3 ren\n2 aki\n1 mei', 'lines')] }
+  });
+
+  if (lessons.length !== 36) throw new Error('応用編は36問で構成します');
+  D.lessons.push(...lessons);
+  D.glossary.push(
+    { term: '固定文字列検索', text: 'grep -Fやrg -Fで、記号も文字どおりに検索する方法です。' },
+    { term: '正規表現', text: '^、$、.*、選択の|などを使い、文字列の条件を表す書き方です。grep -Eで拡張正規表現を使えます。' },
+    { term: '文脈（context）', text: '一致行の前後にある記録です。grepの-A・-B・-Cで追加表示します。' },
+    { term: 'グロブ', text: '*.logなど、ファイル名のパターンです。find -nameやrg -gへ渡す場合は引用符で囲みます。' },
+    { term: '正規化', text: '比較・集計の前に表記をそろえることです。元データの意味やルールを確かめて適用します。' },
+    { term: 'ソートキー', text: '並べ替えで比較する列や範囲です。sort -k3,3nrなら3列目を数値の大きい順にします。' }
+  );
+})(typeof window !== 'undefined' ? window : globalThis);

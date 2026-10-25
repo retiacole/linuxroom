@@ -1,0 +1,639 @@
+{
+  "progress": {
+    "version": 1,
+    "currentId": "27-append",
+    "completed": {
+      "01-echo": {
+        "at": "2026-10-25T12:33:58.223Z",
+        "assisted": true
+      },
+      "02-quotes": {
+        "at": "2026-10-25T12:33:58.224Z",
+        "assisted": false
+      },
+      "03-pwd": {
+        "at": "2026-10-25T12:33:58.224Z",
+        "assisted": false
+      },
+      "04-ls": {
+        "at": "2026-10-25T12:33:58.224Z",
+        "assisted": false
+      },
+      "05-cd": {
+        "at": "2026-10-25T12:33:58.224Z",
+        "assisted": false
+      },
+      "06-paths": {
+        "at": "2026-10-25T12:33:58.224Z",
+        "assisted": false
+      },
+      "07-cat": {
+        "at": "2026-10-25T12:33:58.224Z",
+        "assisted": false
+      },
+      "08-head": {
+        "at": "2026-10-25T12:33:58.225Z",
+        "assisted": false
+      },
+      "09-tail": {
+        "at": "2026-10-25T12:33:58.225Z",
+        "assisted": false
+      },
+      "10-less": {
+        "at": "2026-10-25T12:33:58.225Z",
+        "assisted": false
+      },
+      "11-grep": {
+        "at": "2026-10-25T12:33:58.225Z",
+        "assisted": false
+      },
+      "12-grep-number": {
+        "at": "2026-10-25T12:33:58.225Z",
+        "assisted": false
+      },
+      "13-grep-case": {
+        "at": "2026-10-25T12:33:58.225Z",
+        "assisted": false
+      },
+      "14-grep-invert": {
+        "at": "2026-10-25T12:33:58.225Z",
+        "assisted": false
+      },
+      "15-pipe-count": {
+        "at": "2026-10-25T12:33:58.226Z",
+        "assisted": false
+      },
+      "16-pipe-head": {
+        "at": "2026-10-25T12:33:58.226Z",
+        "assisted": false
+      },
+      "17-awk": {
+        "at": "2026-10-25T12:33:58.227Z",
+        "assisted": false
+      },
+      "18-grep-awk": {
+        "at": "2026-10-25T12:33:58.227Z",
+        "assisted": false
+      },
+      "19-cut": {
+        "at": "2026-10-25T12:33:58.227Z",
+        "assisted": false
+      },
+      "20-sort": {
+        "at": "2026-10-25T12:33:58.227Z",
+        "assisted": false
+      },
+      "21-uniq": {
+        "at": "2026-10-25T12:33:58.227Z",
+        "assisted": false
+      },
+      "22-pipeline-sort": {
+        "at": "2026-10-25T12:33:58.227Z",
+        "assisted": false
+      },
+      "23-pipeline-uniq": {
+        "at": "2026-10-25T12:33:58.228Z",
+        "assisted": false
+      },
+      "24-pipeline-rank": {
+        "at": "2026-10-25T12:33:58.228Z",
+        "assisted": false
+      },
+      "25-mkdir": {
+        "at": "2026-10-25T12:33:58.228Z",
+        "assisted": false
+      },
+      "26-redirect": {
+        "at": "2026-10-25T12:33:58.228Z",
+        "assisted": false
+      },
+      "27-append": {
+        "at": "2026-10-25T12:33:58.228Z",
+        "assisted": false
+      },
+      "28-tee": {
+        "at": "2026-10-25T12:33:58.228Z",
+        "assisted": false
+      },
+      "29-copy": {
+        "at": "2026-10-25T12:33:58.228Z",
+        "assisted": false
+      },
+      "30-move": {
+        "at": "2026-10-25T12:33:58.228Z",
+        "assisted": false
+      },
+      "31-jq-read": {
+        "at": "2026-10-25T12:33:58.228Z",
+        "assisted": false
+      },
+      "32-jq-field": {
+        "at": "2026-10-25T12:33:58.228Z",
+        "assisted": false
+      },
+      "33-jq-select": {
+        "at": "2026-10-25T12:33:58.229Z",
+        "assisted": false
+      },
+      "34-jq-compose": {
+        "at": "2026-10-25T12:33:58.229Z",
+        "assisted": false
+      },
+      "35-final-extract": {
+        "at": "2026-10-25T12:33:58.229Z",
+        "assisted": false
+      },
+      "36-final-ranking": {
+        "at": "2026-10-25T12:33:58.229Z",
+        "assisted": false
+      }
+    },
+    "hints": {
+      "01-echo": 2
+    },
+    "sessions": {
+      "10-less": {
+        "version": 1,
+        "lessonId": "10-less",
+        "shell": {
+          "files": {
+            "/home/analyst/welcome.txt": "Linuxroomへようこそ。\nコマンドを一つずつ試しましょう。\n失敗しても、練習をやり直せます。\n",
+            "/home/analyst/notes/commands.txt": "pwd: 現在地を表示\nls: 名前の一覧を表示\ncd: ディレクトリを移動\n",
+            "/home/analyst/logs/app.log": "09:00 INFO aki login\n09:01 ERROR ren upload\n09:02 ERROR aki download\n09:03 INFO mei logout\n09:04 ERROR ren upload\n09:05 WARN aki retry\n09:06 ERROR mei download\n09:07 ERROR ren upload\n09:08 ERROR aki preview\n09:09 error aki export\n",
+            "/home/analyst/logs/names.txt": "ren\naki\nren\nmei\nren\naki\n",
+            "/home/analyst/logs/sorted-names.txt": "aki\naki\nmei\nren\nren\nren\n",
+            "/home/analyst/logs/counts.txt": "2 aki\n10 ren\n1 mei\n",
+            "/home/analyst/logs/teams.csv": "aki,blue\nren,red\nmei,blue\n",
+            "/home/analyst/logs/profile.json": "{\"user\":\"aki\",\"team\":\"blue\",\"active\":true}\n",
+            "/home/analyst/logs/events.jsonl": "{\"time\":\"09:00\",\"level\":\"INFO\",\"user\":\"aki\",\"action\":\"login\"}\n{\"time\":\"09:01\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:02\",\"level\":\"ERROR\",\"user\":\"aki\",\"action\":\"download\"}\n{\"time\":\"09:03\",\"level\":\"INFO\",\"user\":\"mei\",\"action\":\"logout\"}\n{\"time\":\"09:04\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:05\",\"level\":\"WARN\",\"user\":\"aki\",\"action\":\"retry\"}\n{\"time\":\"09:06\",\"level\":\"ERROR\",\"user\":\"mei\",\"action\":\"download\"}\n{\"time\":\"09:07\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:08\",\"level\":\"ERROR\",\"user\":\"aki\",\"action\":\"preview\"}\n{\"time\":\"09:09\",\"level\":\"error\",\"user\":\"aki\",\"action\":\"export\"}\n",
+            "/home/analyst/inbox/shift.log": "12:00 INFO sora open\n12:01 ERROR sora export\n12:02 ERROR yui save\n12:03 ERROR sora save\n12:04 WARN naoki retry\n12:05 ERROR naoki export\n12:06 ERROR yui save\n12:07 ERROR sora export\n12:08 INFO yui close\n"
+          },
+          "directories": [
+            "/",
+            "/home",
+            "/home/analyst",
+            "/tmp",
+            "/home/analyst/notes",
+            "/home/analyst/logs",
+            "/home/analyst/inbox"
+          ],
+          "cwd": "/home/analyst/logs",
+          "oldcwd": "/home/analyst/logs",
+          "history": [
+            "less app.log"
+          ]
+        },
+        "events": [
+          {
+            "type": "command",
+            "input": "less app.log"
+          },
+          {
+            "type": "pagerClose"
+          }
+        ],
+        "lastResult": {
+          "stdout": "09:00 INFO aki login\n09:01 ERROR ren upload\n09:02 ERROR aki download\n09:03 INFO mei logout\n09:04 ERROR ren upload\n09:05 WARN aki retry\n09:06 ERROR mei download\n09:07 ERROR ren upload\n09:08 ERROR aki preview\n09:09 error aki export\n",
+          "stderr": "",
+          "code": 0,
+          "trace": [
+            {
+              "command": "less",
+              "args": [
+                "app.log"
+              ],
+              "stdin": "",
+              "stdout": "09:00 INFO aki login\n09:01 ERROR ren upload\n09:02 ERROR aki download\n09:03 INFO mei logout\n09:04 ERROR ren upload\n09:05 WARN aki retry\n09:06 ERROR mei download\n09:07 ERROR ren upload\n09:08 ERROR aki preview\n09:09 error aki export\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst/logs",
+              "cwdAfter": "/home/analyst/logs",
+              "pipeline": 0,
+              "index": 0,
+              "connector": ";",
+              "redirections": [],
+              "reads": [
+                "/home/analyst/logs/app.log"
+              ]
+            }
+          ],
+          "pager": true,
+          "feedback": "",
+          "noMatch": false
+        },
+        "evidence": [
+          {
+            "command": "less",
+            "args": [
+              "app.log"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/logs",
+            "cwdAfter": "/home/analyst/logs",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": [
+              "/home/analyst/logs/app.log"
+            ]
+          }
+        ],
+        "pagerOpen": false,
+        "pagerOpened": true,
+        "pagerClosed": true
+      },
+      "27-append": {
+        "version": 1,
+        "lessonId": "27-append",
+        "shell": {
+          "files": {
+            "/home/analyst/welcome.txt": "Linuxroomへようこそ。\nコマンドを一つずつ試しましょう。\n失敗しても、練習をやり直せます。\n",
+            "/home/analyst/notes/commands.txt": "pwd: 現在地を表示\nls: 名前の一覧を表示\ncd: ディレクトリを移動\n",
+            "/home/analyst/logs/app.log": "09:00 INFO aki login\n09:01 ERROR ren upload\n09:02 ERROR aki download\n09:03 INFO mei logout\n09:04 ERROR ren upload\n09:05 WARN aki retry\n09:06 ERROR mei download\n09:07 ERROR ren upload\n09:08 ERROR aki preview\n09:09 error aki export\n",
+            "/home/analyst/logs/names.txt": "ren\naki\nren\nmei\nren\naki\n",
+            "/home/analyst/logs/sorted-names.txt": "aki\naki\nmei\nren\nren\nren\n",
+            "/home/analyst/logs/counts.txt": "2 aki\n10 ren\n1 mei\n",
+            "/home/analyst/logs/teams.csv": "aki,blue\nren,red\nmei,blue\n",
+            "/home/analyst/logs/profile.json": "{\"user\":\"aki\",\"team\":\"blue\",\"active\":true}\n",
+            "/home/analyst/logs/events.jsonl": "{\"time\":\"09:00\",\"level\":\"INFO\",\"user\":\"aki\",\"action\":\"login\"}\n{\"time\":\"09:01\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:02\",\"level\":\"ERROR\",\"user\":\"aki\",\"action\":\"download\"}\n{\"time\":\"09:03\",\"level\":\"INFO\",\"user\":\"mei\",\"action\":\"logout\"}\n{\"time\":\"09:04\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:05\",\"level\":\"WARN\",\"user\":\"aki\",\"action\":\"retry\"}\n{\"time\":\"09:06\",\"level\":\"ERROR\",\"user\":\"mei\",\"action\":\"download\"}\n{\"time\":\"09:07\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:08\",\"level\":\"ERROR\",\"user\":\"aki\",\"action\":\"preview\"}\n{\"time\":\"09:09\",\"level\":\"error\",\"user\":\"aki\",\"action\":\"export\"}\n",
+            "/home/analyst/inbox/shift.log": "12:00 INFO sora open\n12:01 ERROR sora export\n12:02 ERROR yui save\n12:03 ERROR sora save\n12:04 WARN naoki retry\n12:05 ERROR naoki export\n12:06 ERROR yui save\n12:07 ERROR sora export\n12:08 INFO yui close\n",
+            "/home/analyst/reports/memo.txt": "確認開始\n確認完了\n"
+          },
+          "directories": [
+            "/",
+            "/home",
+            "/home/analyst",
+            "/tmp",
+            "/home/analyst/notes",
+            "/home/analyst/logs",
+            "/home/analyst/inbox",
+            "/home/analyst/reports"
+          ],
+          "cwd": "/home/analyst/logs",
+          "oldcwd": "/home/analyst/logs",
+          "history": [
+            "echo '確認完了' >> ../reports/memo.txt"
+          ]
+        },
+        "events": [
+          {
+            "type": "command",
+            "input": "echo '確認完了' >> ../reports/memo.txt"
+          }
+        ],
+        "lastResult": {
+          "stdout": "",
+          "stderr": "",
+          "code": 0,
+          "trace": [
+            {
+              "command": "echo",
+              "args": [
+                "確認完了"
+              ],
+              "stdin": "",
+              "stdout": "確認完了\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst/logs",
+              "cwdAfter": "/home/analyst/logs",
+              "pipeline": 0,
+              "index": 0,
+              "connector": ";",
+              "redirections": [
+                {
+                  "op": ">>",
+                  "target": "/home/analyst/reports/memo.txt"
+                }
+              ],
+              "reads": []
+            }
+          ],
+          "feedback": "コマンドは終了しました。cd や保存など、成功しても文字を表示しない操作があります。",
+          "noMatch": false
+        },
+        "evidence": [
+          {
+            "command": "echo",
+            "args": [
+              "確認完了"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst/logs",
+            "cwdAfter": "/home/analyst/logs",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [
+              {
+                "op": ">>",
+                "target": "/home/analyst/reports/memo.txt"
+              }
+            ],
+            "reads": []
+          }
+        ],
+        "pagerOpen": false,
+        "pagerOpened": false,
+        "pagerClosed": false
+      },
+      "36-final-ranking": {
+        "version": 1,
+        "lessonId": "36-final-ranking",
+        "shell": {
+          "files": {
+            "/home/analyst/welcome.txt": "Linuxroomへようこそ。\nコマンドを一つずつ試しましょう。\n失敗しても、練習をやり直せます。\n",
+            "/home/analyst/notes/commands.txt": "pwd: 現在地を表示\nls: 名前の一覧を表示\ncd: ディレクトリを移動\n",
+            "/home/analyst/logs/app.log": "09:00 INFO aki login\n09:01 ERROR ren upload\n09:02 ERROR aki download\n09:03 INFO mei logout\n09:04 ERROR ren upload\n09:05 WARN aki retry\n09:06 ERROR mei download\n09:07 ERROR ren upload\n09:08 ERROR aki preview\n09:09 error aki export\n",
+            "/home/analyst/logs/names.txt": "ren\naki\nren\nmei\nren\naki\n",
+            "/home/analyst/logs/sorted-names.txt": "aki\naki\nmei\nren\nren\nren\n",
+            "/home/analyst/logs/counts.txt": "2 aki\n10 ren\n1 mei\n",
+            "/home/analyst/logs/teams.csv": "aki,blue\nren,red\nmei,blue\n",
+            "/home/analyst/logs/profile.json": "{\"user\":\"aki\",\"team\":\"blue\",\"active\":true}\n",
+            "/home/analyst/logs/events.jsonl": "{\"time\":\"09:00\",\"level\":\"INFO\",\"user\":\"aki\",\"action\":\"login\"}\n{\"time\":\"09:01\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:02\",\"level\":\"ERROR\",\"user\":\"aki\",\"action\":\"download\"}\n{\"time\":\"09:03\",\"level\":\"INFO\",\"user\":\"mei\",\"action\":\"logout\"}\n{\"time\":\"09:04\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:05\",\"level\":\"WARN\",\"user\":\"aki\",\"action\":\"retry\"}\n{\"time\":\"09:06\",\"level\":\"ERROR\",\"user\":\"mei\",\"action\":\"download\"}\n{\"time\":\"09:07\",\"level\":\"ERROR\",\"user\":\"ren\",\"action\":\"upload\"}\n{\"time\":\"09:08\",\"level\":\"ERROR\",\"user\":\"aki\",\"action\":\"preview\"}\n{\"time\":\"09:09\",\"level\":\"error\",\"user\":\"aki\",\"action\":\"export\"}\n",
+            "/home/analyst/inbox/shift.log": "12:00 INFO sora open\n12:01 ERROR sora export\n12:02 ERROR yui save\n12:03 ERROR sora save\n12:04 WARN naoki retry\n12:05 ERROR naoki export\n12:06 ERROR yui save\n12:07 ERROR sora export\n12:08 INFO yui close\n",
+            "/home/analyst/reports/ranking.txt": "      3 sora\n      2 yui\n      1 naoki\n"
+          },
+          "directories": [
+            "/",
+            "/home",
+            "/home/analyst",
+            "/tmp",
+            "/home/analyst/notes",
+            "/home/analyst/logs",
+            "/home/analyst/inbox",
+            "/home/analyst/reports"
+          ],
+          "cwd": "/home/analyst",
+          "oldcwd": "/home/analyst",
+          "history": [
+            "mkdir reports",
+            "grep 'ERROR' inbox/shift.log | awk '{print $3}' | sort | uniq -c | sort -nr | tee reports/ranking.txt"
+          ]
+        },
+        "events": [
+          {
+            "type": "command",
+            "input": "mkdir reports"
+          },
+          {
+            "type": "command",
+            "input": "grep 'ERROR' inbox/shift.log | awk '{print $3}' | sort | uniq -c | sort -nr | tee reports/ranking.txt"
+          }
+        ],
+        "lastResult": {
+          "stdout": "      3 sora\n      2 yui\n      1 naoki\n",
+          "stderr": "",
+          "code": 0,
+          "trace": [
+            {
+              "command": "grep",
+              "args": [
+                "ERROR",
+                "inbox/shift.log"
+              ],
+              "stdin": "",
+              "stdout": "12:01 ERROR sora export\n12:02 ERROR yui save\n12:03 ERROR sora save\n12:05 ERROR naoki export\n12:06 ERROR yui save\n12:07 ERROR sora export\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst",
+              "cwdAfter": "/home/analyst",
+              "pipeline": 0,
+              "index": 0,
+              "connector": ";",
+              "redirections": [],
+              "reads": [
+                "/home/analyst/inbox/shift.log"
+              ]
+            },
+            {
+              "command": "awk",
+              "args": [
+                "{print $3}"
+              ],
+              "stdin": "12:01 ERROR sora export\n12:02 ERROR yui save\n12:03 ERROR sora save\n12:05 ERROR naoki export\n12:06 ERROR yui save\n12:07 ERROR sora export\n",
+              "stdout": "sora\nyui\nsora\nnaoki\nyui\nsora\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst",
+              "cwdAfter": "/home/analyst",
+              "pipeline": 0,
+              "index": 1,
+              "connector": ";",
+              "redirections": [],
+              "reads": []
+            },
+            {
+              "command": "sort",
+              "args": [],
+              "stdin": "sora\nyui\nsora\nnaoki\nyui\nsora\n",
+              "stdout": "naoki\nsora\nsora\nsora\nyui\nyui\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst",
+              "cwdAfter": "/home/analyst",
+              "pipeline": 0,
+              "index": 2,
+              "connector": ";",
+              "redirections": [],
+              "reads": []
+            },
+            {
+              "command": "uniq",
+              "args": [
+                "-c"
+              ],
+              "stdin": "naoki\nsora\nsora\nsora\nyui\nyui\n",
+              "stdout": "      1 naoki\n      3 sora\n      2 yui\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst",
+              "cwdAfter": "/home/analyst",
+              "pipeline": 0,
+              "index": 3,
+              "connector": ";",
+              "redirections": [],
+              "reads": []
+            },
+            {
+              "command": "sort",
+              "args": [
+                "-nr"
+              ],
+              "stdin": "      1 naoki\n      3 sora\n      2 yui\n",
+              "stdout": "      3 sora\n      2 yui\n      1 naoki\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst",
+              "cwdAfter": "/home/analyst",
+              "pipeline": 0,
+              "index": 4,
+              "connector": ";",
+              "redirections": [],
+              "reads": []
+            },
+            {
+              "command": "tee",
+              "args": [
+                "reports/ranking.txt"
+              ],
+              "stdin": "      3 sora\n      2 yui\n      1 naoki\n",
+              "stdout": "      3 sora\n      2 yui\n      1 naoki\n",
+              "stderr": "",
+              "code": 0,
+              "cwdBefore": "/home/analyst",
+              "cwdAfter": "/home/analyst",
+              "pipeline": 0,
+              "index": 5,
+              "connector": ";",
+              "redirections": [],
+              "reads": []
+            }
+          ],
+          "feedback": "",
+          "noMatch": false
+        },
+        "evidence": [
+          {
+            "command": "mkdir",
+            "args": [
+              "reports"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst",
+            "cwdAfter": "/home/analyst",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          },
+          {
+            "command": "grep",
+            "args": [
+              "ERROR",
+              "inbox/shift.log"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst",
+            "cwdAfter": "/home/analyst",
+            "pipeline": 0,
+            "index": 0,
+            "connector": ";",
+            "redirections": [],
+            "reads": [
+              "/home/analyst/inbox/shift.log"
+            ]
+          },
+          {
+            "command": "awk",
+            "args": [
+              "{print $3}"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst",
+            "cwdAfter": "/home/analyst",
+            "pipeline": 0,
+            "index": 1,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          },
+          {
+            "command": "sort",
+            "args": [],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst",
+            "cwdAfter": "/home/analyst",
+            "pipeline": 0,
+            "index": 2,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          },
+          {
+            "command": "uniq",
+            "args": [
+              "-c"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst",
+            "cwdAfter": "/home/analyst",
+            "pipeline": 0,
+            "index": 3,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          },
+          {
+            "command": "sort",
+            "args": [
+              "-nr"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst",
+            "cwdAfter": "/home/analyst",
+            "pipeline": 0,
+            "index": 4,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          },
+          {
+            "command": "tee",
+            "args": [
+              "reports/ranking.txt"
+            ],
+            "stdin": "",
+            "stdout": "",
+            "stderr": "",
+            "code": 0,
+            "cwdBefore": "/home/analyst",
+            "cwdAfter": "/home/analyst",
+            "pipeline": 0,
+            "index": 5,
+            "connector": ";",
+            "redirections": [],
+            "reads": []
+          }
+        ],
+        "pagerOpen": false,
+        "pagerOpened": false,
+        "pagerClosed": false
+      }
+    }
+  },
+  "ui": {
+    "started": true,
+    "drafts": {
+      "27-append": "cat ../reports/memo.txt"
+    },
+    "transcripts": {},
+    "solutions": {}
+  }
+}

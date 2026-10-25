@@ -1,0 +1,285 @@
+// Adapted from Logroom: Linuxroom help and explicit no-editor behavior.
+'use strict';
+// Run: npm test
+const assert = require('node:assert/strict');
+require('../src/shell.js');
+const files = {
+  '/home/analyst/README.txt': 'Log analysis lab\n',
+  '/var/log/auth.log': [
+    '2026-08-12T09:10:00Z edge sshd[1]: Failed password for invalid user admin from 198.51.100.73 port 45000 ssh2',
+    '2026-08-12T09:10:08Z edge sshd[2]: Failed password for root from 198.51.100.73 port 45001 ssh2',
+    '2026-08-12T09:10:16Z edge sshd[3]: Failed password for ops from 203.0.113.44 port 45002 ssh2',
+    '2026-08-12T09:18:42Z edge sshd[4]: Accepted password for deploy from 198.51.100.73 port 45100 ssh2',
+    '2026-08-12T09:20:11Z edge sudo[5]: deploy : USER=root ; COMMAND=/usr/bin/systemctl restart nginx'
+  ].join('\n')+'\n',
+  '/var/log/app.log': 'ip status path\n198.51.100.73 403 /admin\n192.0.2.10 200 /\n198.51.100.73 500 /api\n',
+  '/var/log/other.log': 'Accepted publickey\n',
+  '/tmp/regex': 'alpha\nALPHA\nalpha+\naaa\nfoo\nbar\nfoobar\n\nfoo bar\n',
+  '/tmp/numbers': '10 pear\n2 apple\n2 banana\n-3 lime\n',
+  '/tmp/nonewline': 'last line',
+  '/tmp/empty': '',
+  '/tmp/csv': 'name,status,ip\na,500,198.51.100.73\nb,200,192.0.2.1\n',
+  '/tmp/.hidden': 'hidden\n',
+  '/tmp/a b.txt': 'space\n',
+  '/tmp/unicode': '日本語 例\n'
+};
+files['/tmp/events.jsonl'] = '{"level":"info","status":200,"ip":"192.0.2.1","user":{"name":"ops"}}\n{"level":"error","status":500,"ip":"198.51.100.73","user":{"name":"deploy"}}\n{"level":"error","status":403,"ip":"198.51.100.73","user":null}\n';
+files['/tmp/array.json'] = '[{"ip":"b","n":2},{"ip":"a","n":1},{"ip":"b","n":3}]\n';
+files['/tmp/before.log'] = 'ready\nlogin ok\nservice ready\n';
+files['/tmp/after.log'] = 'ready\nlogin failed\nlogin ok\nservice ready\n';
+const shell = new LogLabShell(files);
+let count=0;
+function run(command, expected, code=0, allowStderr=false) {
+  const result=shell.run(command); count++;
+  assert.equal(result.code, code, command+' stderr: '+result.stderr);
+  if(expected!==undefined)assert.equal(result.stdout,expected,command);
+  if(code===0&&!allowStderr)assert.equal(result.stderr,'',command);
+  return result;
+}
+function rejects(command, message) {
+  const result=shell.run(command);count++;assert.notEqual(result.code,0,command);assert.match(result.stderr,message,command);return result;
+}
+run('pwd','/home/analyst\n');
+run('ls','README.txt\n');
+run('cd /var/log && pwd','/var/log\n');
+run('cd -','/home/analyst\n');
+run('cat /tmp/nonewline','last line');
+run('cat -n /tmp/nonewline','     1\tlast line');
+run('head -n 1 /tmp/nonewline','last line');
+run('tail -n 1 /tmp/nonewline','last line');
+run('head -n 0 /tmp/regex','');
+run('tail -n 0 /tmp/regex','');
+run('cat /tmp/empty | wc -l','0\n');
+run('wc -l /tmp/nonewline','0 /tmp/nonewline\n');
+run('wc -c /tmp/unicode','14 /tmp/unicode\n');
+run("grep 'Failed password' /var/log/auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr",'      2 198.51.100.73\n      1 203.0.113.44\n');
+run("grep '198.51.100.73' /var/log/auth.log | grep 'Accepted' | wc -l",'1\n');
+run("grep -c 'Failed password' /var/log/auth.log",'3\n');
+run("grep -n 'Accepted' /var/log/auth.log",'4:'+files['/var/log/auth.log'].split('\n')[3]+'\n');
+run("grep 'Accepted' /var/log/auth.log /var/log/other.log",'/var/log/auth.log:'+files['/var/log/auth.log'].split('\n')[3]+'\n/var/log/other.log:Accepted publickey\n');
+run("grep -l 'Accepted' /var/log/*.log",'/var/log/auth.log\n/var/log/other.log\n');
+run("grep 'alpha+' /tmp/regex",'alpha+\n');
+run("grep -E '^a+$' /tmp/regex",'aaa\n');
+run("grep -E '^(foo|bar)$' /tmp/regex",'foo\nbar\n');
+run("grep -F 'alpha+' /tmp/regex",'alpha+\n');
+run("grep -iw '^alpha$' /tmp/regex",'alpha\nALPHA\n');
+run("grep -w 'foo' /tmp/regex",'foo\nfoo bar\n');
+run("grep -o 'foo' /tmp/regex",'foo\nfoo\nfoo\n');
+run("grep -n -A 1 -B 1 '^foo$' /tmp/regex",'4-aaa\n5:foo\n6-bar\n');
+run("grep -nC1 -e '^foo$' -e '^$' /tmp/regex",'4-aaa\n5:foo\n6-bar\n7-foobar\n8:\n9-foo bar\n');
+run("grep 'missing' /tmp/regex",'',1);
+run("grep -q 'alpha' /tmp/regex",'');
+run("grep -q 'missing' /tmp/regex || echo none",'none\n');
+run("grep -v -E 'alpha|ALPHA|aaa|foo|bar|^$' /tmp/regex",'',1);
+run("grep -Ec '[[:digit:]]+' /tmp/numbers",'4\n');
+run('sort -n /tmp/numbers','-3 lime\n2 apple\n2 banana\n10 pear\n');
+run('sort -nr /tmp/numbers','10 pear\n2 banana\n2 apple\n-3 lime\n');
+run('sort -nu /tmp/numbers','-3 lime\n2 apple\n10 pear\n');
+run("echo '2 banana\n2 apple' | sort -nu",'2 banana\n');
+run('sort -k2,2 /tmp/numbers','2 apple\n2 banana\n-3 lime\n10 pear\n');
+run('sort -t, -k2,2 -nr /tmp/csv','a,500,198.51.100.73\nb,200,192.0.2.1\nname,status,ip\n');
+run("echo 'a\na\nb\nc\nc' | uniq -c",'      2 a\n      1 b\n      2 c\n');
+run("echo 'a\na\nb\nc\nc' | uniq -d",'a\nc\n');
+run("echo 'a\na\nb\nc\nc' | uniq -u",'b\n');
+run('cut -d, -f1,3 /tmp/csv','name,ip\na,198.51.100.73\nb,192.0.2.1\n');
+run('cut -d, -f2- /tmp/csv','status,ip\n500,198.51.100.73\n200,192.0.2.1\n');
+run('cut -c1-3 /tmp/nonewline','las\n');
+run("sed -n '2,3p' /tmp/csv",'a,500,198.51.100.73\nb,200,192.0.2.1\n');
+run("sed -n '2,$p' /tmp/csv",'a,500,198.51.100.73\nb,200,192.0.2.1\n');
+run("sed -n '/^a/p' /tmp/csv",'a,500,198.51.100.73\n');
+run("echo 'a a' | sed 's/a/b/g'",'b b\n');
+run("echo 'a a' | sed -n 's/a/b/p'",'b a\n');
+run("echo 'a/a' | sed 's|a/a|b|'",'b\n');
+run("echo 'foo bar' | sed -E 's/(foo) (bar)/\\2 \\1/'",'bar foo\n');
+run("sed 's/last/first/' /tmp/nonewline",'first line');
+run("sed -n '1p' /tmp/nonewline",'last line');
+run("awk '{print $1, $2}' /tmp/numbers",'10 pear\n2 apple\n2 banana\n-3 lime\n');
+run("awk 'NR > 1 && $2 >= 400 {print $1}' /var/log/app.log",'198.51.100.73\n198.51.100.73\n');
+run("awk '$2 ~ /^5/ {print $3}' /var/log/app.log",'/api\n');
+run("awk '/Accepted/ {print $(NF-5)}' /var/log/auth.log",'deploy\n');
+run("awk -F, 'NR > 1 {print $2, $NF}' /tmp/csv",'500 198.51.100.73\n200 192.0.2.1\n');
+run("awk '{n++} END {print n}' /tmp/numbers",'4\n');
+run("awk 'END {print NR}' /tmp/numbers",'4\n');
+run("awk '{count[$1]++} END {for (ip in count) print count[ip], ip}' /tmp/numbers",'1 10\n2 2\n1 -3\n');
+run("awk '{count[$1]++} END {for (ip in count) print ip, count[ip]}' /tmp/numbers",'10 1\n2 2\n-3 1\n');
+run("echo 'HELLO world' | awk '{print tolower($1), toupper($2), length($0)}'",'hello WORLD 11\n');
+run("find /var/log -type f -name '*.log'",'/var/log/app.log\n/var/log/auth.log\n/var/log/other.log\n');
+run("cat '/tmp/a b.txt'",'space\n');
+run("echo '*'",'*\n');
+assert.equal(run('echo /tmp/*').stdout.includes('/tmp/.hidden'),false);
+run('echo /tmp/.*','/tmp/.hidden\n');
+run('cat /tmp/a?b.txt','space\n');
+run("echo first > /tmp/result; echo second >> /tmp/result; cat < /tmp/result",'first\nsecond\n');
+run('cp /tmp/result /home/analyst/result');
+run('cat /home/analyst/result','first\nsecond\n');
+run('cat /tmp/result > /tmp/result; cat /tmp/result','');
+run('echo text > /tmp/first > /tmp/second; wc -c /tmp/first /tmp/second','0 /tmp/first\n5 /tmp/second\n5 total\n');
+run('mkdir -p /home/analyst/results/day1 && touch /home/analyst/results/day1/notes');
+run("find /home/analyst/results -type f",'/home/analyst/results/day1/notes\n');
+run('rm /home/analyst/results/day1/notes');
+run('rm -f /tmp/absent');
+const failFallback=run('cat /not/found || echo fallback','fallback\n',0,true);
+assert.match(failFallback.stderr,/no such file/);
+const redirFallback=shell.run('echo no > /missing/dir/out || echo fallback');count++;assert.equal(redirFallback.stdout,'fallback\n');assert.equal(redirFallback.code,0);
+const p=run('less /tmp/regex',files['/tmp/regex']);assert.equal(p.pager,true);
+assert.equal(run('less /tmp/regex | wc -l','9\n').pager,undefined);
+assert.equal(run('clear','').clear,true);
+assert.ok(run('help awk').stdout.includes('$(NF-3)'));
+assert.ok(run('help').stdout.includes('Linuxroom'));
+assert.ok(shell.complete('/var/log/a').includes('/var/log/auth.log'));
+rejects('grep -P test /tmp/regex',/unsupported option -P/);
+rejects('sort -V /tmp/regex',/unsupported option -V/);
+rejects('tail -f /tmp/regex',/static snapshots/);
+rejects("awk '{system(\"whoami\")}' /tmp/regex",/unsupported action/);
+rejects("awk '{printf $1}' /tmp/regex",/unsupported action/);
+rejects("awk 'BEGIN {system(\"whoami\")}' /tmp/regex",/unsupported action/);
+rejects("sed -z 's/a/b/' /tmp/regex",/unsupported option/);
+rejects("grep '[' /tmp/regex",/invalid regular expression/);
+rejects('cat /missing',/no such file/);
+assert.equal(rejects('grep foo /missing',/no such file/).code,2);
+rejects('cat /var/log',/is a directory/);
+rejects('cat /tmp/regex |',/expected command/);
+rejects('echo hi &&',/expected command/);
+rejects("echo 'unclosed",/unclosed/);
+rejects('echo $(whoami)',/substitution/);
+rejects('echo "$HOME"',/variable expansion/);
+rejects('cat /tmp/regex &',/background/);
+rejects('cat <<EOF',/here documents/);
+rejects('echo hi 2>/tmp/error',/stderr redirection/);
+run("echo '2' > /tmp/quoted-two; cat /tmp/quoted-two",'2\n');
+run('echo 2 > /tmp/space-two; cat /tmp/space-two','2\n');
+run('echo test 1>/tmp/stdout; cat /tmp/stdout','test\n');
+rejects('rm -r /var/log',/unsupported option/);
+rejects('touch /missing/f',/parent directory/);
+rejects('cut -d, /tmp/csv',/choose either/);
+rejects('echo '+ 'x'.repeat(8192),/input exceeds/);
+// v2: common log-analysis tools, still entirely inside the virtual filesystem.
+run("echo 'ERROR  Warning  INFO' | tr '[:upper:]' '[:lower:]' | tr -s ' '",'error warning info\n');
+run("echo 'abc123DEF' | tr -d '[:digit:]'",'abcDEF\n');
+run("echo 'a,,b,,,c' | tr -s ','",'a,b,c\n');
+run("echo 'a1   b2' | tr -ds '[:digit:]' ' '",'a b\n');
+run("echo 'a1b2!' | tr -cd '[:digit:]'",'12');
+run("echo 'a b c' | tr -cs '[:alnum:]' '\\n'",'a\nb\nc\n');
+run("echo 'abc' | tr 'a-c' 'x-z'",'xyz\n');
+run("echo 'abc' | tr 'a-c' 'Z'",'ZZZ\n');
+run("echo 'abc' | tr '\\141' 'X'",'Xbc\n');
+rejects("echo a | tr -z 'a'",/unsupported option/);
+rejects("echo a | tr 'z-a' 'a'",/ascending ASCII/);
+rejects("echo a | tr '[:unknown:]' 'a'",/unsupported character class/);
+run("echo 'ip count\na 2\nlong-name 14' | column -t",'ip         count\na          2\nlong-name  14\n');
+run("echo 'ip,count\na,2\nlong-name,14' | column -ts,",'ip         count\na          2\nlong-name  14\n');
+run("echo 'a,,b\nc,d,e' | column -t -s,",'a     b\nc  d  e\n');
+rejects('column /tmp/csv',/only table mode/);
+run("echo 'a\n\nb' | nl -ba",'     1\ta\n     2\t\n     3\tb\n');
+run("echo 'a\n\nb' | nl",'     1\ta\n\n     2\tb\n');
+run("echo 'a\nb' | nl -ba -w2 -s': '",' 1: a\n 2: b\n');
+run('nl /tmp/nonewline','     1\tlast line');
+run('diff /tmp/before.log /tmp/before.log','');
+run('diff /tmp/before.log /tmp/after.log','1a2\n> login failed\n',1);
+run('diff -u /tmp/before.log /tmp/after.log','--- /tmp/before.log\n+++ /tmp/after.log\n@@ -1,3 +1,4 @@\n ready\n+login failed\n login ok\n service ready\n',1);
+run('diff /tmp/empty /tmp/nonewline','0a1\n> last line\n\\ No newline at end of file\n',1);
+assert.equal(rejects('diff /tmp/before.log /missing',/no such file/).code,2);
+run("jq -c '.' /tmp/events.jsonl",files['/tmp/events.jsonl']);
+run("jq -r '.level' /tmp/events.jsonl",'info\nerror\nerror\n');
+run("jq -r '.user.name' /tmp/events.jsonl",'ops\ndeploy\nnull\n');
+run("jq -r 'select(.level == \"error\") | .ip' /tmp/events.jsonl",'198.51.100.73\n198.51.100.73\n');
+run("jq -r 'select(.status >= 400 and .status < 500) | .ip' /tmp/events.jsonl",'198.51.100.73\n');
+run("jq -cr '{code: .status, from: .ip}' /tmp/events.jsonl",'{"code":200,"from":"192.0.2.1"}\n{"code":500,"from":"198.51.100.73"}\n{"code":403,"from":"198.51.100.73"}\n');
+run("jq -cs 'length' /tmp/events.jsonl",'3\n');
+run("jq -csr 'map(.ip)' /tmp/events.jsonl",undefined,3);
+run("jq -r '.[] | .ip' /tmp/array.json",'b\na\nb\n');
+run("jq -r '.[-1].ip' /tmp/array.json",'b\n');
+run("jq -c '[.[] | .n]' /tmp/array.json",'[2,1,3]\n');
+run("jq -c 'sort_by(.n) | [.[] | .n]' /tmp/array.json",'[1,2,3]\n');
+run("jq -c 'unique_by(.ip) | [.[] | .ip]' /tmp/array.json",'["a","b"]\n');
+run("jq -c 'group_by(.ip) | [.[] | length]' /tmp/array.json",'[1,2]\n');
+run("echo '[[10],[2],[1]]' | jq -c sort",'[[1],[2],[10]]\n');
+run("echo '[{\"b\":2,\"a\":1},{\"a\":1,\"b\":2}]' | jq -c unique",'[{"b":2,"a":1}]\n');
+run("echo '{\"b\":2,\"a\":1}' | jq -c 'select(. == {\"a\":1,\"b\":2})'",'{"b":2,"a":1}\n');
+run("jq -r '.[] | .ip, .n' /tmp/array.json",'b\n2\na\n1\nb\n3\n');
+run("echo '{}' | jq -c '.missing // false'",'false\n');
+run("echo '{\"x\":null}' | jq -c '.x // \"fallback\"'",'"fallback"\n');
+run("echo '{\"status\":403}' | jq -r '.status, has(\"status\")'",'403\ntrue\n');
+run("echo '[\"a,b\",1,null]' | jq -r '@csv'",'"a,b",1,\n');
+run("echo '[\"a\\tb\",1]' | jq -r '@tsv'",'a\\tb\t1\n');
+run("echo '\"admin login\"' | jq 'test(\"login\")'",'true\n');
+run("echo 'not JSON' | jq '.'",'',4);
+rejects("jq 'reduce .[] as $i (0; . + $i)' /tmp/array.json",/unsupported filter/);
+run("rg --no-heading -n 'Failed|Accepted' /var/log/auth.log",files['/var/log/auth.log'].split('\n').slice(0,4).map((l,i)=>(i+1)+':'+l+'\n').join(''));
+run("rg --files -g '*.log' /var/log",'/var/log/app.log\n/var/log/auth.log\n/var/log/other.log\n');
+run("rg --count 'Accepted' /var/log",'/var/log/auth.log:1\n/var/log/other.log:1\n');
+run("rg --no-filename 'Accepted' /var/log",files['/var/log/auth.log'].split('\n')[3]+'\nAccepted publickey\n');
+run("rg -l -g '*.log' -g '!other.log' 'Accepted' /var/log",'/var/log/auth.log\n');
+run("echo 'a\nb\na' | rg -c '^a$'",'2\n');
+run("echo 'a' | rg -c '^z$'",'',1);
+run("rg -F 'alpha+' /tmp/regex",'alpha+\n');
+rejects('rg -P test /tmp/regex',/unsupported option -P/);
+run('sort -k2,2nr /tmp/numbers','-3 lime\n10 pear\n2 apple\n2 banana\n');
+run("echo 'one\ntwo\nthree' | tac",'three\ntwo\none\n');
+run("echo first | tee /tmp/tee-out",'first\n');
+run("echo second | tee -a /tmp/tee-out | wc -l",'1\n');
+run('cat /tmp/tee-out','first\nsecond\n');
+run("echo -n 'hello' | base64",'aGVsbG8=\n');
+run("echo -n 'hello' | base64 -w0",'aGVsbG8=');
+run("echo 'aGVsbG8=' | base64 -d",'hello');
+run('cat /tmp/unicode | base64 | base64 --decode',files['/tmp/unicode']);
+rejects("echo '@bad' | base64 -d",/invalid input/);
+rejects("echo '/w==' | base64 -d",/not UTF-8/);
+// v3: practical options, joining evidence, safe dispatch, and editor contract.
+run("grep --ignore-case --max-count=1 '^alpha' /tmp/regex",'alpha\n');
+run("grep -R --include '*.log' --exclude 'other.log' -l 'Accepted' /var/log",'/var/log/auth.log\n');
+run("grep -L 'Accepted' /var/log/app.log",'/var/log/app.log\n',1);
+run("echo 'b\nA\na' | sort -f -s",'A\na\nb\n');
+run("echo ' x\nx' | sort -bu",' x\n');
+run("echo 'a\nb' | sort -c",'');
+run("echo 'b\na' | sort -c",'',1);
+run("echo 'a b\ny b\nz c' | uniq -f1 -c",'      2 a b\n      1 z c\n');
+run("echo 'xxABC\nyyabc' | uniq -s2 -i",'xxABC\n');
+run("echo 'a\nb\nc' | head -n -1",'a\nb\n');
+run("echo 'a\nb\nc' | tail -n +2",'b\nc\n');
+run("echo abcdef | head -c3",'abc');
+run("echo -n abcdef | tail -c +4",'def');
+run('wc -m /tmp/unicode','6 /tmp/unicode\n');
+run("echo 'a\tX' | wc -L",'9\n');
+run('cut -d, -f2 --complement --output-delimiter="|" /tmp/csv','name|ip\na|198.51.100.73\nb|192.0.2.1\n');
+run("echo abcdef | cut -c1,3,5 --output-delimiter=':'",'a:c:e\n');
+run("echo 'a\nb\nc' | sed -e 's/a/A/' -e '/b/d'",'A\nc\n');
+run("echo 'a\nb\nc' | sed -n '2,3p;1p'",'a\nb\nc\n');
+run("echo 'a\nb' > /tmp/edit; sed -i.bak 's/a/A/' /tmp/edit; cat /tmp/edit",'A\nb\n');
+run('cat /tmp/edit.bak','a\nb\n');
+run("awk -v target=500 '$2 == target {print $1}' /var/log/app.log",'198.51.100.73\n');
+run("awk 'BEGIN {FS=\",\";OFS=\"|\"} NR > 1 {print $1, $2}' /tmp/csv",'a|500\nb|200\n');
+run("awk -F, 'NR > 1 {sum += $2} END {print sum}' /tmp/csv",'700\n');
+run("awk 'BEGIN {print \"ready\"}'",'ready\n');
+run("find /var/log -type f -iname '*.LOG' -maxdepth 1 -mindepth 1",'/var/log/app.log\n/var/log/auth.log\n/var/log/other.log\n');
+run('ls -d /var/log','/var/log\n');
+run('ls -r /var/log','other.log\nauth.log\napp.log\n');
+run("printf '%s=%03d\\n' status 7",'status=007\n');
+run("printf '%s\\n' a b c",'a\nb\nc\n');
+run("printf '%.3d %.2f %%' 5 1.25",'005 1.25 %');
+run("printf '\\x41\\102\\n'",'AB\n');
+run("printf 'a\\nb\\n' > /tmp/left; printf '1\\n2\\n3\\n' > /tmp/right; paste /tmp/left /tmp/right",'a\t1\nb\t2\n\t3\n');
+run('paste -s -d, /tmp/left /tmp/right','a,b\n1,2,3\n');
+run("printf 'a\\nb\\n' > /tmp/one; printf 'b\\nc\\n' > /tmp/two; comm -12 /tmp/one /tmp/two",'b\n');
+run("printf 'a first\\nb second\\n' > /tmp/join1; printf 'b 2\\nc 3\\n' > /tmp/join2; join -a1 -a2 -e NA -o 0,1.2,2.2 /tmp/join1 /tmp/join2",'a first NA\nb second 2\nc NA 3\n');
+run("printf 'a b c d' | xargs -n2 printf '%s %s\\n'",'a b\nc d\n');
+run("echo 'x;echo injected' | xargs echo",'x;echo injected\n');
+run("printf 'a\\nb\\n' | xargs -I{} echo 'item={}'",'item=a\nitem=b\n');
+run("printf '' | xargs -r echo unused",'');
+rejects("echo hi | xargs sh -c 'echo no'",/only existing virtual commands/);
+run("echo 'abc 日本' | rev",'本日 cba\n');
+run("printf '\\001hello\\002world' | strings -n5",'hello\nworld\n');
+run('basename /var/log/auth.log .log','auth\n');
+run('dirname /var/log/auth.log relative','/var/log\n.\n');
+run('realpath -m ../missing/../notes','/home/notes\n');
+run('file -b /tmp/events.jsonl','JSON Lines text data\n');
+run("stat -c '%n %s %F' /tmp/empty",'/tmp/empty 0 regular file\n');
+run('du -sb /tmp/empty','0\t/tmp/empty\n');
+run("date -u -d '2026-08-12T09:18:42Z' '+%F %T %z'",'2026-08-12 09:18:42 +0000\n');
+run("date -u -d @0 '+%s %j %u'",'0 001 4\n');
+rejects("date -d yesterday",/relative dates are unsupported/);
+run('mkdir /tmp/move-dir; touch /tmp/move-dir/file; mv /tmp/move-dir /tmp/moved; cat /tmp/moved/file','');
+run('rm /tmp/moved/file; rmdir /tmp/moved','');
+rejects('vi /tmp/a',/利用できません/);
+rejects('view /tmp/a',/利用できません/);
+console.log('shell-test: '+count+' command checks passed');
