@@ -11,7 +11,7 @@ English · [日本語](README.md)
 **Build your Linux command skills, one step at a time.**<br>
 *ひとつずつ、つないでいこう。*
 
-[Start in your browser](https://retiacole.github.io/linuxroom/) · [Download the offline HTML](https://github.com/retiacole/linuxroom/releases/latest/download/linuxroom.html)
+**[Play Now](https://retiacole.github.io/linuxroom/)** · [Download the offline HTML](https://github.com/retiacole/linuxroom/releases/latest/download/linuxroom.html)
 
 Learn Linux commands one small step at a time. Linuxroom is a self-contained browser lab for navigating files, searching records, extracting fields, building pipelines and saving results. Inspect the actual input and output at each pipeline stage.
 

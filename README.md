@@ -11,7 +11,7 @@
 **ひとつずつ、つないでいこう。**<br>
 *Build your Linux command skills, one step at a time.*
 
-[ブラウザで学習する](https://retiacole.github.io/linuxroom/) · [オフライン版をダウンロード](https://github.com/retiacole/linuxroom/releases/latest/download/linuxroom.html)
+**[すぐにやってみる](https://retiacole.github.io/linuxroom/)** · [オフライン版をダウンロード](https://github.com/retiacole/linuxroom/releases/latest/download/linuxroom.html)
 
 Linuxコマンドに初めて触れる人が、ファイルの移動・閲覧から、検索・列の抽出・集計・保存までを段階的に練習する教材です。前のコマンドに処理を一つずつ足し、パイプの途中結果を見ながら組み立てます。
 
