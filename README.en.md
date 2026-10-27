@@ -2,7 +2,7 @@
   <img src="docs/images/linuxroom-banner.png" width="960" alt="Pixel art of the Linuxroom character casting fire magic in ancient ruins">
 </p>
 
-# Linuxroom v0.4.2
+# Linuxroom v0.5.0
 
 English · [日本語](README.md)
 
@@ -11,7 +11,7 @@ English · [日本語](README.md)
 **Build your Linux command skills, one step at a time.**<br>
 *ひとつずつ、つないでいこう。*
 
-**[Play Now](https://retiacole.github.io/linuxroom/)** · [Download the offline HTML](https://github.com/retiacole/linuxroom/releases/latest/download/linuxroom.html)
+**[Play Now](https://retiacole.github.io/linuxroom/)** · [Download the offline HTML](https://github.com/retiacole/linuxroom/raw/refs/tags/v0.5.0/linuxroom.html)
 
 Learn Linux commands one small step at a time. Linuxroom is a self-contained browser lab for navigating files, searching records, extracting fields, building pipelines and saving results. Inspect the actual input and output at each pipeline stage.
 
@@ -21,7 +21,7 @@ Learn Linux commands one small step at a time. Linuxroom is a self-contained bro
 
 Open the hosted version or download `linuxroom.html` and open it locally. No installation, Linux machine or account is required. All lessons, styles, translations and code are included in the single HTML file. The exercises do not use the network.
 
-Choose **English** in the header's **Language** menu. Japanese and English cover all 119 lessons, the learning map, hints, solution guidance, command reference, feedback and progress dialogs. Your choice is remembered in this browser and included in progress exports. Switching languages keeps your working files, current directory, command draft, history, completion records and revealed hints.
+Choose **English** in the header's **Language** menu. Japanese and English cover all 121 lessons, the learning map, hints, solution guidance, command reference, feedback and progress dialogs. Your choice is remembered in this browser and included in progress exports. Switching languages keeps your working files, current directory, command draft, history, completion records and revealed hints.
 
 1. Select **Start the first lesson**, or choose a level or lesson from the learning map.
 2. Read the explanation and exercise, type a command, and press Enter. Do not type the prompt itself.
@@ -36,10 +36,10 @@ Commands, filenames, fixture contents and answer checks are identical in both la
 | Level | Lessons | Topics |
 | --- | ---: | --- |
 | Beginner | 36 | Navigation, reading, grep, fields, pipes, counts, saving and JSON |
-| Applied | 47 | Regular expressions, context, recursive search, text preparation, conditional aggregation and shell control |
+| Applied | 49 | Regular expressions, context, recursive search, text preparation, conditional aggregation and shell control |
 | Advanced | 36 | Metadata, UTC time, comparisons, joins, awk aggregation, JSON arrays and cross-log investigation |
 
-All 49 supported commands are practiced in solutions or runnable examples. The command reference links to related lessons. Each lesson has its own workspace, so you can revisit previous material without losing work in another lesson. Free practice is available from the home page and learning map.
+All 56 supported commands are practiced in solutions or runnable examples. The command reference links to related lessons. Each lesson has its own workspace, so you can revisit previous material without losing work in another lesson. Free practice is available from the home page and learning map.
 
 The final exercises connect multiple sources and produce saved detail, counts and totals. After the beginner level, you can also continue to [SOCroom-easy](https://github.com/retiacole/socroom-easy) for reading logs and [Logroom](https://github.com/retiacole/logroom) for command-based log analysis.
 
@@ -56,7 +56,15 @@ The final exercises connect multiple sources and produce saved detail, counts an
 
 The prompt, such as `analyst@linuxroom:~/logs$`, shows the user, host and current directory. Type only the command after it. `help COMMAND` describes the supported subset. In this lab, `man COMMAND` opens the same teaching help in a viewer; on real Linux it opens the installed manual.
 
-The shell is a simulation. It affects only virtual exercise files and implements a subset of real Linux behavior. Its file metadata is virtual, and `du` totals content bytes rather than real filesystem allocation. Use the command help to check supported options.
+The shell is a simulation. It affects only virtual exercise files and implements a subset of real Linux behavior. Its metadata is virtual. `ls -l` totals and `du -h` simulate 4 KiB allocation; directories have size 4096 and link count 2 plus immediate subdirectories. Real values depend on the filesystem. `du -b` reports apparent byte sizes. Use the command help to check supported options.
+
+Sorting uses C-locale order. If mixed-case names sort differently on Linux, compare with `LC_ALL=C sort`. Real `find` and `grep -r` traversal order is not guaranteed; use `| sort` when comparing lists. This lab uses the byte-oriented `cut -c` behavior of GNU coreutils 9.4, as reviewed, equivalent to the C locale. GNU coreutils 9.11 and later select characters in UTF-8 locales. Use `cut -b` when bytes are intended. Cutting inside a UTF-8 character produces incomplete text, shown with replacement characters here. `awk length` counts characters here; real mawk may count bytes. `file` descriptions vary by version, including `CSV ASCII text`.
+
+See the [GNU coreutils 9.11 release notes](https://github.com/coreutils/coreutils/blob/v9.11/NEWS#L35-L39) and [9.4 manual](https://github.com/coreutils/coreutils/blob/v9.4/doc/coreutils.texi#L5810-L5820) for the `cut` version difference.
+
+The shell expands `$HOME`, `$USER`, `$PWD`, `$OLDPWD` and `$?`, and supports `whoami`, `id`, `true`, `false` and `seq`. `LC_ALL=C` and `LC_ALL=POSIX` prefixes state the supported ordering. Arbitrary variable assignments and full shell scripts remain outside the teaching subset. `ls /` presents a basic Linux directory skeleton. `seq` limits numeric precision and output size; values outside its supported range produce explicit errors.
+
+New applied lessons reveal CRLF and tabs with `cat -A` and record file hashes with `sha256sum`, with a `md5sum` example for comparing existing records. The shell also supports awk concatenation, division, `printf`, `substr`, field assignment and deduplication; multiple sort keys, `sort -h` and `-V`; and `find -print0` and `-exec`.
 
 ## Saving and restoring
 
@@ -75,11 +83,13 @@ npm test
 npm run test:browser
 ```
 
+With GNU coreutils and Bash available, `npm run test:native` runs 101 comparisons against native commands. It supports Linux command names and the g-prefixed names commonly used on macOS.
+
 For browser checks, install Playwright Chromium or set `LINUXROOM_BROWSER_CHANNEL=chrome` to use an installed Chrome browser. `LINUXROOM_URL` can point the browser smoke test at a hosted copy.
 
 `build.js` generates identical standalone files at `linuxroom.html`, `docs/index.html` and `docs/linuxroom.html`. Edit files under `src/`, then rebuild. English lesson copy is in `src/data-en.js`; the original concepts, example notes and progressive hints are translated in `src/concepts-en.js`, `src/examples-en.js` and `src/hints-en.js`. `src/i18n.js` contains presentation translations and language switching. Executable lesson definitions and fixtures remain in the original curriculum files.
 
-The tests cover shell behavior, every lesson's validation, all 119 rendered lessons in Japanese and English, language switching, saved-state compatibility, storage denial, escaping, pagers and pipeline inspection. The HTML has no external dependencies or translation service.
+The tests cover shell behavior, every lesson's validation, all 121 rendered lessons in Japanese and English, language switching, saved-state compatibility, storage denial, escaping, pagers and pipeline inspection. The HTML has no external dependencies or translation service.
 
 ## Credits and license
 

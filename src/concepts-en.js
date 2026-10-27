@@ -267,3 +267,10 @@ globalThis.LINUXROOM_EN_CONCEPTS = {
   "-s（slurp）": "-s（slurp）",
   "group_by": "group_by"
 };
+
+Object.assign(globalThis.LINUXROOM_EN_CONCEPTS, {
+  "CRLF": "CRLF",
+  "CRとLFという2バイトの改行です。cat -Aでは行末が^M$と見えます。": "A two-byte line ending consisting of CR and LF. cat -A shows it as ^M$.",
+  "ファイルハッシュ": "File hash",
+  "ファイル内容から計算した固定長の値です。名前ではなくバイト列を照合します。": "A fixed-length value calculated from file contents. It compares bytes, rather than filenames."
+});

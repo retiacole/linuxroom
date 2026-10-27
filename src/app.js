@@ -128,8 +128,8 @@
     $('map-overall').textContent = t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了');
     $('welcome-progress').textContent = s.completed ? t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了。今日も一歩ずつ。') : '';
     $('course-summary').textContent = levels.length + t(' 段階 · 全 ') + s.total + t(' レッスン');
-    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.4.2');
-    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.4.2');
+    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.5.0');
+    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.5.0');
     $('start-learning').replaceChildren(document.createTextNode(ui.started ? t('続きから学ぶ ') : t('最初のレッスンをはじめる ')), node('span', '', '→'));
     renderLevelCards();
   }
@@ -628,6 +628,13 @@
   }
 
   const builtInReferences = [
+    {"term": "cat -A / -T / -v / -E", "text": "-Aはタブを^I、CRを^M、行末を$で表示する。CRLFのログで行末の検索が一致しないときに確認する。-Tはタブ、-vは制御文字、-Eは行末だけ。", "example": "cat -A windows.log"},
+    {"term": "sha256sum / md5sum", "text": "ファイルのバイト列からハッシュを計算する。改行の有無も値に影響する。調査では同じファイルを探す手掛かりになる。新しい完全性確認にはSHA-256を使う。", "example": "sha256sum artifact.txt\nmd5sum artifact.txt"},
+    {"term": "$HOME / $USER / $PWD / whoami / id", "text": "$HOMEはホーム、$USERはユーザー名、$PWDは現在地、$OLDPWDは前の現在地。ダブルクォート内でも展開する。whoamiとidは仮想ユーザーの情報を表示する。", "example": "echo \"$HOME\" \"$USER\" \"$PWD\"\nwhoami\nid"},
+    {"term": "true / false / seq", "text": "trueは0、falseは1で終了し、どちらも本文は出さない。echo $?で直後に確認できる。seq 1 3は1から3を1行ずつ表示する。", "example": "true; echo $?\nfalse; echo $?\nseq 1 3"},
+    {"term": "awk: print / printf / substr", "text": "print $1, $2は空白で区切り、print $1\":\"$2は連結する。printfは書式で表示し、substrは文字の一部分を取る。END {print sum/NR}のような除算も使える。", "example": "awk '{print NR \": \" $0}' app.log\nawk '{printf \"%s:%s\\n\", $1, $2}' app.log"},
+    {"term": "LC_ALL=C sort / sort -h / sort -V", "text": "LC_ALL=Cでこの教材と同じ順序にする。sort -k1,1nr -k2,2は件数の多い順と名前順の2キー。-hは単位付きサイズ、-Vは版番号を並べる。", "example": "LC_ALL=C sort names.txt\nsort -k1,1nr -k2,2 ranking.txt"},
+
     { term: 'プロンプト / analyst@linuxroom:~$', text: 'コマンドの入力を待つ表示。analyst はユーザー名、linuxroom はホスト名（コンピューター名）、: の後ろが現在地。~ はホームフォルダ。$ は一般ユーザー、# は管理者の目印としてよく使われる。この教材では一般ユーザーで操作する。表示は環境ごとに異なる。プロンプト自体は入力しない。', example: 'analyst@linuxroom:~$ pwd\n/home/analyst\nanalyst@linuxroom:~$ cd logs\nanalyst@linuxroom:~/logs$' },
     { term: 'pwd', text: '今いるフォルダの場所を表示する。', example: 'pwd' },
     { term: 'ls / cd / ~', text: 'ls は中身の一覧。実機の端末では横に並ぶこともあり、ls -1 なら1行1項目。cd はフォルダを移動する。.. は一つ上、~ はホームフォルダ。移動するとプロンプトの現在地も変わる。', example: 'ls -1\ncd logs\ncd ..\ncd ~' },
@@ -744,7 +751,7 @@
       const allowedFiles = new Set((before.fixtureRevision || 1) < (lesson && lesson.fixtureRevision || 1) ? lesson.fixtureAdditions || [] : []);
       const additions = Object.keys(b.files || {}).filter(path => !own(a.files, path));
       if (additions.some(path => !allowedFiles.has(path) || !fixture || !own(fixture.files, path) || b.files[path] !== fixture.files[path])) return false;
-      const allowedDirectories = new Set();
+      const allowedDirectories = new Set(['/bin','/dev','/etc','/opt','/proc','/root','/usr','/var']);
       for (const path of additions) {
         let parent = path.slice(0, path.lastIndexOf('/')) || '/';
         while (true) {

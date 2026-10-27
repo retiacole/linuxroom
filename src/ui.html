@@ -11,7 +11,7 @@
 <body>
   <a class="skip-link" href="#main">本文へ移動</a>
   <header class="site-header">
-    <button id="home-button" class="brand" aria-label="Linuxroom ホーム"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>linuxroom<span id="brand-version" class="brand-version">STEP BY STEP / v0.4.2</span></span></button>
+    <button id="home-button" class="brand" aria-label="Linuxroom ホーム"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>linuxroom<span id="brand-version" class="brand-version">STEP BY STEP / v0.5.0</span></span></button>
     <nav class="header-actions" aria-label="メインメニュー">
       <label class="language-control" for="language-select"><span>Language</span><select id="language-select" aria-label="Language"><option value="ja" data-language-name>日本語</option><option value="en" data-language-name>English</option></select></label>
       <button id="map-button" class="nav-button">学習マップ</button>
@@ -86,7 +86,7 @@
       </div>
     </section>
   </main>
-  <footer class="site-footer"><span>LINUXROOM <span class="footer-dot">/</span> Small commands. Real understanding.</span><span id="footer-version">Offline learning lab · v0.4.2</span></footer>
+  <footer class="site-footer"><span>LINUXROOM <span class="footer-dot">/</span> Small commands. Real understanding.</span><span id="footer-version">Offline learning lab · v0.5.0</span></footer>
 
   <dialog id="map-dialog" class="app-dialog map-dialog" aria-labelledby="map-title"><div class="dialog-top"><div><p class="eyebrow">YOUR LEARNING PATH</p><h2 id="map-title">学習マップ</h2></div><button class="close-dialog icon-button" aria-label="学習マップを閉じる">×</button></div><p class="dialog-intro">初級 → 応用 → 発展の順に、操作を積み重ねます。どの段階・課題からでも選べます。</p><div id="map-levels" class="map-levels" role="group" aria-label="学習する段階を選ぶ"></div><p id="map-level-description" class="map-level-description"></p><div class="map-progress-row"><div id="map-progress" class="map-progress"></div><span id="map-overall" class="map-overall"></span></div><div id="chapter-list" class="chapter-list"></div><button id="sandbox-button" class="button secondary full-width">自由練習のターミナルを開く →</button><p class="muted">✓ は修了済み。ヒント・解答例を見た課題も、何度でも復習できます。</p></dialog>
   <dialog id="reference-dialog" class="app-dialog reference-dialog" aria-labelledby="reference-title"><div class="dialog-top"><div><p class="eyebrow">KEEP IT HANDY</p><h2 id="reference-title">コマンド帳</h2></div><button class="close-dialog icon-button" aria-label="コマンド帳を閉じる">×</button></div><p class="dialog-intro">覚えていなくても大丈夫。必要なときに見ながら試そう。</p><label class="sr-only" for="reference-search">コマンドや用語を探す</label><input id="reference-search" class="search-input" placeholder="コマンドや用語を探す" type="search"><div id="reference-lessons" class="reference-lessons"></div><div id="reference-list" class="reference-list"></div><div id="prompt-guide" class="key-guide"><h3>プロンプトの読み方</h3><code>analyst@linuxroom:~$</code><dl><dt>analyst</dt><dd>操作しているユーザー名</dd><dt>linuxroom</dt><dd>ホスト名（コンピューター名）</dd><dt>:~</dt><dd>: の後ろは現在地。~ は /home/analyst の省略。cd で移動すると ~/logs などに変わる</dd><dt>$ / #</dt><dd>一般ユーザー / 管理者の目印としてよく使われる。この教材は一般ユーザーの $</dd></dl><p class="muted">プロンプトの見た目は環境によって変わります。プロンプト自体は入力せず、その後ろにコマンドだけを打ちます。</p><h3>ターミナルの操作</h3><dl><dt>Enter</dt><dd>コマンドを実行</dd><dt>↑ / ↓</dt><dd>実行したコマンドを呼び出す</dd><dt>Tab</dt><dd>コマンド・ファイル名を補完</dd><dt>Ctrl + C</dt><dd>入力を消す / 閲覧画面を閉じる</dd><dt>Ctrl + L</dt><dd>ターミナルの表示を消す</dd><dt>less / more で q</dt><dd>閲覧を終えてターミナルへ戻る</dd></dl><p class="muted">実機では man grep などでマニュアルを調べます。この教材では man を help と同じ学習用の案内にしています。</p></div></dialog>

@@ -47,7 +47,7 @@ fs.mkdirSync(artifactDir, {recursive:true});
     await openLesson(listing);
     await page.locator('#command-input').fill('ls -1');await page.locator('#command-input').press('Enter');
     await page.locator('#check-answer').click();assert.equal(await page.locator('#success-box').isVisible(),true);
-    for(const id of ['ap-37-input-redirection','ap-39-ls-time','ap-45-and-sequence','ap-46-stderr','ap-47-exit-status'])await solve(lessons.find(l=>l.id===id));
+    for(const id of ['ap-37-input-redirection','ap-39-ls-time','ap-45-and-sequence','ap-46-stderr','ap-47-exit-status','ap-48-cat-visible','ap-49-file-hash'])await solve(lessons.find(l=>l.id===id));
     await page.reload();
     await page.locator('#check-answer').click();assert.equal(await page.locator('#success-box').isVisible(),true,'review lesson evidence survives a real reload');
     // Separate pager entry/exit, then progressively longer pipelines and persistence.

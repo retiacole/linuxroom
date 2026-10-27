@@ -45,7 +45,7 @@ function createApp(saved, blocked = false) {
   return {dom, w, d, errors, click, language, run, open, save};
 }
 
-test('all 119 English lessons can be completed through the shipped HTML', () => {
+test('all 121 English lessons can be completed through the shipped HTML', () => {
   const app = createApp();
   try {
     const D = app.w.LINUXROOM_DATA;
@@ -54,8 +54,8 @@ test('all 119 English lessons can be completed through the shipped HTML', () => 
     const teaching = D.lessons.map(l => ({id: l.id, concepts: JSON.parse(JSON.stringify(l.concepts)), note: l.example.note, hints: Array.from(l.hints)}));
     app.language('en');
     assert.equal(app.d.documentElement.lang, 'en');
-    assert.equal(D.lessons.length, 119);
-    assert.equal(Object.keys(app.w.LINUXROOM_EN_LESSONS).length, 119);
+    assert.equal(D.lessons.length, 121);
+    assert.equal(Object.keys(app.w.LINUXROOM_EN_LESSONS).length, 121);
     for (const original of teaching) {
       const lesson = D.lessons.find(l => l.id === original.id);
       assert.equal(lesson.concepts.length, original.concepts.length, lesson.id + ' retains every concept');
@@ -83,7 +83,7 @@ test('all 119 English lessons can be completed through the shipped HTML', () => 
       app.click('check-answer');
       assert.equal(app.d.getElementById('success-box').hidden, false, lesson.id + ': ' + app.d.getElementById('lesson-feedback').textContent);
     }
-    assert.equal(Object.keys(JSON.parse(app.save().progress).completed).length, 119);
+    assert.equal(Object.keys(JSON.parse(app.save().progress).completed).length, 121);
     assert.equal(app.d.getElementById('storage-warning').hidden, true);
     assert.equal(JSON.stringify(D.datasets), fixtures);
     assert.equal(JSON.stringify(D.lessons.map(l => ({id: l.id, solution: l.solution, example: l.example.command, starter: l.starter, newPart: l.newPart, fixture: l.fixture, validation: l.validation}))), canonical);

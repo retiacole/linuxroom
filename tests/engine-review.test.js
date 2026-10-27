@@ -99,7 +99,7 @@ test('fixture clocks stay fixed after restoration',()=>{
 
 test('v0.2 progress retains all108 completions and every saved file',()=>{
   const p=E.hydrate(old.progress);
-  assert.equal(E.stats(p).completed,108);assert.equal(E.stats(p).total,119);
+  assert.equal(E.stats(p).completed,108);assert.equal(E.stats(p).total,121);
   for(const [id,snapshot] of Object.entries(old.progress.sessions)){
     const restored=p.sessions[id];
     for(const [path,contents] of Object.entries(snapshot.shell.files))assert.equal(restored.shell.files[path],contents,id+' '+path);

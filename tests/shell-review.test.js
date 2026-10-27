@@ -144,7 +144,7 @@ test('du totals file operands without teaching directory sizes as file-only sums
 test('man is explicitly a training help alias and keeps the supported curriculum list stable', () => {
   const sh = shell(), r = sh.run('man grep');assert.equal(r.code, 0);assert.equal(r.pager, true);
   assert.match(r.stdout, /実機の man マニュアルではありません/);assert.match(r.stdout, /grep \[/);
-  assert.equal(sh.supportedCommands.length, 49);assert.ok(!sh.supportedCommands.includes('man'));
+  assert.equal(sh.supportedCommands.length, 56);assert.ok(!sh.supportedCommands.includes('man'));
 });
 
 

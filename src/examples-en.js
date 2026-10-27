@@ -120,3 +120,10 @@ globalThis.LINUXROOM_EN_EXAMPLES = {
   "行の並びを確認し、IPの位置が末尾から数えられることを確かめます。": "Inspect the record layout and verify that the IP field can be counted from the end.",
   "まずJSONの全記録を表にして内容を確認できます。access.logもcatで列を確認してください。": "First display all JSON records as a table. Also use cat on access.log to inspect its fields."
 };
+
+Object.assign(globalThis.LINUXROOM_EN_EXAMPLES, {
+  "タブだけが^Iになり、列の区切りを確認できます。": "Only tabs become ^I, making field separators visible.",
+  "同じファイルのMD5を表示します。SHA-256とは別の方式なので値も長さも異なります。": "Display the MD5 of the same file. It uses a different algorithm from SHA-256, producing a different value and length.",
+  "ユーザー名・ID・1から3の連番を表示し、最後にheadの-nと-cを調べます。": "Show the username, IDs and numbers 1 through 3, then inspect head options -n and -c.",
+  "trueの成功0とfalseの失敗1が、この順に表示されます。": "The success status 0 from true and failure status 1 from false appear in that order."
+});

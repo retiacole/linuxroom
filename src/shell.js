@@ -3,15 +3,15 @@
   'use strict';
   const t = value => root.LinuxroomI18n ? root.LinuxroomI18n.t(value) : value;
   const MAX_INPUT = 8192, MAX_OUTPUT = 524288, MAX_FILE = 2097152;
-  const COMMANDS = ['help','pwd','cd','ls','cat','tac','less','more','grep','rg','sort','uniq','cut','tr','column','nl','diff','jq','base64','tee','head','tail','wc','sed','awk','find','echo','printf','paste','comm','join','xargs','rev','strings','basename','dirname','realpath','file','stat','du','date','clear','history','mkdir','touch','cp','mv','rm','rmdir'];
+  const COMMANDS = ['help','pwd','cd','ls','cat','tac','less','more','grep','rg','sort','uniq','cut','tr','column','nl','diff','jq','base64','tee','head','tail','wc','sed','awk','find','echo','printf','paste','comm','join','xargs','rev','strings','basename','dirname','realpath','file','stat','du','date','clear','history','mkdir','touch','cp','mv','rm','rmdir','whoami','id','true','false','seq','sha256sum','md5sum'];
   const USAGE = {
-    help: 'help [command]', pwd: 'pwd', cd: 'cd [directory|-]',
-    ls: 'ls [-1alhdtRSr] [path ...]', cat: 'cat [-n] [file ...]', tac: 'tac [file ...]',
+    help: 'help [command]', whoami: 'whoami', id: 'id [-ugGn] [analyst]', true: 'true', false: 'false', seq: 'seq [-w] [-s separator] [first [increment]] last', sha256sum: 'sha256sum [-bt] [file ...]', md5sum: 'md5sum [-bt] [file ...]', pwd: 'pwd', cd: 'cd [directory|-]',
+    ls: 'ls [-1alhdtRSr] [path ...]', cat: 'cat [-nAvTEet] [file ...]', tac: 'tac [file ...]',
     less: 'less [file ...]  (read-only viewer; q closes)', more: 'more [file ...]  (read-only viewer; q closes)',
     grep: 'grep [-EFiwvncrRlhHLqxo] [-m N] [-A N|-B N|-C N] [-e pattern ...] [--include glob|--exclude glob|--exclude-dir glob] [--] pattern [file ...]',
     rg: 'rg [-FiwvnclHhqo] [-A N|-B N|-C N] [-e pattern] [-g glob] [--no-heading] [--count] [pattern] [path ...] | rg --files [-g glob] [path ...]',
-    sort: 'sort [-nrufbsc] [-k N[,M][nrfb]] [-t delimiter] [file ...]', uniq: 'uniq [-cdui] [-f fields] [-s characters] [file]',
-    cut: 'cut [-d delimiter] -f fields [-s] [--complement] [--output-delimiter text] [file ...] | cut -c characters [file ...]',
+    sort: 'sort [-nrhVufbsc] [-k N[,M][nhrVfb] ...] [-t delimiter] [file ...]', uniq: 'uniq [-cdui] [-f fields] [-s characters] [file]',
+    cut: 'cut [-d delimiter] -f fields [-s] [--complement] [--output-delimiter text] [file ...] | cut -c bytes [file ...] | cut -b bytes [file ...]',
     tr: 'tr [-cds] [--] SET1 [SET2]  (reads standard input)',
     column: 'column -t [-s delimiter-characters] [file ...]', nl: 'nl [-ba|-bt] [-w width] [-s separator] [file]',
     diff: 'diff [-u] [--] file1 file2', jq: 'jq [-rcs] [--] [filter] [file ...]',
@@ -19,7 +19,7 @@
     head: 'head [-n N|-c N] [file ...]', tail: 'tail [-n N|+N] [-c N|+N] [file ...]', wc: 'wc [-lwmcL] [file ...]',
     sed: "sed [-nE] [-i[backup-suffix]] [-e script ...] [script] [file ...]",
     awk: "awk [-F separator] [-v name=value ...] '[BEGIN {...}] [/regex/|expression] {print field, ...} [END {...}]' [file ...]",
-    find: 'find [path] [-type f|d] [-name glob|-iname glob] [-path glob] [-maxdepth N] [-mindepth N]', echo: 'echo [-n] [text ...]',
+    find: 'find [path] [-type f|d] [-name glob|-iname glob] [-path glob] [-maxdepth N] [-mindepth N] [-print|-print0|-exec command {} \\;|-exec command {} +]', echo: 'echo [-n] [text ...]',
     printf: 'printf format [argument ...]', paste: 'paste [-s] [-d delimiters] [file ...]', comm: 'comm [-123] file1 file2',
     join: 'join [-1 N] [-2 N] [-t delimiter] [-a 1|2|-v 1|2] [-e text] [-o field-list] file1 file2',
     xargs: 'xargs [-0r] [-d delimiter] [-n N] [-I token] [virtual-command [argument ...]]', rev: 'rev [file ...]',
@@ -62,24 +62,23 @@
     catch (e) { fail('invalid regular expression: ' + e.message); }
   }
   function lex(input) {
-    const tokens=[]; let value='', mask=[], started=false, quote=null,plain=true,tilde=false,tildeEnd=false,statusOffsets=[];
-    const add=(c,unquoted) => { if(!started&&c==='~'&&unquoted)tilde=true;if(tilde&&c==='/'&&unquoted)tildeEnd=true;value+=c; mask.push(Boolean(unquoted && (c==='*'||c==='?'))); started=true; };
-    const flush=()=>{ if(started) tokens.push({kind:'word',value,mask,tilde,statusOffsets}); value=''; mask=[]; started=false;plain=true;tilde=false;tildeEnd=false;statusOffsets=[]; };
+    const tokens=[]; let value='', mask=[], started=false, quote=null,plain=true,tilde=false,tildeEnd=false,parameterOffsets=[],braceMask=[];
+    const add=(c,unquoted) => { if(!started&&c==='~'&&unquoted)tilde=true;if(tilde&&c==='/'&&unquoted)tildeEnd=true;value+=c; braceMask.push(Boolean(unquoted)); mask.push(Boolean(unquoted && (c==='*'||c==='?'))); started=true; };
+    const flush=()=>{ if(started) tokens.push({kind:'word',value,mask,tilde,parameterOffsets,braceMask}); value=''; mask=[]; started=false;plain=true;tilde=false;tildeEnd=false;parameterOffsets=[];braceMask=[]; };
+    const parameter=(at,quoted)=>{const match=input.slice(at).match(/^\$(?:\{([A-Za-z_][A-Za-z0-9_]*|\?)\}|([A-Za-z_][A-Za-z0-9_]*|\?))/);if(!match)fail('unsupported shell variable expansion');const name=match[1]||match[2];if(!['HOME','USER','PWD','OLDPWD','?'].includes(name))fail('shell variable expansion is unsupported for '+name+'; supported: HOME, USER, PWD, OLDPWD, ?');parameterOffsets.push({at:value.length,length:match[0].length,name,quoted});for(const c of match[0])add(c,false);plain=false;return at+match[0].length-1;};
     for(let i=0;i<input.length;i++) {
       const c=input[i];
       if(quote) {
         if(c===quote) { quote=null; continue; }
         if(quote==='"' && c==='\\' && i+1<input.length && /["\\$`\n]/.test(input[i+1])) { add(input[++i],false); continue; }
         if(quote==='"' && (c==='`'||(c==='$'&&input[i+1]==='('))) fail('command substitution is unsupported');
-        if(quote==='"' && c==='$'&&input[i+1]==='?'){statusOffsets.push(value.length);add('$',false);add('?',false);i++;plain=false;continue;}
-        if(quote==='"' && c==='$' && /[A-Za-z_?{0-9]/.test(input[i+1]||'')) fail('shell variable expansion is unsupported; use literal paths');
+        if(quote==='"' && c==='$' && /[A-Za-z_?{0-9]/.test(input[i+1]||'')){i=parameter(i,true);continue;}
         add(c,false); continue;
       }
       if(c==='\''||c==='"') { if(!tildeEnd)tilde=false;quote=c; started=true;plain=false; continue; }
       if(c==='\\') { if(i+1===input.length) fail('unfinished escape');if(!tildeEnd)tilde=false;plain=false; add(input[++i],false); continue; }
       if(c==='`'||(c==='$'&&input[i+1]==='(')) fail('command substitution is unsupported; quote awk programs with single quotes');
-      if(c==='$'&&input[i+1]==='?'){statusOffsets.push(value.length);add('$',false);add('?',false);i++;plain=false;continue;}
-      if(c==='$' && /[A-Za-z_?{0-9]/.test(input[i+1]||'')) fail('shell variable expansion is unsupported; use literal paths');
+      if(c==='$' && /[A-Za-z_?{0-9]/.test(input[i+1]||'')){i=parameter(i,false);continue;}
       if(c==='\n'||c===';') { flush(); tokens.push({kind:'op',value:';'}); continue; }
       if(/\s/.test(c)) { flush(); continue; }
       if(c==='#'&&!started) break;
@@ -97,6 +96,33 @@
     }
     if(quote) fail('unclosed '+(quote==='\''?'single':'double')+' quote');
     flush(); return tokens;
+  }
+  // Keep quoting metadata while expanding words; generated text is never parsed as shell syntax.
+  function tokenSlice(token,start,end) {
+    return {...token,value:token.value.slice(start,end),mask:token.mask.slice(start,end),braceMask:(token.braceMask||[]).slice(start,end),splitMask:(token.splitMask||[]).slice(start,end),tilde:start===0&&token.tilde,parameterOffsets:(token.parameterOffsets||[]).filter(p=>p.at>=start&&p.at+p.length<=end).map(p=>({...p,at:p.at-start}))};
+  }
+  function tokenJoin(parts) {
+    let offset=0;const out={...parts[0],value:'',mask:[],braceMask:[],splitMask:[],parameterOffsets:[]};
+    for(const part of parts){out.value+=part.value;out.mask.push(...part.mask);out.braceMask.push(...(part.braceMask||Array(part.value.length).fill(false)));out.splitMask.push(...(part.splitMask?.length?part.splitMask:Array(part.value.length).fill(false)));out.parameterOffsets.push(...(part.parameterOffsets||[]).map(p=>({...p,at:p.at+offset})));offset+=part.value.length;}return out;
+  }
+  function tokenSplice(token,start,length,value,unquoted=false) {
+    return tokenJoin([tokenSlice(token,0,start),{value,mask:value.split('').map(c=>unquoted&&(c==='*'||c==='?')),braceMask:Array(value.length).fill(false),splitMask:Array(value.length).fill(unquoted),parameterOffsets:[]},tokenSlice(token,start+length,token.value.length)]);
+  }
+  function braceExpand(token,depth=0) {
+    if(depth>16)fail('shell: brace expansion nesting exceeds 16');
+    const {value}=token,active=token.braceMask||[];
+    for(let start=0;start<value.length;start++){if(value[start]!=='{'||!active[start])continue;let level=0,end=-1;const commas=[];
+      for(let i=start+1;i<value.length;i++){if(!active[i])continue;if(value[i]==='{')level++;else if(value[i]==='}'){if(!level){end=i;break;}level--;}else if(value[i]===','&&!level)commas.push(i);}
+      if(end<0)continue;let alternatives=[];
+      if(commas.length){const cuts=[start,...commas,end];alternatives=cuts.slice(0,-1).map((at,i)=>tokenSlice(token,at+1,cuts[i+1]));}
+      else {const inner=value.slice(start+1,end),m=inner.match(/^(-?\d+|[A-Za-z])\.\.(-?\d+|[A-Za-z])(?:\.\.(-?\d+))?$/);if(m&&active.slice(start+1,end).every(Boolean)){const numeric=/^-?\d+$/.test(m[1])&&/^-?\d+$/.test(m[2]),letters=/^[A-Za-z]$/.test(m[1])&&/^[A-Za-z]$/.test(m[2]);if(numeric||letters){const first=numeric?+m[1]:m[1].charCodeAt(0),last=numeric?+m[2]:m[2].charCodeAt(0),step=(Math.abs(+(m[3]||1))||1)*(first<=last?1:-1),count=Math.floor(Math.abs(last-first)/Math.abs(step))+1,pad=numeric&&[m[1],m[2]].some(s=>/^-?0\d/.test(s)),width=Math.max(m[1].length,m[2].length);if(![first,last,step].every(Number.isSafeInteger)||!Number.isSafeInteger(count)||count>256)fail('shell: brace expansion exceeds 256 words');for(let n=0;n<count;n++){const v=first+n*step,text=numeric?(pad?(v<0?'-':'')+String(Math.abs(v)).padStart(width-(v<0?1:0),'0'):String(v)):String.fromCharCode(v);alternatives.push({value:text,mask:Array(text.length).fill(false),braceMask:Array(text.length).fill(false)});}}}}
+      if(!alternatives.length)continue;const out=[];for(const alternative of alternatives){const next=tokenJoin([tokenSlice(token,0,start),alternative,tokenSlice(token,end+1,value.length)]);if(next.value[0]==='~'&&next.braceMask[0])next.tilde=true;out.push(...braceExpand(next,depth+1));if(out.length>256)fail('shell: brace expansion exceeds 256 words');}return out;
+    }return [token];
+  }
+  function runSeq(args) {
+    let separator='\n',equal=false,after=false;const operands=[];
+    for(let i=0;i<args.length;i++){const arg=args[i];if(!after&&arg==='--'){after=true;continue;}if(!after&&(arg==='-w'||arg==='--equal-width')){equal=true;continue;}if(!after&&(arg==='-s'||arg.startsWith('-s')||arg==='--separator'||arg.startsWith('--separator='))){const v=arg.startsWith('--separator=')?arg.slice(12):arg==='--separator'||arg==='-s'?args[++i]:arg.slice(2);if(v===undefined)usageError('seq','separator requires a value');if(v.length>MAX_OUTPUT)usageError('seq','separator exceeds the browser limit');separator=v;continue;}if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(arg))usageError('seq','expected a finite decimal number');operands.push(arg);}
+    if(operands.length<1||operands.length>3)usageError('seq','one to three numbers are required');const source=operands.length===1?['1','1',operands[0]]:operands.length===2?[operands[0],'1',operands[1]]:operands,[first,step,last]=source.map(Number);if(![first,step,last].every(Number.isFinite)||step===0)usageError('seq','finite numbers and a nonzero increment are required');if([first,step,last].some(n=>Math.abs(n)>Number.MAX_SAFE_INTEGER))usageError('seq','numbers outside the safe integer range are unsupported');const precision=Math.max(...source.slice(0,2).map(v=>{const [base,exp='0']=v.toLowerCase().split('e');return Math.max(0,(base.split('.')[1]||'').length-Number(exp));}));if(precision>12)usageError('seq','at most 12 decimal places are supported');const distance=(last-first)/step,count=distance<0?0:Math.floor(distance+1e-12)+1;if(!Number.isSafeInteger(count)||count>100000)usageError('seq','at most 100000 values are supported');if(count*Math.max(0,separator.length)>MAX_OUTPUT)usageError('seq','output exceeds the browser limit');let rows=Array.from({length:count},(_,i)=>(first+i*step).toFixed(precision));if(equal){const width=Math.max(...[first.toFixed(precision),last.toFixed(precision)].map(s=>s.length));rows=rows.map(v=>v[0]==='-'?'-'+v.slice(1).padStart(width-1,'0'):v.padStart(width,'0'));}const text=rows.length?rows.join(separator)+'\n':'';if(text.length>MAX_OUTPUT)usageError('seq','output exceeds the browser limit');return text;
   }
   function parse(tokens) {
     const chains=[]; let pipeline=[], words=[], redirs=[], connector=';';
@@ -150,7 +176,7 @@
   }
   class LogLabShell {
     constructor(files={},options={}) {
-      this.files=Object.create(null); this.directories=new Set(['/','/home','/home/analyst','/tmp']);
+      this.files=Object.create(null); this.directories=new Set(['/','/bin','/dev','/etc','/home','/home/analyst','/opt','/proc','/root','/tmp','/usr','/var']);
       this.snapshotTime=Number.isFinite(options.snapshotTime)?options.snapshotTime:Date.UTC(2026,9,25,9);
       this.clock=typeof options.now==='function'?options.now:()=>options.now===undefined?Date.now():new Date(options.now).getTime();
       this.metadata=Object.create(null);this.lastExitCode=Number.isInteger(options.lastExitCode)?options.lastExitCode:0;
@@ -169,15 +195,16 @@
     allPaths() { for(const p of Object.keys(this.files)) this.addParents(p); return [...new Set([...this.directories,...Object.keys(this.files)])].sort(cmp); }
     getMetadata(path) {const p=this.resolve(path);return this.metadata[p]||(this.metadata[p]={mtime:this.snapshotTime});}
     expand(token) {
-      if(token.statusOffsets?.length){if(this._traceVariables)this._traceVariables.add('?');let value=token.value,mask=token.mask.slice();for(const at of [...token.statusOffsets].reverse()){const status=String(this._expansionStatus===undefined?this.lastExitCode:this._expansionStatus);value=value.slice(0,at)+status+value.slice(at+2);mask.splice(at,2,...Array(status.length).fill(false));}token={...token,value,mask};}
-      if(token.tilde&&(token.value==='~'||token.value.startsWith('~/'))){const prefix='/home/analyst';token={...token,value:prefix+token.value.slice(1),mask:[...Array(prefix.length).fill(false),...token.mask.slice(1)]};}
+      const braced=braceExpand(token);if(braced.length!==1||braced[0]!==token)return braced.flatMap(t=>this.expand(t));
+      if(token.tilde&&(token.value==='~'||token.value.startsWith('~/')))token=tokenSplice(token,0,1,'/home/analyst');
+      if(token.parameterOffsets?.length){for(const item of [...token.parameterOffsets].reverse()){if(this._traceVariables)this._traceVariables.add(item.name);const value=String(item.name==='?'?(this._expansionStatus===undefined?this.lastExitCode:this._expansionStatus):({HOME:'/home/analyst',USER:'analyst',PWD:this.cwd,OLDPWD:this.oldcwd})[item.name]);token=tokenSplice(token,item.at,item.length,value,!item.quoted);}const pieces=[];let begin=0;for(let i=0;i<=token.value.length;i++)if(i===token.value.length||token.splitMask?.[i]&&/[ \t\n]/.test(token.value[i])){if(i>begin)pieces.push(tokenSlice(token,begin,i));begin=i+1;}if(pieces.length>1||pieces.length===0)return pieces.flatMap(t=>this.expand(t));token=pieces[0];}
       if(!token.mask.some(Boolean)) return [token.value];
       const segments=[]; let segment=[], offset=0;
       for(const part of token.value.split('/')) { const masks=token.mask.slice(offset,offset+part.length); offset+=part.length+1; if(!part||part==='.') continue; if(part==='..') segments.push({parent:true}); else segments.push({part,masks}); }
       const resolved=token.value.startsWith('/')?[]:this.cwd.split('/').filter(Boolean).map(part=>({part,masks:[]}));
       for(const seg of segments) { if(seg.parent) resolved.pop(); else resolved.push(seg); }
-      const source='^/'+resolved.map(seg=>Array.from(seg.part).map((c,i)=>seg.masks[i]?(c==='*'?'[^/]*':'[^/]'):escRE(c)).join('')).join('/')+'$';
-      const matcher=new RegExp(source), found=this.allPaths().filter(p=>matcher.test(p)&&resolved.every((seg,i)=>!seg.masks.some(Boolean)||seg.part[0]==='.'||!p.split('/')[i+1].startsWith('.'))).map(p=>token.value.startsWith('/')?p:this.relative(p));
+      const source='^/'+resolved.map(seg=>seg.part.split('').map((c,i)=>seg.masks[i]?(c==='*'?'[^/]*':'[^/]'):escRE(c)).join('')).join('/')+'$';
+      const matcher=new RegExp(source), found=this.allPaths().filter(p=>matcher.test(p)&&(!token.value.endsWith('/')||this.isDir(p))&&resolved.every((seg,i)=>!seg.masks.some(Boolean)||seg.part[0]==='.'||!p.split('/')[i+1].startsWith('.'))).map(p=>(token.value.startsWith('/')?p:this.relative(p))+(token.value.endsWith('/')?'/':''));
       return found.length?found:[token.value];
     }
     relative(path) { const a=this.cwd.split('/').filter(Boolean),b=path.split('/').filter(Boolean); while(a.length&&b.length&&a[0]===b[0]) { a.shift();b.shift(); } return [...a.map(()=>'..'),...b].join('/')||'.'; }
@@ -191,9 +218,9 @@
         let extra='';
         if(command==='grep') extra='\nDefault grep uses basic regex: + ? | ( ) are literal unless escaped; -E enables extended regex.\n-F matches literal text. -r/-R recurse (virtual filesystem has no symlinks); -m limits selected lines per file.\n-L lists files without matching lines. Exit status still follows line matches: 0 match, 1 no match, 2 error.\nLong aliases: --recursive, --ignore-case, --invert-match, --line-number, --count, --regexp,\n--fixed-strings, --extended-regexp, --word-regexp, --line-regexp, --only-matching, --quiet,\n--files-with-matches, --files-without-match, --max-count, --after-context, --before-context, --context.\n--include/--exclude filter basenames; --exclude-dir filters directory names with * and ? globs.\nPCRE (-P), binary options, and color flags are unsupported.';
         if(command==='rg') extra='\nSubset: extended regex by default, recursive paths, no headings; -n adds line numbers.\nWith piped input and no paths, search standard input. -g accepts quoted * / ** / ? patterns; ! excludes.\n--files lists files. Hidden paths are skipped unless --hidden. --count counts matching lines.\nPCRE (-P), replacements, ignore files, multiline matching, and other options are unsupported.';
-        if(command==='awk') extra='\nSubset: print $N, $NF, $(NF-3), comma-separated expressions; -F regex separator; -v name=value.\nBEGIN supports scalar assignments (including FS/OFS/ORS) and print statements separated by semicolons.\nFilters: /regex/, fields, == != < <= > >=, ~ !~, && ||. Functions: length, tolower, toupper, int.\nCounters: {n++} END {print n}; sums: {sum += $N} END {print sum};\n{count[$1]++} END {for (key in count) print count[key], key}. END {print NR} counts records.\nOne record block and one END block; arbitrary loops, system(), printf, and field assignment are unsupported.';
+        if(command==='awk') extra='\nSubset: print $N, $NF, $(NF-3), comma-separated expressions; -F regex separator; -v name=value.\nBEGIN supports scalar assignments (including FS/OFS/ORS) and print statements separated by semicolons.\nFilters: /regex/, fields, == != < <= > >=, ~ !~, && ||. Functions: length, tolower, toupper, int.\nCounters: {n++} END {print n}; sums: {sum += $N} END {print sum};\n{count[$1]++} END {for (key in count) print count[key], key}. END {print NR} counts records.\nConcatenation: print $1 \" : \" $2; arithmetic including division; printf; substr(text, start[, length]).\nField/scalar assignments and !seen[$3]++ are supported. length/substr count Unicode characters (like UTF-8 gawk); mawk may count bytes.\nOne record block and one END block; arbitrary loops and system() are unsupported.';
         if(command==='sed') extra='\nAddresses: numbers, $, /regex/, and address ranges; actions p, d, and s/old/new/g.\n-n suppresses automatic printing. Multiple -e scripts and semicolon-separated commands run in sequence.\nSubstitution supports &, \\1…\\9, escaped delimiters, and g/p/i flags; -E enables extended regex.\n-i edits named virtual files only; an attached suffix (e.g. -i.bak) saves a backup.\nBranches, hold space, arbitrary insertion, and other sed actions are unsupported.';
-        if(command==='sort') extra='\nOne field key range, including -k9,9nr; field-position syntax is unsupported.\n-n numeric, -r reverse, -f ignore case, -b ignore leading blanks, -s stable, -u unique, -c check order.\nDefault fields split on whitespace; -t changes the separator. Numbers use a leading signed decimal.\n-u keeps the first line per equal key. Sorting uses deterministic character order (no locale collation).';
+        if(command==='sort') extra='\nMultiple field keys are supported: -k1,1nr -k2,2. Character positions within fields are unsupported.\n-n numeric, -h human sizes, -V version order, -r reverse, -f ASCII case folding, -b ignore leading blanks.\n-s stable, -u unique, -c check order; -t changes the separator. Key-specific options override global ordering.\n-u keeps the first line per equal set of keys. Ordering follows the C locale; use LC_ALL=C sort on Linux for reproducibility.';
         if(command==='tr') extra='\nTranslate, delete (-d), squeeze consecutive characters (-s), or complement SET1 (-c).\nSets support ASCII ranges, \\n \\r \\t \\\\, octal escapes, and [:lower:] [:upper:] [:digit:] [:alpha:]\n[:alnum:] [:space:] [:blank:] [:punct:] [:xdigit:] [:print:] [:graph:] [:cntrl:].\nComplemented translation requires one output character. Repeated-set syntax is unsupported.';
         if(command==='column') extra='\nOnly table mode is supported. Default input splits on whitespace; -s uses each delimiter character.\nCells are padded with two spaces. Quoted CSV fields and ANSI styling are unsupported.';
         if(command==='nl') extra='\nDefault numbers nonempty lines; -ba numbers every line, -bt numbers nonempty lines.\nDefault width 6 and tab separator. Page delimiters and numbering formats are unsupported.';
@@ -203,10 +230,13 @@
         if(command==='base64') extra='\nEncode UTF-8 text or decode Base64 into UTF-8 text. Default output wraps at 76 columns.\n-w 0 disables wrapping. Binary data that is not valid UTF-8 is unsupported in this text filesystem.';
         if(command==='tee') extra='\nCopy standard input to virtual files and standard output. -a appends. All writes stay in memory.';
         if(command==='uniq') extra='\nConsecutive equal lines only. -i ignores case, -f skips fields, -s skips characters for comparison.\nOriginal first lines are retained. Use sort before uniq to group scattered equal values.';
+        if(command==='seq') extra='\nDecimal sequences with optional first/increment; -w pads equally, -s sets separator. At most 100000 values.';
+        if(command==='id'||command==='whoami') extra='\nThe virtual user is analyst, uid/gid 1000; these are not your host credentials.';
+        if(command==='sha256sum'||command==='md5sum') extra='\nHash UTF-8 virtual file bytes or standard input; standard hexadecimal digest and filename output. -b marks binary mode; -t is text mode. Verification (-c) is unsupported. MD5 is for legacy identification, not security verification.';
         if(command==='wc') extra='\n-l newline count, -w whitespace-separated words, -m Unicode characters, -c UTF-8 bytes.\n-L maximum display width with 8-column tab stops. Multiple-file totals use the maximum for -L.';
-        if(command==='cut') extra='\nFields/ranges: 1,3-5,7-, -3. -s omits lines without a delimiter; otherwise those lines pass through.\n--complement reverses selection; --output-delimiter changes field separation (or gaps between character ranges).';
-        if(command==='ls') extra='\n-a includes dotfiles, -l shows virtual permissions/owner and text byte sizes, -h human sizes,\n-d lists directories themselves, -R recurses, -S sorts by size, -t newest first, -r reverses.\nModification times are simulated fixture metadata in UTC, updated by touch/writes; not host filesystem times.\nThis text terminal always shows one item per line; -1 is also accepted. Symlinks and permission changes are unsupported.';
-        if(command==='find') extra='\nOne starting path. Name/path predicates combine with AND; -iname/-ipath ignore case.\nQuoted * and ? globs are supported. The starting path has depth 0; no -exec or boolean expressions.';
+        if(command==='cut') extra='\nFields/ranges: 1,3-5,7-, -3. -s omits lines without a delimiter; otherwise those lines pass through.\n-c follows GNU coreutils 9.4 byte selection; -b explicitly selects UTF-8 bytes. GNU 9.11+ supports characters in multibyte locales. Partial characters display U+FFFD in this text-only filesystem.\n--complement reverses selection; --output-delimiter changes field separation (or gaps between character ranges).';
+        if(command==='ls') extra='\n-a includes dotfiles, -l shows virtual permissions/owner, aligned sizes, links, and total blocks, -h human sizes,\n-d lists directories themselves, -R recurses, -S sorts by size, -t newest first, -r reverses.\nModification times are simulated fixture metadata in UTC, updated by touch/writes; not host filesystem times.\nDirectories are modeled as 4096 bytes with 2 + child-directory links; allocation rounds files to 4 KiB.\nActual filesystem allocation/links may differ. This text terminal always shows one item per line; -1 is also accepted. Symlinks and permission changes are unsupported.';
+        if(command==='find') extra='\nOne starting path. Name/path predicates combine with AND; -iname/-ipath ignore case.\n-print0 emits NUL-delimited paths for xargs -0. -exec COMMAND {} \\; invokes once per match; {} + batches paths.\nOnly virtual commands run; nested find/xargs, shell execution, and boolean expressions are unsupported.\nTraversal is deterministic here; real filesystem order varies. Add | sort when line order matters.';
         if(command==='printf') extra='\nFormats: %s %b %c %d %i %u %o %x %X %f %e %E %g %G and %%.\nSupports numeric width/precision, -/0 padding, standard backslash escapes, \\xHH and octal.\nFormat repeats for extra arguments. Safe JavaScript integers only; %q/%n and dynamic widths are unsupported.';
         if(command==='paste') extra='\nDefault joins corresponding lines with tabs; -s joins each file in sequence.\n-d cycles delimiter characters; standard backslash escapes and \\0 for an empty delimiter are supported.';
         if(command==='comm') extra='\nInputs must be sorted in this lab\'s character order. Columns: only file1, only file2, common.\n-1/-2/-3 suppress columns; comm -12 shows shared lines. Unsorted inputs report an error.';
@@ -218,7 +248,7 @@
         if(command==='realpath') extra='\nNormalize virtual absolute paths and .. / .; there are no symlinks.\nDefault requires an existing parent; -e requires the path to exist; -m permits missing parents.';
         if(command==='file') extra='\nClassify virtual text using its contents: empty, ASCII, UTF-8, JSON/JSONL, or data.\n-b suppresses filenames; -i gives a basic MIME/charset description. No executable or archive inspection.';
         if(command==='stat') extra='\nVirtual metadata only; no real owners, inode allocation, or device numbers.\n-c formats: %n name, %s text bytes, %F type, %a octal virtual mode, %A mode letters,\n%y simulated UTC modification time, %Y epoch modification seconds, %%.';
-        if(command==='du') extra='\nVirtual logical text size, not physical disk allocation. Default units are rounded-up KiB.\n-b reports bytes, -h human sizes, -s summarizes, -a includes files, -c adds a total.\nDirectory allocation is not modeled; real du -b includes the size of each directory.\nTo total only file contents, use du -cb bundle/*.log | tail -n 1. --max-depth limits display depth.';
+        if(command==='du') extra='\nSimulated disk allocation: nonempty files round up to 4 KiB; each directory uses 4 KiB. Default units are KiB.\n-b reports bytes, -h human sizes, -s summarizes, -a includes files, -c adds a total.\n-b reports apparent bytes including the modeled directory size; real du -b includes the size of each directory too. Actual filesystems can differ.\nTo total only file contents, use du -cb bundle/*.log | tail -n 1. --max-depth limits display depth.';
         if(command==='date') extra='\nBrowser clock by default; -u formats UTC. -d accepts timezone-qualified ISO, YYYY-MM-DD (UTC), or @epoch.\nFormats: %Y %m %d %e %H %M %S %F %T %s %z %Z %a %A %b %B %u %w %j %n %t %%.\nRelative dates, setting the clock, locale modes, and nanoseconds are unsupported.';
         if(command==='mv') extra='\nMove one virtual file or directory; -n preserves an existing destination. No interactive mode or merging directories.';
         if(command==='rmdir') extra='\nRemove empty virtual directories; -p also removes empty parents. Current directory and its ancestors are protected.';
@@ -228,9 +258,9 @@
       }
       return t('Linuxroom 学習用の仮想ターミナル — Linux コマンドの一部を再現\n')+
         'Commands: '+COMMANDS.join(', ')+'\n'+
-        'Syntax: quotes, escapes, |, <, >, >>, 2>, 2>>, 2>&1, ;, &&, ||, unquoted ~ / * / ? and $? status.\n'+
+        'Syntax: quotes, escapes, |, <, >, >>, 2>, 2>>, 2>&1, ;, &&, ||, unquoted ~ / * / ? brace lists/ranges, $HOME/$USER/$PWD/$OLDPWD and $? status. LC_ALL=C command is accepted.\n'+
         'Use help COMMAND for exact options. Files and redirects stay in virtual memory.\n'+
-        'No host OS, server execution, package installation, general shell variables, scripts, or network.\n'+
+        'No host OS, server execution, package installation, variable assignment/export, scripts, or network.\n'+
         t('less/more open the viewer; q closes. help は教材専用ヘルプ。実機では man COMMAND。man は教材ヘルプの別名です。\n');
     }
     complete(input) {
@@ -295,6 +325,7 @@
                 if(r.op==='<') stdin=this.read(targets[0],'redirection');
                 else {if(path!=='/dev/null'&&openedOutputs.has(path))fail('independent redirects to the same file are unsupported; use > file 2>&1 to share one descriptor');openedOutputs.add(path);this.write(targets[0],'',r.op==='>>');fds[r.fd]={kind:'file',path:targets[0]};}
               }
+              while(/^LC_(?:ALL|COLLATE)=/.test(words[0]||'')){if(!/^LC_(?:ALL|COLLATE)=(?:C|POSIX)$/.test(words.shift()))fail('shell: only the C/POSIX locale is supported');}if(!words.length)fail('shell: locale assignment requires a command');
               last=this.execute(words[0],words.slice(1),stdin,{hasStdin:nodeIndex>0||node.redirs.some(r=>r.op==='<')});
             } catch(e) {
               last={stdout:'',stderr:(e instanceof ShellError?e.message:'shell: internal error')+'\n',code:e instanceof ShellError?e.code:2};
@@ -329,6 +360,11 @@
       switch(cmd) {
         case 'man': if(args.length!==1)fail('man: one command name is required',2);return result(t('Linuxroom 学習用ヘルプ — 実機の man マニュアルではありません。実機では man COMMAND で詳細を調べます。\n\n')+this.getHelp(args[0]),0,{pager:true});
         case 'help': if(args.length>1) usageError(cmd,'too many arguments'); return result(this.getHelp(args[0]));
+        case 'whoami': if(args.length)usageError(cmd,'no operands are supported');return result('analyst\n');
+        case 'true': return result();
+        case 'false': return result('',1);
+        case 'seq': return result(runSeq(args));
+        case 'id': {const {flags,rest}=simpleOptions(args,'ugGn',cmd);if(rest.length>1||rest.length&&rest[0]!=='analyst')fail('id: unknown virtual user',1);const modes=['u','g','G'].filter(f=>flags.has(f));if(modes.length>1||flags.has('n')&&!modes.length)usageError(cmd,'choose one of -u, -g, -G with optional -n');return result(modes.length?(flags.has('n')?'analyst':'1000')+'\n':'uid=1000(analyst) gid=1000(analyst) groups=1000(analyst)\n');}
         case 'pwd': if(args.length) usageError(cmd,'no options are supported'); return result(this.cwd+'\n');
         case 'clear': if(args.length) usageError(cmd,'no arguments are supported'); return result('',0,{clear:true});
         case 'sl': if(args.length)usageError(cmd,'no options or arguments are supported');return result('',0,{train:true});
@@ -336,10 +372,11 @@
         case 'cd': { if(args.length>1) usageError(cmd,'too many arguments'); const dest=args[0]==='-'?this.oldcwd:this.resolve(args[0]||'/home/analyst'); if(!this.isDir(dest)) fail('cd: '+(args[0]||dest)+': '+(this.isFile(dest)?'Not a directory':'No such file or directory'),1); const old=this.cwd;this.cwd=dest;this.oldcwd=old;return result(args[0]==='-'?dest+'\n':''); }
         case 'echo': { let n=false; if(args[0]==='-n'){n=true;args=args.slice(1);} if(args[0]==='-e'||args[0]==='-E') usageError(cmd,'escape expansion options are unsupported'); return result(args.join(' ')+(n?'':'\n')); }
         case 'ls': return result(runLs(this,args));
-        case 'cat': {const {flags,rest}=simpleOptions(args,'n',cmd);let text='',stderr='',code=0,lineNumber=0,lineStart=true;const events=[];for(const path of rest.length?rest:['-']){try{let chunk=path==='-'?stdin:this.read(path,cmd);if(flags.has('n'))chunk=lineChunks(chunk).map(line=>{const numbered=(lineStart?String(++lineNumber).padStart(6)+'\t':'')+line;lineStart=line.endsWith('\n');return numbered;}).join('');text+=chunk;events.push([1,chunk]);}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';events.push([2,e.message+'\n']);code=1;}}return {stdout:text,stderr,code,events};}
+        case 'cat': return runCat(this,args,stdin);
         case 'zcat': case 'zgrep': case 'zless': {const decompression=this.decompressing;this.decompressing=true;try{if(cmd==='zgrep')return this.grep(args,stdin);const {rest}=simpleOptions(args,'',cmd);if(!rest.length||rest.includes('-'))usageError(cmd,'named gzip fixtures are required; binary standard input is unsupported');const texts=rest.map(path=>{const text=this.read(path,cmd);if(!this.getMetadata(path).compressed)fail(cmd+': '+path+': not in gzip format (use cat for plain text)',1);return text;});return result(texts.join(''),0,cmd==='zless'?{pager:true}:{});}finally{this.decompressing=decompression;}}
         case 'tac': {const {rest}=simpleOptions(args,'',cmd);return result(this.inputs(rest,stdin,cmd).map(f=>lineChunks(f.text).reverse().join('')).join(''));}
         case 'base64': return result(runBase64(this,args,stdin));
+        case 'sha256sum': case 'md5sum': return runChecksum(this,cmd,args,stdin);
         case 'tee': {const {flags,rest}=simpleOptions(args,'a',cmd);let stderr='',code=0;for(const path of rest){try{this.write(path,stdin,flags.has('a'),cmd);}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';code=1;}}return {stdout:stdin,stderr,code};}
         case 'less': case 'more': { const {rest}=simpleOptions(args,'',cmd); return result(this.inputs(rest,stdin,cmd).map(f=>f.text).join(''),0,{pager:true}); }
         case 'grep': return this.grep(args,stdin);
@@ -356,7 +393,7 @@
         case 'wc': return result(runWc(this,args,stdin));
         case 'sed': return result(runSed(this,args,stdin));
         case 'awk': return result(this.awk(args,stdin));
-        case 'find': return result(runFind(this,args));
+        case 'find': return runFind(this,args);
         case 'printf': return result(runPrintf(args));
         case 'paste': return result(runPaste(this,args,stdin));
         case 'comm': return result(runComm(this,args,stdin));
@@ -516,25 +553,49 @@
   function positive(value,cmd,name,zero=false) {if(!/^\d+$/.test(value)||+value<(zero?0:1)||+value>1000000)usageError(cmd,name+' must be '+(zero?'nonnegative':'positive')+' and at most 1000000');return +value;}
   function lsTimestamp(time) {const date=new Date(time),months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return months[date.getUTCMonth()]+' '+String(date.getUTCDate()).padStart(2)+' '+String(date.getUTCHours()).padStart(2,'0')+':'+String(date.getUTCMinutes()).padStart(2,'0');}
   function humanSize(n) {if(n<1024)return String(n);const units=['K','M','G'];let i=-1;do{n/=1024;i++;}while(n>=1024&&i<units.length-1);return n.toFixed(n<10?1:0)+units[i];}
+  const apparentSize=(shell,p)=>shell.isDir(p)?4096:bytes(shell.files[p]);
+  const allocatedSize=(shell,p)=>shell.isDir(p)?4096:Math.ceil(bytes(shell.files[p])/4096)*4096;
   function runLs(shell,args) {
     let sort='name',after=false;const cleaned=[];for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--'){after=true;cleaned.push(arg);continue;}if(!after&&(arg==='--sort'||arg.startsWith('--sort='))){sort=arg==='--sort'?args[++i]:arg.slice(7);if(!['time','size','name'].includes(sort))usageError('ls','--sort supports time, size, or name');}else{if(!after&&/^-[^-]/.test(arg))for(const f of arg.slice(1))if(f==='t'||f==='S')sort=f==='t'?'time':'size';cleaned.push(arg);}}
     args=longOptions(cleaned,{'--all':'a','--directory':'d','--recursive':'R','--reverse':'r','--human-readable':'h'},{},'ls');
-    const {flags,rest}=simpleOptions(args,'1alhdtRSr','ls'),paths=rest.length?rest:['.'],sections=[],fileRows=[];
-    const format=(p,name)=>{if(!flags.has('l'))return name;const dir=shell.isDir(p),size=dir?0:bytes(shell.files[p]),meta=shell.getMetadata(p);return (dir?'drwxr-xr-x':'-rw-r--r--')+' 1 analyst analyst '+(flags.has('h')?humanSize(size):String(size)).padStart(7)+' '+lsTimestamp(meta.mtime)+' '+name;};
-    const compare=(a,b)=>(sort==='time'?shell.getMetadata(b).mtime-shell.getMetadata(a).mtime:sort==='size'?(shell.isDir(b)?0:bytes(shell.files[b]))-(shell.isDir(a)?0:bytes(shell.files[a])):0)||cmp(basename(a),basename(b));
-    const visit=(p,label,heading)=>{let children=shell.allPaths().filter(x=>x!==p&&dirname(x)===p).filter(x=>flags.has('a')||!basename(x).startsWith('.'));children.sort(compare);if(flags.has('r'))children.reverse();const rows=children.map(x=>format(x,basename(x)));if(flags.has('a'))rows.unshift(format(p,'.'),format(dirname(p),'..'));sections.push((heading?label+':\n':'')+rows.join('\n'));if(flags.has('R'))for(const child of children)if(shell.isDir(child))visit(child,label.replace(/\/$/,'')+'/'+basename(child),true);};
+    const {flags,rest}=simpleOptions(args,'1alhdtRSr','ls'),paths=rest.length?rest:['.'],sections=[],fileRows=[],all=shell.allPaths();
+    const format=entries=>{if(!flags.has('l'))return entries.map(e=>e.name);const rows=entries.map(({p,name})=>{const dir=shell.isDir(p),size=apparentSize(shell,p);return {p,name,dir,size:flags.has('h')?humanSize(size):String(size),links:String(dir?2+all.filter(x=>x!==p&&dirname(x)===p&&shell.isDir(x)).length:1)};}),width=Math.max(1,...rows.map(r=>r.size.length)),linkWidth=Math.max(1,...rows.map(r=>r.links.length));return rows.map(r=>(r.dir?'drwxr-xr-x':'-rw-r--r--')+' '+r.links.padStart(linkWidth)+' analyst analyst '+r.size.padStart(width)+' '+lsTimestamp(shell.getMetadata(r.p).mtime)+' '+r.name);};
+    const compare=(a,b)=>(sort==='time'?shell.getMetadata(b).mtime-shell.getMetadata(a).mtime:sort==='size'?apparentSize(shell,b)-apparentSize(shell,a):0)||cmp(basename(a),basename(b));
+    const visit=(p,label,heading)=>{let children=all.filter(x=>x!==p&&dirname(x)===p).filter(x=>flags.has('a')||!basename(x).startsWith('.'));children.sort(compare);if(flags.has('r'))children.reverse();const entries=children.map(p=>({p,name:basename(p)}));if(flags.has('a'))entries.unshift({p,name:'.'},{p:dirname(p),name:'..'});const rows=format(entries);if(flags.has('l')){const total=entries.reduce((n,e)=>n+allocatedSize(shell,e.p),0);rows.unshift('total '+(flags.has('h')?humanSize(total):total/1024));}const content=(heading?label+':\n':'')+lineOutput(rows);sections.push(content);if(flags.has('R'))for(const child of children)if(shell.isDir(child))visit(child,label.replace(/\/$/,'')+'/'+basename(child),true);};
     for(const name of paths){const p=shell.resolve(name);if(shell.isFile(p)||flags.has('d')&&shell.isDir(p))fileRows.push({p,name});else if(!shell.isDir(p))fail('ls: '+name+': No such file or directory',1);}
-    fileRows.sort((a,b)=>compare(a.p,b.p));if(flags.has('r'))fileRows.reverse();if(fileRows.length)sections.push(fileRows.map(f=>format(f.p,f.name)).join('\n'));
+    fileRows.sort((a,b)=>compare(a.p,b.p));if(flags.has('r'))fileRows.reverse();if(fileRows.length)sections.push(lineOutput(format(fileRows)));
     for(const name of paths){const p=shell.resolve(name);if(!flags.has('d')&&shell.isDir(p))visit(p,name,paths.length>1||flags.has('R'));}
-    return sections.join('\n\n')+(sections.some(Boolean)?'\n':'');
+    return sections.join('\n');
+  }
+  function sortNumeric(value) {
+    const match=value.match(/^[ \t]*(-?)(\d*)(?:\.(\d*))?/),integer=(match?.[2]||'').replace(/^0+/,''),fraction=(match?.[3]||'').replace(/0+$/,'');
+    return {sign:integer||fraction?(match[1]?-1:1):0,integer,fraction,suffix:match?value.slice(match[0].length,match[0].length+1):''};
+  }
+  function compareNumeric(a,b) {
+    const x=sortNumeric(a),y=sortNumeric(b);if(x.sign!==y.sign)return cmp(x.sign,y.sign);if(!x.sign)return 0;
+    return x.sign*(cmp(x.integer.length,y.integer.length)||cmp(x.integer,y.integer)||cmp(x.fraction,y.fraction));
+  }
+  function compareHuman(a,b) {
+    const x=sortNumeric(a),y=sortNumeric(b),rank=s=>s?'KMGTPEZYRQ'.indexOf(s==='k'?'K':s)+1:0;
+    return cmp(x.sign,y.sign)||(x.sign&&(x.sign*cmp(rank(x.suffix),rank(y.suffix))||compareNumeric(a,b)));
+  }
+  function compareVersion(a,b) {
+    const special=s=>s===''?0:s==='.'?1:s==='..'?2:s[0]==='.'?3:4;
+    const priority=cmp(special(a),special(b));if(priority)return priority;
+    const version=(x,y)=>{let i=0,j=0;const digit=c=>c!==undefined&&c>='0'&&c<='9',order=c=>c==='~'?-1:c===undefined||digit(c)?0:/[A-Za-z]/.test(c)?c.charCodeAt(0):c.charCodeAt(0)+256;
+      while(i<x.length||j<y.length){while(i<x.length&&!digit(x[i])||j<y.length&&!digit(y[j])){const difference=order(x[i])-order(y[j]);if(difference)return Math.sign(difference);if(i<x.length)i++;if(j<y.length)j++;}while(x[i]==='0')i++;while(y[j]==='0')j++;let difference=0;while(digit(x[i])&&digit(y[j])){if(!difference)difference=cmp(x[i],y[j]);i++;j++;}if(digit(x[i]))return 1;if(digit(y[j]))return -1;if(difference)return difference;}return 0;};
+    const suffix=/^(.+?)(?:\.[A-Za-z~][A-Za-z0-9~]*)+$/;
+    return version(a.replace(suffix,'$1'),b.replace(suffix,'$1'))||version(a,b);
   }
   function runSort(shell,args,stdin) {
-    args=longOptions(args,{'--numeric-sort':'n','--reverse':'r','--unique':'u','--ignore-case':'f','--ignore-leading-blanks':'b','--stable':'s','--check':'c'},{'--key':'k','--field-separator':'t'},'sort');
-    let keys=0,after=false;for(const arg of args){if(arg==='--')after=true;else if(!after&&/^-.*k/.test(arg))keys++;}if(keys>1)usageError('sort','only one key range is supported');
-    const {flags,values,rest}=parseValued(args,'nrufbsc','kt','sort');let key=null,keyFlags='';if(values.k!==undefined){const m=values.k.match(/^(\d+)([nrfb]*)(?:,(\d+)([nrfb]*))?$/);if(!m||!+m[1]||m[3]&&+m[3]<+m[1])usageError('sort','key must be N[,M] with optional n/r/f/b suffixes');key=[+m[1],m[3]?+m[3]:Infinity];keyFlags=m[2]+(m[4]||'');}if(values.t!==undefined&&values.t.length!==1)usageError('sort','delimiter must be one character');const delim=values.t,rows=shell.inputs(rest,stdin,'sort').flatMap(f=>asLines(f.text));
-    const get=line=>{if(key){const fields=delim===undefined?line.trim().split(/\s+/):line.split(delim);line=fields.slice(key[0]-1,key[1]).join(delim===undefined?' ':delim);}if(flags.has('b')||keyFlags.includes('b'))line=line.replace(/^\s+/,'');if(flags.has('f')||keyFlags.includes('f'))line=line.toUpperCase();return line;};
-    const numeric=s=>{const m=s.match(/^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))/);return m?+m[1]:0;};
-    const compareKey=(a,b)=>{a=get(a);b=get(b);return (flags.has('n')||keyFlags.includes('n')?Math.sign(numeric(a)-numeric(b)):cmp(a,b))*((flags.has('r')||keyFlags.includes('r'))?-1:1);};
+    args=longOptions(args,{'--numeric-sort':'n','--human-numeric-sort':'h','--version-sort':'V','--reverse':'r','--unique':'u','--ignore-case':'f','--ignore-leading-blanks':'b','--stable':'s','--check':'c'},{'--key':'k','--field-separator':'t'},'sort');
+    const flags=new Set(),keys=[],paths=[];let delim,after=false;
+    for(let i=0;i<args.length;i++){const arg=args[i];if(!after&&arg==='--'){after=true;continue;}if(!after&&arg.startsWith('-')&&arg!=='-'){for(let j=1;j<arg.length;j++){const f=arg[j];if(f==='k'||f==='t'){const t=takeValue(args,i,arg.slice(j+1),'sort','-'+f);i=t.next;if(f==='t'){if(t.value.length!==1)usageError('sort','delimiter must be one character');delim=t.value;}else{const m=t.value.match(/^(\d+)([nhrVfb]*)(?:,(\d+)([nhrVfb]*))?$/);if(!m||!+m[1]||m[3]&&+m[3]<+m[1])usageError('sort','key must be N[,M] with optional n/h/r/V/f/b suffixes');keys.push({start:+m[1],end:m[3]?+m[3]:Infinity,startBlank:m[2].includes('b'),options:new Set(m[2]+(m[4]||''))});}break;}if(!'nrhVufbsc'.includes(f))usageError('sort','unsupported option -'+f);flags.add(f);}}else paths.push(arg);}
+    const ordering=[...flags].filter(f=>'nhrVfb'.includes(f));if(!keys.length)keys.push({start:0,end:Infinity,startBlank:flags.has('b'),options:new Set(ordering)});
+    for(const key of keys){if(!key.options.size){key.options=new Set(ordering);key.startBlank=flags.has('b');}if(['n','h','V'].filter(f=>key.options.has(f)).length>1)usageError('sort','numeric, human-numeric, and version ordering are mutually exclusive');}
+    const get=(line,key)=>{if(key.start){const fields=delim===undefined?(line.match(/[ \t]*[^ \t]+|[ \t]+$/g)||[]):line.split(delim);line=key.end===Infinity&&delim===undefined?(key.start>fields.length?'':line.slice(fields.slice(0,key.start-1).join('').length)):fields.slice(key.start-1,key.end).join(delim===undefined?'':delim);}if(key.startBlank)line=line.replace(/^[ \t]+/,'');if(key.options.has('f'))line=line.replace(/[a-z]/g,c=>c.toUpperCase());return line;};
+    const rows=shell.inputs(paths,stdin,'sort').flatMap(f=>asLines(f.text));
+    const compareKey=(a,b)=>{for(const key of keys){const x=get(a,key),y=get(b,key),options=key.options,n=options.has('n')?compareNumeric(x,y):options.has('h')?compareHuman(x,y):options.has('V')?compareVersion(x,y):cmp(x,y);if(n)return n*(options.has('r')?-1:1);}return 0;};
     const compare=(a,b)=>compareKey(a,b)||((flags.has('s')||flags.has('u'))?0:cmp(a,b)*(flags.has('r')?-1:1));
     if(flags.has('c')){for(let i=1;i<rows.length;i++)if(compare(rows[i-1],rows[i])>0||flags.has('u')&&compareKey(rows[i-1],rows[i])===0)return {stdout:'',stderr:'sort: disorder at line '+(i+1)+': '+rows[i]+'\n',code:1};return {stdout:'',stderr:'',code:0};}
     rows.sort(compare);return {stdout:lineOutput(flags.has('u')?rows.filter((row,i)=>!i||compareKey(rows[i-1],row)!==0):rows),stderr:'',code:0};
@@ -546,9 +607,9 @@
   }
   function runCut(shell,args,stdin) {
     let complement=false,output=null;const cleaned=[];let after=false;
-    for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--'){after=true;cleaned.push(arg);continue;}if(!after&&arg==='--complement'){complement=true;continue;}if(!after&&(arg==='--output-delimiter'||arg.startsWith('--output-delimiter='))){output=arg.includes('=')?arg.slice(arg.indexOf('=')+1):args[++i];if(output===undefined)usageError('cut','--output-delimiter requires text');continue;}cleaned.push(arg);}
-    const {flags,values,rest}=parseValued(cleaned,'s','dfc','cut'),field=values.f,characters=values.c,delimiter=values.d===undefined?'\t':values.d;if((field===undefined)===(characters===undefined))usageError('cut','choose either -f or -c');if(delimiter.length!==1)usageError('cut','delimiter must be one character');if(characters!==undefined&&(values.d!==undefined||flags.has('s')))usageError('cut','-d and -s require -f');const chosen=rangeSelector(field===undefined?characters:field,'cut'),select=i=>chosen(i)!==complement,out=[];
-    for(const f of shell.inputs(rest,stdin,'cut'))for(const line of asLines(f.text)){if(field!==undefined&&!line.includes(delimiter)){if(!flags.has('s'))out.push(line);continue;}const items=field===undefined?Array.from(line):line.split(delimiter);if(field!==undefined)out.push(items.filter((_,i)=>select(i+1)).join(output===null?delimiter:output));else{let value='',previous=-2;items.forEach((v,i)=>{if(select(i+1)){if(output!==null&&previous>=0&&i>previous+1)value+=output;value+=v;previous=i;}});out.push(value);}}return lineOutput(out);
+    for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--'){after=true;cleaned.push(arg);continue;}if(!after&&arg==='--complement'){complement=true;continue;}if(!after&&(arg==='--output-delimiter'||arg.startsWith('--output-delimiter='))){output=arg.includes('=')?arg.slice(arg.indexOf('=')+1):args[++i];if(output===undefined)usageError('cut','--output-delimiter requires text');if(output==='')output='\0';continue;}cleaned.push(arg);}
+    const {flags,values,rest}=parseValued(cleaned,'s','dfcb','cut'),field=values.f,characters=values.c===undefined?values.b:values.c,delimiter=values.d===undefined?'\t':values.d===''?'\0':values.d;if(values.b!==undefined&&values.c!==undefined)usageError('cut','choose either -b or -c');if((field===undefined)===(characters===undefined))usageError('cut','choose either -f or -c');if(delimiter.length!==1)usageError('cut','delimiter must be one character');if(characters!==undefined&&(values.d!==undefined||flags.has('s')))usageError('cut','-d and -s require -f');const chosen=rangeSelector(field===undefined?characters:field,'cut'),select=i=>chosen(i)!==complement,out=[];
+    for(const f of shell.inputs(rest,stdin,'cut'))for(const line of asLines(f.text)){if(field!==undefined&&!line.includes(delimiter)){if(!flags.has('s'))out.push(line);continue;}const items=field===undefined?Array.from(new TextEncoder().encode(line)):line.split(delimiter);if(field!==undefined)out.push(items.filter((_,i)=>select(i+1)).join(output===null?delimiter:output));else{const selected=[];let previous=-2;items.forEach((v,i)=>{if(select(i+1)){if(output!==null&&previous>=0&&i>previous+1)selected.push(...new TextEncoder().encode(output));selected.push(v);previous=i;}});out.push(new TextDecoder().decode(Uint8Array.from(selected)));}}return lineOutput(out);
   }
   function runEnds(shell,cmd,args,stdin) {
     const end=args.indexOf('--');if(args.some((a,i)=>(end<0||i<end)&&(a==='--follow'||a.startsWith('--follow='))))usageError(cmd,'logs are static snapshots; continuous follow is unavailable. Re-run tail to inspect the current file');
@@ -559,13 +620,35 @@
   }
   function runWc(shell,args,stdin) {
     args=longOptions(args,{'--lines':'l','--words':'w','--bytes':'c','--chars':'m','--max-line-length':'L'},{},'wc');const {flags,rest}=simpleOptions(args,'lwmcL','wc'),chosen=['l','w','m','c','L'].filter(f=>flags.size?flags.has(f):'lwc'.includes(f)),inputs=shell.inputs(rest,stdin,'wc'),total={l:0,w:0,m:0,c:0,L:0};
-    const rows=inputs.map(f=>{const counts={l:(f.text.match(/\n/g)||[]).length,w:(f.text.match(/\S+/g)||[]).length,m:Array.from(f.text).length,c:bytes(f.text),L:asLines(f.text).reduce((max,line)=>{let col=0;for(const c of line)col=c==='\t'?col+8-col%8:col+displayWidth(c);return Math.max(max,col);},0)};for(const k of chosen)total[k]=k==='L'?Math.max(total[k],counts[k]):total[k]+counts[k];return chosen.map(k=>counts[k]).join(' ')+(rest.length?' '+f.name:'');});if(inputs.length>1)rows.push(chosen.map(k=>total[k]).join(' ')+' total');return lineOutput(rows);
+    const rows=inputs.map(f=>{const counts={l:(f.text.match(/\n/g)||[]).length,w:(f.text.match(/\S+/g)||[]).length,m:Array.from(f.text).length,c:bytes(f.text),L:asLines(f.text).reduce((max,line)=>{let col=0;for(const c of line)col=c==='\t'?col+8-col%8:col+displayWidth(c);return Math.max(max,col);},0)};for(const k of chosen)total[k]=k==='L'?Math.max(total[k],counts[k]):total[k]+counts[k];return {counts,name:rest.length?f.name:null};});
+    const width=chosen.length===1&&inputs.length===1?1:rest.length&&!rest.includes('-')?String(inputs.reduce((n,f)=>n+bytes(f.text),0)).length:7;
+    if(inputs.length>1)rows.push({counts:total,name:'total'});return lineOutput(rows.map(({counts,name})=>chosen.map(k=>String(counts[k]).padStart(width)).join(' ')+(name===null?'':' '+name)));
+
   }
   function runFind(shell,args) {
-    let path='.',type=null,min=0,max=Infinity,i=0;const predicates=[];if(args[0]&&!args[0].startsWith('-'))path=args[i++];
-    for(;i<args.length;i++){const flag=args[i],value=args[++i];if(value===undefined)usageError('find',flag+' requires a value');if(flag==='-type'){if(value!=='f'&&value!=='d')usageError('find','-type supports f or d');type=value;}else if(flag==='-maxdepth')max=positive(value,'find','maximum depth',true);else if(flag==='-mindepth')min=positive(value,'find','minimum depth',true);else if(['-name','-iname','-path','-ipath'].includes(flag))predicates.push({flag,value});else usageError('find','unsupported predicate '+flag);}
+    let path='.',min=0,max=Infinity,i=0,explicitAction=false;const operations=[];
+    if(args[0]&&!args[0].startsWith('-'))path=args[i++];
+    for(;i<args.length;i++){const flag=args[i];
+      if(flag==='-print'||flag==='-print0'){operations.push({flag});explicitAction=true;continue;}
+      if(flag==='-exec'){const command=args[++i],argv=[];while(i+1<args.length&&args[i+1]!==';'&&args[i+1]!=='+')argv.push(args[++i]);const terminator=args[++i];if(!command||!terminator)usageError('find','-exec requires a virtual command and a quoted or escaped ; (or +) terminator');if(!COMMANDS.includes(command)||['find','xargs'].includes(command))usageError('find','-exec supports existing virtual commands without nested find/xargs');if(terminator==='+'&&(argv.at(-1)!=='{}'||argv.filter(a=>a.includes('{}')).length!==1))usageError('find','-exec ... + requires one {} argument at the end');operations.push({flag,command,argv,batch:terminator==='+',pending:[]});explicitAction=true;continue;}
+      const value=args[++i];if(value===undefined)usageError('find',flag+' requires a value');
+      if(flag==='-maxdepth')max=positive(value,'find','maximum depth',true);else if(flag==='-mindepth')min=positive(value,'find','minimum depth',true);else if(flag==='-type'){if(!['f','d'].includes(value))usageError('find','-type supports f or d');operations.push({flag,value});}else if(['-name','-iname','-path','-ipath'].includes(flag))operations.push({flag,value});else usageError('find','unsupported predicate '+flag);
+    }
+    if(!explicitAction)operations.push({flag:'-print'});
     const start=shell.resolve(path);if(!shell.isFile(start)&&!shell.isDir(start))fail('find: '+path+': No such file or directory',1);const label=p=>path.startsWith('/')?p:path==='.'?(p===shell.cwd?'.':'./'+shell.relative(p)):path.replace(/\/$/,'')+p.slice(start.length);
-    return lineOutput(shell.allPaths().filter(p=>{if(p!==start&&!p.startsWith(start==='/'?'/':start+'/'))return false;const depth=p===start?0:p.slice(start==='/'?1:start.length+1).split('/').length;return depth>=min&&depth<=max&&(!type||(type==='f'?shell.isFile(p):shell.isDir(p)))&&predicates.every(pred=>globMatch(pred.value,pred.flag.includes('path')?label(p):basename(p),pred.flag.startsWith('-i')));}).map(label));
+    let stdout='',stderr='',code=0,invocations=0;const events=[];
+    const emit=(fd,text)=>{if(!text)return;events.push([fd,text]);if(fd===1)stdout+=text;else stderr+=text;if(stdout.length+stderr.length>MAX_OUTPUT)usageError('find','combined output exceeds the browser limit');};
+    const execute=(operation,argv)=>{if(++invocations>256)usageError('find','at most 256 command invocations may run');let result;try{result=shell.execute(operation.command,argv,'',{hasStdin:false});}catch(e){if(!(e instanceof ShellError))throw e;result={stdout:'',stderr:e.message+'\n',code:e.code};}for(const [fd,text] of result.events||[[1,result.stdout],[2,result.stderr]])emit(fd,text);return result.code||0;};
+    for(const p of shell.allPaths()){if(p!==start&&!p.startsWith(start==='/'?'/':start+'/'))continue;const depth=p===start?0:p.slice(start==='/'?1:start.length+1).split('/').length;if(depth<min||depth>max)continue;const name=label(p);
+      for(const operation of operations){const {flag,value}=operation;
+        if(flag==='-print'||flag==='-print0')emit(1,name+(flag==='-print0'?'\0':'\n'));
+        else if(flag==='-exec'){if(operation.batch)operation.pending.push(name);else if(execute(operation,operation.argv.map(arg=>arg.split('{}').join(name))))break;}
+        else if(flag==='-type'){if(value==='f'?!shell.isFile(p):!shell.isDir(p))break;}
+        else if(!globMatch(value,flag.includes('path')?name:basename(p),flag.startsWith('-i')))break;
+      }
+    }
+    for(const operation of operations)if(operation.batch)for(let at=0;at<operation.pending.length;at+=256)if(execute(operation,[...operation.argv.slice(0,-1),...operation.pending.slice(at,at+256)]))code=1;
+    return {stdout,stderr,code,events};
   }
   function sedScripts(source) {
     const out=[];let at=0;
@@ -628,6 +711,32 @@
     let items=replace!==null?asLines(stdin).filter(s=>s.trim()!==''):zero||delimiter!==null?stdin.split(zero?'\0':delimiter):xargsWords(stdin);if((zero||delimiter!==null)&&items[items.length-1]==='')items.pop();if(!items.length&&noEmpty)return {stdout:'',stderr:'',code:0};const size=replace!==null?1:number||Math.max(1,items.length),batches=[];for(let i=0;i<items.length;i+=size)batches.push(items.slice(i,i+size));if(!batches.length)batches.push([]);if(batches.length>256)usageError('xargs','at most 256 batches may run');let stdout='',stderr='',code=0;
     for(const batch of batches){const argv=replace!==null?fixed.map(arg=>arg.split(replace).join(batch[0]||'')):[...fixed,...batch];let result;try{result=shell.execute(command,argv,'',{hasStdin:false});}catch(e){if(!(e instanceof ShellError))throw e;result={stdout:'',stderr:e.message+'\n',code:e.code};}stdout+=result.stdout||'';stderr+=result.stderr||'';if(result.code)code=123;if(stdout.length>MAX_OUTPUT)usageError('xargs','combined output exceeds the browser limit');}return {stdout,stderr,code};
   }
+  function runCat(shell,args,stdin) {
+    args=longOptions(args,{'--number':'n','--show-all':'A','--show-nonprinting':'v','--show-tabs':'T','--show-ends':'E'},{},'cat');
+    const {flags,rest}=simpleOptions(args,'nAvTEet','cat'),visible=flags.has('v')||flags.has('A')||flags.has('e')||flags.has('t'),tabs=flags.has('T')||flags.has('A')||flags.has('t'),ends=flags.has('E')||flags.has('A')||flags.has('e');
+    let stdout='',stderr='',code=0,lineNumber=0,lineStart=true,pendingCR=false;const events=[];
+    const shownByte=n=>n===127?'^?':n<32?'^'+String.fromCharCode(n+64):String.fromCharCode(n);
+    const show=text=>{let out='';for(const c of text){if(pendingCR){out+=c==='\n'?'^M':'\r';pendingCR=false;}if(lineStart){if(flags.has('n'))out+=String(++lineNumber).padStart(6)+'\t';lineStart=false;}if(c==='\n'){out+=(ends?'$':'')+'\n';lineStart=true;}else if(c==='\t')out+=tabs?'^I':'\t';else if(c==='\r'&&ends&&!visible)pendingCR=true;else if(visible)for(const byte of new TextEncoder().encode(c))out+=byte>=128?'M-'+shownByte(byte-128):shownByte(byte);else out+=c;}return out;};
+    for(const path of rest.length?rest:['-'])try{const text=show(path==='-'?stdin:shell.read(path,'cat'));stdout+=text;events.push([1,text]);}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';events.push([2,e.message+'\n']);code=1;}
+    if(pendingCR){stdout+='\r';events.push([1,'\r']);}return {stdout,stderr,code,events};
+  }
+  // Fixed-size, synchronous digest implementations keep the standalone HTML fully offline.
+  function textDigest(text,algorithm) {
+    const input=new TextEncoder().encode(text),length=Math.ceil((input.length+9)/64)*64,data=new Uint8Array(length),view=new DataView(data.buffer);data.set(input);data[input.length]=128;
+    const little=algorithm==='md5sum';view.setUint32(length-(little?8:4),input.length*8,little);view.setUint32(length-(little?4:8),Math.floor(input.length/0x20000000),little);
+    if(little){let state=[0x67452301,0xefcdab89,0x98badcfe,0x10325476];const shifts=[7,12,17,22,5,9,14,20,4,11,16,23,6,10,15,21],constants=Array.from({length:64},(_,i)=>Math.floor(Math.abs(Math.sin(i+1))*0x100000000));
+      for(let offset=0;offset<length;offset+=64){let [a,b,c,d]=state;for(let i=0;i<64;i++){let f,g;if(i<16){f=(b&c)|(~b&d);g=i;}else if(i<32){f=(d&b)|(~d&c);g=(5*i+1)%16;}else if(i<48){f=b^c^d;g=(3*i+5)%16;}else{f=c^(b|~d);g=(7*i)%16;}const sum=(a+f+constants[i]+view.getUint32(offset+g*4,true))|0,shift=shifts[Math.floor(i/16)*4+i%4],previousD=d;d=c;c=b;b=(b+((sum<<shift)|(sum>>>(32-shift))))|0;a=previousD;}state=state.map((v,i)=>(v+[a,b,c,d][i])>>>0);}
+      return state.map(word=>[0,8,16,24].map(shift=>((word>>>shift)&255).toString(16).padStart(2,'0')).join('')).join('');
+    }
+    const constants=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2],rotate=(x,n)=>(x>>>n)|(x<<(32-n)),words=new Uint32Array(64);let state=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+    for(let offset=0;offset<length;offset+=64){for(let i=0;i<16;i++)words[i]=view.getUint32(offset+i*4);for(let i=16;i<64;i++){const x=words[i-15],y=words[i-2],s0=rotate(x,7)^rotate(x,18)^(x>>>3),s1=rotate(y,17)^rotate(y,19)^(y>>>10);words[i]=(words[i-16]+s0+words[i-7]+s1)>>>0;}let [a,b,c,d,e,f,g,h]=state;
+      for(let i=0;i<64;i++){const s1=rotate(e,6)^rotate(e,11)^rotate(e,25),choice=(e&f)^(~e&g),t1=(h+s1+choice+constants[i]+words[i])>>>0,s0=rotate(a,2)^rotate(a,13)^rotate(a,22),majority=(a&b)^(a&c)^(b&c),t2=(s0+majority)>>>0;h=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0;}state=state.map((v,i)=>(v+[a,b,c,d,e,f,g,h][i])>>>0);
+    }return state.map(word=>word.toString(16).padStart(8,'0')).join('');
+  }
+  function runChecksum(shell,cmd,args,stdin) {
+    args=longOptions(args,{'--binary':'b','--text':'t'},{},cmd);const {flags,rest}=simpleOptions(args,'bt',cmd);if(flags.has('b')&&flags.has('t'))usageError(cmd,'choose either binary or text mode');let stdout='',stderr='',code=0;const events=[];
+    for(const name of rest.length?rest:['-'])try{const digest=textDigest(name==='-'?stdin:shell.read(name,cmd),cmd),escaped=/[\\\n\r]/.test(name),label=name.replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/\r/g,'\\r'),line=(escaped?'\\':'')+digest+' '+(flags.has('b')?'*':' ')+label+'\n';stdout+=line;events.push([1,line]);}catch(e){if(!(e instanceof ShellError))throw e;stderr+=e.message+'\n';events.push([2,e.message+'\n']);code=1;}return {stdout,stderr,code,events};
+  }
   function runStrings(shell,args,stdin) {
     const {values,rest}=parseValued(args,'a','nt','strings'),minimum=values.n===undefined?4:positive(values.n,'strings','minimum length');if(values.t!==undefined&&!['d','o','x'].includes(values.t))usageError('strings','offset radix must be d, o, or x');const out=[];
     for(const input of shell.inputs(rest,stdin,'strings')){const re=new RegExp('[\\x20-\\x7e\\t]{'+minimum+',}','g');let match;while((match=re.exec(input.text))!==null){let prefix='';if(values.t!==undefined)prefix=bytes(input.text.slice(0,match.index)).toString(values.t==='d'?10:values.t==='o'?8:16).padStart(7)+' ';out.push(prefix+match[0]);}}return lineOutput(out);
@@ -641,9 +750,9 @@
   }
   function runMetadata(shell,cmd,args) {
     if(cmd==='file'){const {flags,rest}=simpleOptions(args,'bi',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(path=>{const p=shell.resolve(path);let description;if(shell.isDir(p))description=flags.has('i')?'inode/directory; charset=binary':'directory';else if(!shell.isFile(p))fail('file: '+path+': No such file or directory',1);else{const text=shell.files[p],ascii=/^[\x00-\x7f]*$/.test(text),binary=/[\x00-\x08\x0e-\x1f]/.test(text);if(flags.has('i'))description=(binary?'application/octet-stream':text.trim()&&(()=>{try{JSON.parse(text);return true;}catch(_){return false;}})()?'application/json':'text/plain')+'; charset='+(binary?'binary':ascii?'us-ascii':'utf-8');else if(!text)description='empty';else if(binary)description='data';else{let json=false,jsonl=false;try{JSON.parse(text);json=true;}catch(_){try{const rows=asLines(text).filter(s=>s.trim());if(rows.length>1){rows.forEach(s=>JSON.parse(s));jsonl=true;}}catch(_){}}description=json?'JSON text data':jsonl?'JSON Lines text data':ascii?'ASCII text':'UTF-8 Unicode text';}}return (flags.has('b')?'':path+': ')+description;}));}
-    if(cmd==='stat'){const {values,rest}=parseValued(args,'','c',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(path=>{const p=shell.resolve(path),dir=shell.isDir(p);if(!dir&&!shell.isFile(p))fail('stat: '+path+': No such file or directory',1);const meta=shell.getMetadata(p),data={y:new Date(meta.mtime).toISOString().replace('T',' ').replace('Z',' +0000'),Y:String(Math.floor(meta.mtime/1000)),n:path,s:String(dir?0:bytes(shell.files[p])),F:dir?'directory':'regular file',a:dir?'755':'644',A:dir?'drwxr-xr-x':'-rw-r--r--'};if(values.c!==undefined)return values.c.replace(/%(%|[A-Za-z])/g,(_,key)=>{if(key==='%')return '%';if(!Object.prototype.hasOwnProperty.call(data,key))usageError(cmd,'unsupported format %'+key);return data[key];});return '  File: '+path+'\n  Size: '+data.s+' bytes\n  Type: '+data.F+'\n  Mode: '+data.a+' ('+data.A+', virtual)';}));}
-    let depth=Infinity;const cleaned=[];let after=false;for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--'){after=true;cleaned.push(arg);continue;}if(!after&&(arg==='--max-depth'||arg.startsWith('--max-depth='))){const value=arg.includes('=')?arg.slice(arg.indexOf('=')+1):args[++i];depth=positive(value,'du','maximum depth',true);}else cleaned.push(arg);}const {flags,rest}=simpleOptions(cleaned,'ashbc',cmd),paths=rest.length?rest:['.'],out=[];let total=0;const counted=new Set();if(flags.has('b')&&flags.has('h'))usageError(cmd,'choose -b or -h');const logical=p=>shell.isFile(p)?bytes(shell.files[p]):Object.entries(shell.files).reduce((n,[file,text])=>n+(file.startsWith(p==='/'?'/':p+'/')?bytes(text):0),0),show=n=>flags.has('b')?String(n):flags.has('h')?humanSize(n):String(Math.ceil(n/1024));
-    for(const path of paths){const start=shell.resolve(path);if(!shell.isFile(start)&&!shell.isDir(start))fail('du: '+path+': No such file or directory',1);if(!counted.has(start)){total+=logical(start);counted.add(start);}if(flags.has('s')||shell.isFile(start)){out.push(show(logical(start))+'\t'+path);continue;}const all=shell.allPaths().filter(p=>p===start||p.startsWith(start==='/'?'/':start+'/')).filter(p=>flags.has('a')||shell.isDir(p)).filter(p=>(p===start?0:p.slice(start==='/'?1:start.length+1).split('/').length)<=depth).sort((a,b)=>b.split('/').length-a.split('/').length||cmp(a,b));for(const p of all)out.push(show(logical(p))+'\t'+(p===start?path:path.replace(/\/$/,'')+p.slice(start.length)));}if(flags.has('c'))out.push(show(total)+'\ttotal');return lineOutput(out);
+    if(cmd==='stat'){const {values,rest}=parseValued(args,'','c',cmd);if(!rest.length)usageError(cmd,'missing path');return lineOutput(rest.map(path=>{const p=shell.resolve(path),dir=shell.isDir(p);if(!dir&&!shell.isFile(p))fail('stat: '+path+': No such file or directory',1);const meta=shell.getMetadata(p),data={y:new Date(meta.mtime).toISOString().replace('T',' ').replace('Z',' +0000'),Y:String(Math.floor(meta.mtime/1000)),n:path,s:String(apparentSize(shell,p)),F:dir?'directory':'regular file',a:dir?'755':'644',A:dir?'drwxr-xr-x':'-rw-r--r--'};if(values.c!==undefined)return values.c.replace(/%(%|[A-Za-z])/g,(_,key)=>{if(key==='%')return '%';if(!Object.prototype.hasOwnProperty.call(data,key))usageError(cmd,'unsupported format %'+key);return data[key];});return '  File: '+path+'\n  Size: '+data.s+' bytes\n  Type: '+data.F+'\n  Mode: '+data.a+' ('+data.A+', virtual)';}));}
+    let depth=Infinity;const cleaned=[];let after=false;for(let i=0;i<args.length;i++){const arg=args[i];if(arg==='--'){after=true;cleaned.push(arg);continue;}if(!after&&(arg==='--max-depth'||arg.startsWith('--max-depth='))){const value=arg.includes('=')?arg.slice(arg.indexOf('=')+1):args[++i];depth=positive(value,'du','maximum depth',true);}else cleaned.push(arg);}const {flags,rest}=simpleOptions(cleaned,'ashbc',cmd),paths=rest.length?rest:['.'],out=[];let total=0;const counted=new Set();if(flags.has('b')&&flags.has('h'))usageError(cmd,'choose -b or -h');const nodes=p=>shell.allPaths().filter(x=>x===p||shell.isDir(p)&&x.startsWith(p==='/'?'/':p+'/')),size=p=>flags.has('b')?apparentSize(shell,p):allocatedSize(shell,p),logical=p=>nodes(p).reduce((n,x)=>n+size(x),0),show=n=>flags.has('b')?String(n):flags.has('h')?humanSize(n):String(Math.ceil(n/1024));
+    for(const path of paths){const start=shell.resolve(path);if(!shell.isFile(start)&&!shell.isDir(start))fail('du: '+path+': No such file or directory',1);for(const node of nodes(start))if(!counted.has(node)){total+=size(node);counted.add(node);}if(flags.has('s')||shell.isFile(start)){out.push(show(logical(start))+'\t'+path);continue;}const all=shell.allPaths().filter(p=>p===start||p.startsWith(start==='/'?'/':start+'/')).filter(p=>flags.has('a')||shell.isDir(p)).filter(p=>(p===start?0:p.slice(start==='/'?1:start.length+1).split('/').length)<=depth).sort((a,b)=>b.split('/').length-a.split('/').length||cmp(a,b));for(const p of all)out.push(show(logical(p))+'\t'+(p===start?path:path.replace(/\/$/,'')+p.slice(start.length)));}if(flags.has('c'))out.push(show(total)+'\ttotal');return lineOutput(out);
   }
   function runDate(args) {
     args=longOptions(args,{'--utc':'u','--universal':'u'},{'--date':'d'},'date');const {flags,values,rest}=parseValued(args,'u','d','date');if(rest.length>1||rest.length&&rest[0][0]!=='+')usageError('date','use one +format operand');let date=new Date();if(values.d!==undefined){const value=values.d;if(/^@-?\d+(?:\.\d+)?$/.test(value))date=new Date(+value.slice(1)*1000);else{let normalized=value.replace(/ UTC$/,'Z').replace(' ','T');if(/^\d{4}-\d{2}-\d{2}$/.test(normalized))normalized+='T00:00:00Z';if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:?\d{2})$/.test(normalized))usageError('date','-d accepts an ISO date with timezone, YYYY-MM-DD, or @epoch; relative dates are unsupported');const y=+normalized.slice(0,4),m=+normalized.slice(5,7),d=+normalized.slice(8,10);if(m<1||m>12||d<1||d>new Date(Date.UTC(y,m,0)).getUTCDate())usageError('date','invalid calendar date');date=new Date(normalized);}if(!Number.isFinite(date.getTime()))usageError('date','invalid date');}
@@ -780,49 +889,88 @@
   }
 
   /* A small parsed awk interpreter. It deliberately never evaluates JavaScript. */
+  function awkRegexStart(source, at) {
+    const before=source.slice(0,at).trimEnd();
+    return !before || /(?:^|\W)(?:print|printf)\s*$/.test(before) || !/[\w\])"']$/.test(before)&&!/(?:\+\+|--)$/.test(before);
+  }
+  function awkNumber(value) {return parseFloat(value)||0;}
+  function awkString(value) {
+    if(typeof value!=='number')return String(value);
+    if(Number.isInteger(value))return String(value);
+    return Number(value.toPrecision(6)).toString().replace(/e([+-])(\d)$/, 'e$10$2');
+  }
   function awkExpr(source) {
     const tokens=[];let i=0;
-    while(i<source.length){const c=source[i];if(/\s/.test(c)){i++;continue;}if(c==='"'||c==='\''){const q=c;let value='';i++;let closed=false;while(i<source.length){let x=source[i++];if(x===q){closed=true;break;}if(x==='\\'&&i<source.length){x=source[i++];value+=({n:'\n',t:'\t',r:'\r'}[x]||x);}else value+=x;}if(!closed)usageError('awk','unclosed string');tokens.push({type:'literal',value});continue;}
-      if(c==='/'){let p='',closed=false;i++;while(i<source.length){const x=source[i++];if(x==='\\'&&i<source.length){p+=x+source[i++];continue;}if(x==='/'){closed=true;break;}p+=x;}if(!closed)usageError('awk','unclosed regex');tokens.push({type:'regex',value:regex(p)});continue;}
-      const number=source.slice(i).match(/^(?:\d+(?:\.\d*)?|\.\d+)/);if(number){tokens.push({type:'literal',value:+number[0]});i+=number[0].length;continue;}
+    while(i<source.length){const c=source[i];if(/\s/.test(c)){i++;continue;}
+      if(c==='"'){let value='';i++;let closed=false;while(i<source.length){let x=source[i++];if(x==='"'){closed=true;break;}if(x==='\\'&&i<source.length){x=source[i++];const escape={n:'\n',t:'\t',r:'\r',b:'\b',f:'\f',v:'\v',a:'\x07','\\':'\\','"':'"'};if(/[0-7]/.test(x)){const m=(x+source.slice(i)).match(/^[0-7]{1,3}/)[0];value+=String.fromCharCode(parseInt(m,8));i+=m.length-1;}else value+=Object.prototype.hasOwnProperty.call(escape,x)?escape[x]:x;}else value+=x;}if(!closed)usageError('awk','unclosed string');tokens.push({type:'literal',value});continue;}
+      if(c==='/'&&awkRegexStart(source,i)){let p='',closed=false;i++;while(i<source.length){const x=source[i++];if(x==='\\'&&i<source.length){p+=x+source[i++];continue;}if(x==='/'){closed=true;break;}p+=x;}if(!closed)usageError('awk','unclosed regex');tokens.push({type:'regex',value:regex(p)});continue;}
+      const number=source.slice(i).match(/^(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/);if(number){tokens.push({type:'literal',value:+number[0]});i+=number[0].length;continue;}
       const identifier=source.slice(i).match(/^[A-Za-z_][A-Za-z0-9_]*/);if(identifier){tokens.push({type:'id',value:identifier[0]});i+=identifier[0].length;continue;}
-      const op=source.slice(i).match(/^(?:&&|\|\||==|!=|<=|>=|!~|[~<>+*%$(),!\-])/);if(op){tokens.push({type:'op',value:op[0]});i+=op[0].length;continue;}
+      const op=source.slice(i).match(/^(?:\+\+|--|&&|\|\||==|!=|<=|>=|!~|[~<>+*/%$(),!\[\]\-])/);if(op){tokens.push({type:'op',value:op[0]});i+=op[0].length;continue;}
       usageError('awk','unsupported expression near '+source.slice(i,20));
     }
     let at=0;const peek=v=>tokens[at]&&tokens[at].value===v,accept=v=>peek(v)?(at++,true):false,need=v=>{if(!accept(v))usageError('awk','expected '+v);};
     const literal=value=>({type:'literal',value});
-    function primary(){const t=tokens[at++];if(!t)usageError('awk','incomplete expression');if(t.type==='literal'||t.type==='regex')return {type:t.type,value:t.value};if(t.value==='('){const n=or();need(')');return n;}if(t.value==='$')return {type:'field',index:primary()};if(t.type==='id'){if(accept('(')){if(!['tolower','toupper','length','int'].includes(t.value))usageError('awk','unsupported function '+t.value);const value=peek(')')?{type:'field',index:literal(0)}:or();need(')');return {type:'call',name:t.value,value};}return {type:'var',name:t.value};}usageError('awk','unexpected '+t.value);}
-    function unary(){if(accept('!'))return {type:'unary',op:'!',value:unary()};if(accept('-'))return {type:'unary',op:'-',value:unary()};if(accept('+'))return {type:'unary',op:'+',value:unary()};return primary();}
-    function multiply(){let n=unary();while(peek('*')||peek('%')){const op=tokens[at++].value;n={type:'binary',op,left:n,right:unary()};}return n;}
+    const assignable=n=>n&&['var','field','array'].includes(n.type);
+    function primary(){const t=tokens[at++];if(!t)usageError('awk','incomplete expression');if(t.type==='literal'||t.type==='regex')return {type:t.type,value:t.value};if(t.value==='('){const n=or();need(')');return n;}if(t.value==='$')return {type:'field',index:primary()};if(t.type==='id'){
+        if(accept('(')){if(!['tolower','toupper','length','int','substr'].includes(t.value))usageError('awk','unsupported function '+t.value);const args=[];if(!peek(')')){do{args.push(or());}while(accept(','));}need(')');if(t.value==='substr'?args.length<2||args.length>3:t.value==='length'?args.length>1:args.length!==1)usageError('awk','invalid argument count for '+t.value);if(!args.length)args.push({type:'field',index:literal(0)});return {type:'call',name:t.value,args};}
+        if(accept('[')){const key=or();need(']');return {type:'array',name:t.value,key};}return {type:'var',name:t.value};}usageError('awk','unexpected '+t.value);}
+    function postfix(){let n=primary();if(peek('++')||peek('--')){if(!assignable(n))usageError('awk','increment requires a variable or field');n={type:'increment',target:n,step:tokens[at++].value==='++'?1:-1};}return n;}
+    function unary(){if(peek('!')||peek('-')||peek('+'))return {type:'unary',op:tokens[at++].value,value:unary()};return postfix();}
+    function multiply(){let n=unary();while(peek('*')||peek('/')||peek('%')){const op=tokens[at++].value;n={type:'binary',op,left:n,right:unary()};}return n;}
     function add(){let n=multiply();while(peek('+')||peek('-')){const op=tokens[at++].value;n={type:'binary',op,left:n,right:multiply()};}return n;}
-    function compare(){let n=add();while(tokens[at]&&['==','!=','<','<=','>','>=','~','!~'].includes(tokens[at].value)){const op=tokens[at++].value;n={type:'binary',op,left:n,right:add()};}return n;}
+    function concat(){let n=add();while(tokens[at]&&(tokens[at].type==='literal'||tokens[at].type==='id'||peek('$')||peek('(')))n={type:'binary',op:'concat',left:n,right:add()};return n;}
+    function compare(){let n=concat();while(tokens[at]&&['==','!=','<','<=','>','>=','~','!~'].includes(tokens[at].value)){const op=tokens[at++].value;n={type:'binary',op,left:n,right:concat()};}return n;}
     function and(){let n=compare();while(accept('&&'))n={type:'binary',op:'&&',left:n,right:compare()};return n;}
     function or(){let n=and();while(accept('||'))n={type:'binary',op:'||',left:n,right:and()};return n;}
-    const ast=or();if(at!==tokens.length)usageError('awk','unsupported expression; use commas between printed fields');
+    const ast=or();if(at!==tokens.length)usageError('awk','unsupported expression near '+tokens[at].value);
     const truth=(v,env)=>v instanceof RegExp?v.test(env.line):typeof v==='number'?v!==0:v!==''&&v!=='0';
+    const scalar=(v,env)=>v instanceof RegExp?+v.test(env.line):v;
+    function array(node,env){if(Object.prototype.hasOwnProperty.call(env.vars,node.name))usageError('awk',node.name+' is a scalar');return env.arrays[node.name]||(env.arrays[node.name]=new Map());}
+    function fieldIndex(node,env){const n=Math.trunc(awkNumber(evaluate(node.index,env)));if(n<0||n>10000)usageError('awk','field index must be 0–10000');return n;}
+    function assign(node,env,value){value=scalar(value,env);if(node.type==='var'){if(['NR','NF','FNR'].includes(node.name))usageError('awk','assigning record counters is unsupported');if(env.arrays[node.name])usageError('awk',node.name+' is an array');env.vars[node.name]=value;}
+      else if(node.type==='array')array(node,env).set(awkString(evaluate(node.key,env)),value);
+      else if(node.type==='field'){const n=fieldIndex(node,env);if(n===0){env.line=awkString(value);env.fields=env.split(env.line);}else{while(env.fields.length<n)env.fields.push('');env.fields[n-1]=awkString(value);env.line=env.fields.join(awkString(env.vars.OFS));}}
+      else usageError('awk','assignment requires a variable or field');return value;}
     function evaluate(node,env){
       if(node.type==='literal'||node.type==='regex')return node.value;
-      if(node.type==='var')return node.name==='NF'?env.fields.length:node.name==='NR'||node.name==='FNR'?env[node.name]:Object.prototype.hasOwnProperty.call(env.vars,node.name)?env.vars[node.name]:0;
-      if(node.type==='field'){const n=Math.trunc(Number(evaluate(node.index,env)));if(n<0)usageError('awk','negative field index');return n===0?env.line:env.fields[n-1]||'';}
-      if(node.type==='call'){const v=evaluate(node.value,env);return node.name==='tolower'?String(v).toLowerCase():node.name==='toupper'?String(v).toUpperCase():node.name==='length'?String(v).length:Math.trunc(Number(v)||0);}
-      if(node.type==='unary'){const v=evaluate(node.value,env);return node.op==='!'?+!truth(v,env):node.op==='-'?-(Number(v)||0):(Number(v)||0);}
-      const a=evaluate(node.left,env);if(node.op==='&&')return +(truth(a,env)&&truth(evaluate(node.right,env),env));if(node.op==='||')return +(truth(a,env)||truth(evaluate(node.right,env),env));const b=evaluate(node.right,env);
-      if(node.op==='~'||node.op==='!~'){const re=b instanceof RegExp?b:regex(String(b));return +(re.test(String(a))!==(node.op==='!~'));}
-      if(node.op==='+'||node.op==='-'||node.op==='*'||node.op==='%'){const x=Number(a)||0,y=Number(b)||0;return node.op==='+'?x+y:node.op==='-'?x-y:node.op==='*'?x*y:y?x%y:0;}
-      const numeric=v=>typeof v==='number'||(String(v).trim()!==''&&Number.isFinite(Number(v))),x=numeric(a)&&numeric(b)?Number(a):String(a),y=numeric(a)&&numeric(b)?Number(b):String(b);
+      if(node.type==='var'){if(env.arrays[node.name])usageError('awk',node.name+' is an array');return node.name==='NF'?env.fields.length:node.name==='NR'||node.name==='FNR'?env[node.name]:Object.prototype.hasOwnProperty.call(env.vars,node.name)?env.vars[node.name]:'';}
+      if(node.type==='array')return array(node,env).get(awkString(evaluate(node.key,env)))??'';
+      if(node.type==='field'){const n=fieldIndex(node,env);return n===0?env.line:env.fields[n-1]||'';}
+      if(node.type==='increment'){const before=awkNumber(evaluate(node.target,env));assign(node.target,env,before+node.step);return before;}
+      if(node.type==='call'){const values=node.args.map(n=>scalar(evaluate(n,env),env)),v=values[0];if(node.name==='substr'){const chars=Array.from(awkString(v)),start=Math.max(0,Math.trunc(awkNumber(values[1]))-1);return chars.slice(start,values.length===3?start+Math.max(0,Math.trunc(awkNumber(values[2]))):undefined).join('');}return node.name==='tolower'?awkString(v).toLowerCase():node.name==='toupper'?awkString(v).toUpperCase():node.name==='length'?Array.from(awkString(v)).length:Math.trunc(awkNumber(v));}
+      if(node.type==='unary'){const v=evaluate(node.value,env);return node.op==='!'?+!truth(v,env):node.op==='-'?-awkNumber(scalar(v,env)):awkNumber(scalar(v,env));}
+      const rawA=evaluate(node.left,env);if(node.op==='&&')return +(truth(rawA,env)&&truth(evaluate(node.right,env),env));if(node.op==='||')return +(truth(rawA,env)||truth(evaluate(node.right,env),env));const rawB=evaluate(node.right,env);
+      if(node.op==='~'||node.op==='!~'){const re=rawB instanceof RegExp?rawB:regex(awkString(rawB));return +(re.test(awkString(scalar(rawA,env)))!==(node.op==='!~'));}
+      const a=scalar(rawA,env),b=scalar(rawB,env);if(node.op==='concat')return awkString(a)+awkString(b);
+      if(['+','-','*','/','%'].includes(node.op)){const x=awkNumber(a),y=awkNumber(b);if((node.op==='/'||node.op==='%')&&!y)fail('awk: division by zero',2);return node.op==='+'?x+y:node.op==='-'?x-y:node.op==='*'?x*y:node.op==='/'?x/y:x%y;}
+      const numeric=v=>typeof v==='number'||(String(v).trim()!==''&&Number.isFinite(Number(v))),x=numeric(a)&&numeric(b)?Number(a):awkString(a),y=numeric(a)&&numeric(b)?Number(b):awkString(b);
       return +(node.op==='=='?x===y:node.op==='!='?x!==y:node.op==='<'?x<y:node.op==='<='?x<=y:node.op==='>'?x>y:x>=y);
     }
-    return {value:env=>evaluate(ast,env),test:env=>truth(evaluate(ast,env),env)};
+    return {value:env=>scalar(evaluate(ast,env),env),test:env=>truth(evaluate(ast,env),env),assign:assignable(ast)?(env,value)=>assign(ast,env,value):null};
   }
-  function splitAwkArgs(source) {
-    const out=[];let start=0,depth=0,quote=null,slash=false;
-    for(let i=0;i<source.length;i++){const c=source[i];if(c==='\\'){i++;continue;}if(quote){if(c===quote)quote=null;continue;}if(slash){if(c==='/')slash=false;continue;}if(c==='"'||c==='\''){quote=c;continue;}if(c==='/'){slash=true;continue;}if(c==='(')depth++;if(c===')')depth--;if(c===','&&depth===0){out.push(source.slice(start,i));start=i+1;}}
+  function awkParts(source,delimiter) {
+    const out=[];let start=0,depth=0,quote=false,slash=false;
+    for(let i=0;i<source.length;i++){const c=source[i];if(c==='\\'){i++;continue;}if(quote){if(c==='"')quote=false;continue;}if(slash){if(c==='/')slash=false;continue;}if(c==='"'){quote=true;continue;}if(c==='/'&&awkRegexStart(source,i)){slash=true;continue;}if(c==='('||c==='[')depth++;if(c===')'||c===']')depth--;if(c===delimiter&&depth===0){out.push(source.slice(start,i));start=i+1;}}
     out.push(source.slice(start));return out;
   }
+  function splitAwkArgs(source) {return awkParts(source,',');}
   function awkBlocks(program) {
-    const blocks=[];let start=0,open=-1,quote=null,slash=false;
-    for(let i=0;i<program.length;i++){const c=program[i];if(c==='\\'){i++;continue;}if(quote){if(c===quote)quote=null;continue;}if(slash){if(c==='/')slash=false;continue;}if(c==='"'||c==='\''){quote=c;continue;}if(c==='/'){slash=true;continue;}if(c==='{'){if(open!==-1)usageError('awk','nested blocks are unsupported');open=i;}if(c==='}'){if(open===-1)usageError('awk','unmatched closing brace');blocks.push({pattern:program.slice(start,open).trim(),action:program.slice(open+1,i).trim().replace(/;\s*$/,'')});open=-1;start=i+1;}}
-    if(open!==-1)usageError('awk','unclosed block');const tail=program.slice(start).trim();if(tail){if(blocks.length)usageError('awk','unexpected text after block');blocks.push({pattern:tail,action:'print'});}return blocks;
+    const blocks=[];let start=0,open=-1,quote=false,slash=false;
+    for(let i=0;i<program.length;i++){const c=program[i];if(c==='\\'){i++;continue;}if(quote){if(c==='"')quote=false;continue;}if(slash){if(c==='/')slash=false;continue;}if(c==='"'){quote=true;continue;}if(c==='/'&&awkRegexStart(program,i)){slash=true;continue;}if(c==='{'){if(open!==-1)usageError('awk','nested blocks are unsupported');open=i;}if(c==='}'){if(open===-1)usageError('awk','unmatched closing brace');blocks.push({pattern:program.slice(start,open).trim(),action:program.slice(open+1,i).trim().replace(/;\s*$/,'')});open=-1;start=i+1;}}
+    if(open!==-1||quote||slash)usageError('awk','unclosed block, string, or regex');const tail=program.slice(start).trim();if(tail){if(blocks.length)usageError('awk','unexpected text after block');blocks.push({pattern:tail,action:'print'});}return blocks;
+  }
+  function awkPrintf(format,values) {
+    format=awkString(format);let out='',at=0;
+    for(let i=0;i<format.length;){if(format[i]!=='%'){out+=format[i++];continue;}const m=format.slice(i).match(/^%([-+ 0]*)(\d+)?(?:\.(\d+))?([%sdioxXufFeEgGc])/);if(!m)usageError('awk','unsupported format conversion near '+format.slice(i,i+12));i+=m[0].length;
+      const flags=m[1],width=+(m[2]||0),precision=m[3]===undefined?null:+m[3],type=m[4];if(width>4096||precision!==null&&precision>100)usageError('awk','format width/precision is too large');if(type==='%'){out+='%';continue;}if(at>=values.length)usageError('awk','not enough arguments for printf format');const value=values[at++];let text;
+      if(type==='s')text=precision===null?awkString(value):Array.from(awkString(value)).slice(0,precision).join('');
+      else if(type==='c')text=typeof value==='number'?String.fromCodePoint(Math.trunc(value)&255):Array.from(awkString(value))[0]||'\0';
+      else{const n=awkNumber(value);if(!Number.isFinite(n))usageError('awk','number is outside the supported finite range');if('diuoxX'.includes(type)){const integer=Math.trunc(n);if(!Number.isSafeInteger(integer)||'uoxX'.includes(type)&&integer<0)usageError('awk','integer is outside the supported safe range');text=integer.toString(type==='o'?8:'xX'.includes(type)?16:10);if(precision!==null){const negative=text.startsWith('-');text=(negative?text.slice(1):text).padStart(precision,'0');if(precision===0&&!integer)text='';if(negative)text='-'+text;}}
+        else if(type.toLowerCase()==='f')text=n.toFixed(precision===null?6:precision);else if(type.toLowerCase()==='e')text=n.toExponential(precision===null?6:precision);else{const p=precision===null?6:Math.max(1,precision),exponent=n===0?0:Math.floor(Math.log10(Math.abs(n)));text=exponent< -4||exponent>=p?n.toExponential(p-1).replace(/(\.\d*?)0+e/,'$1e').replace(/\.e/,'e'):n.toFixed(Math.max(0,p-exponent-1)).replace(/(\.\d*?)0+$/,'$1').replace(/\.$/,'');}
+        text=text.replace(/e([+-])(\d)$/,'e$10$2');if('XFEG'.includes(type))text=text.toUpperCase();if(n>=0&&(flags.includes('+')||flags.includes(' ')))text=(flags.includes('+')?'+':' ')+text;}
+      const count=Math.max(0,width-Array.from(text).length);if(flags.includes('-'))text+=' '.repeat(count);else if(flags.includes('0')&&!['s','c'].includes(type)&&!(precision!==null&&'diuoxX'.includes(type))){const sign=/^[-+ ]/.test(text)?text[0]:'';text=sign+'0'.repeat(count)+text.slice(sign.length);}else text=' '.repeat(count)+text;out+=text;if(out.length>MAX_OUTPUT)fail('awk: output exceeds the browser text limit',1);
+    }return out;
   }
   function runAwk(shell,args,stdin) {
     let separator=' ',program=null,after=false;const paths=[],initial=Object.create(null);
@@ -830,20 +978,23 @@
     if(program===null||!program.trim())usageError('awk','missing program');
     const blocks=awkBlocks(program);if(!blocks.length)usageError('awk','empty program');let main=null,end=null;const begins=[];
     for(const block of blocks){if(block.pattern==='BEGIN')begins.push(block);else if(block.pattern==='END'){if(end)usageError('awk','only one END block is supported');end=block;}else{if(main)usageError('awk','only one record block is supported');main=block;}}
-    const filter=main&&main.pattern?awkExpr(main.pattern):null;let printers=null,counter=null,aggregate=null,sum=null;
-    const compilePrint=action=>{const m=action.match(/^print(?:\s+([\s\S]*))?$/);if(!m)usageError('awk','unsupported action; use help awk');return m[1]?splitAwkArgs(m[1]).map(s=>awkExpr(s.trim())):[awkExpr('$0')];};
-    if(main){let m;if(/^print(?:\s|$)/.test(main.action))printers=compilePrint(main.action);else if((m=main.action.match(/^([A-Za-z_]\w*)\+\+$/)))counter=m[1];else if((m=main.action.match(/^([A-Za-z_]\w*)\s*\+=\s*([\s\S]+)$/)))sum={name:m[1],value:awkExpr(m[2])};else if((m=main.action.match(/^([A-Za-z_]\w*)\[([\s\S]+)\]\+\+$/)))aggregate={name:m[1],key:awkExpr(m[2]),values:new Map()};else if(main.action!=='')usageError('awk','unsupported action; use help awk');}
-    let endPrinters=null,aggregateOrder=null;
-    if(end){if(aggregate){const m=end.action.match(/^for\s*\(\s*([A-Za-z_]\w*)\s+in\s+([A-Za-z_]\w*)\s*\)\s*print\s+([\s\S]+)$/);if(!m||m[2]!==aggregate.name)usageError('awk','unsupported aggregate END block');const normalized=m[3].replace(/\s/g,''),forward=aggregate.name+'['+m[1]+'],'+m[1],reverse=m[1]+','+aggregate.name+'['+m[1]+']';if(normalized===forward)aggregateOrder='count';else if(normalized===reverse)aggregateOrder='key';else usageError('awk','aggregate output supports count[key], key or key, count[key]');}else endPrinters=compilePrint(end.action);}
-    const env={line:'',fields:[],NR:0,FNR:0,vars:Object.assign(Object.create(null),{FS:separator,OFS:' ',ORS:'\n'},initial)},out=[];
-    const render=v=>v instanceof RegExp?+v.test(env.line):String(v);
-    const emit=printers=>out.push(printers.map(p=>render(p.value(env))).join(String(env.vars.OFS))+String(env.vars.ORS));
-    for(const begin of begins)for(const statement of awkStatements(begin.action)){const assignment=statement.match(/^([A-Za-z_]\w*)\s*=\s*([\s\S]+)$/);if(assignment){if(['NR','NF','FNR'].includes(assignment[1]))usageError('awk','assigning record counters is unsupported');env.vars[assignment[1]]=awkExpr(assignment[2]).value(env);}else emit(compilePrint(statement));}
-    // AWK treats a one-character FS literally (except the special space value).
-    const fieldSeparator=String(env.vars.FS),fs=fieldSeparator===' '?null:fieldSeparator.length<=1?fieldSeparator:regex(fieldSeparator);
-    for(const input of shell.inputs(paths,stdin,'awk')){env.FNR=0;for(const line of asLines(input.text)){env.line=line;env.fields=fs===''?Array.from(line):fs?line.split(fs):line.trim()?line.trim().split(/\s+/):[];env.NR++;env.FNR++;if(!main||filter&&!filter.test(env))continue;if(printers)emit(printers);if(counter)env.vars[counter]=(Number(env.vars[counter])||0)+1;if(sum)env.vars[sum.name]=(Number(env.vars[sum.name])||0)+(Number(sum.value.value(env))||0);if(aggregate){const key=String(aggregate.key.value(env));aggregate.values.set(key,(aggregate.values.get(key)||0)+1);}}}
-    if(endPrinters)emit(endPrinters);if(aggregate&&aggregateOrder)for(const [key,count] of aggregate.values)out.push((aggregateOrder==='count'?count+String(env.vars.OFS)+key:key+String(env.vars.OFS)+count)+String(env.vars.ORS));return out.join('');
+    const env={line:'',fields:[],NR:0,FNR:0,vars:Object.assign(Object.create(null),{FS:separator,OFS:' ',ORS:'\n'},initial),arrays:Object.create(null)},out=[];let outputSize=0;
+    env.split=line=>{const fieldSeparator=awkString(env.vars.FS),fs=fieldSeparator===' '?null:fieldSeparator.length<=1?fieldSeparator:regex(fieldSeparator);return fs===''?Array.from(line):fs?line.split(fs):line.trim()?line.trim().split(/\s+/):[];};
+    const emit=text=>{outputSize+=text.length;if(outputSize>MAX_OUTPUT)fail('awk: output exceeds the browser text limit',1);out.push(text);};
+    const compileAction=action=>awkStatements(action).map(statement=>{
+      const print=statement.match(/^(print|printf)(?=\s|\(|$)([\s\S]*)$/);if(print){let content=print[2].trim();if(content.startsWith('(')){let depth=0,quoted=false,end=-1;for(let i=0;i<content.length;i++){const c=content[i];if(c==='\\'){i++;continue;}if(c==='"'){quoted=!quoted;continue;}if(quoted)continue;if(c==='(')depth++;if(c===')'&&!--depth){end=i;break;}}if(end===content.length-1)content=content.slice(1,-1);}
+        if(print[1]==='printf'&&!content)usageError('awk','printf requires a format');const values=content?splitAwkArgs(content).map(s=>awkExpr(s.trim())):[awkExpr('$0')];return ()=>{const rendered=values.map(p=>p.value(env));emit(print[1]==='printf'?awkPrintf(rendered[0],rendered.slice(1)):rendered.map(awkString).join(awkString(env.vars.OFS))+awkString(env.vars.ORS));};}
+      const assignment=statement.match(/^((?:\$(?:\d+|[A-Za-z_]\w*|\([^)]*\)))|(?:[A-Za-z_]\w*(?:\[[\s\S]+\])?))\s*(\+=|-=|\*=|\/=|%=|=)(?!=)\s*([\s\S]+)$/);
+      if(assignment){const target=awkExpr(assignment[1]),value=awkExpr(assignment[3]),op=assignment[2];if(!target.assign)usageError('awk','unsupported assignment target');return ()=>{const v=value.value(env);if(op==='=')target.assign(env,v);else{const a=awkNumber(target.value(env)),b=awkNumber(v);if((op==='/='||op==='%=')&&!b)fail('awk: division by zero',2);target.assign(env,op==='+='?a+b:op==='-='?a-b:op==='*='?a*b:op==='/='?a/b:a%b);}};}
+      if(/(?:\+\+|--)$/.test(statement)){const expression=awkExpr(statement);return ()=>expression.value(env);}usageError('awk','unsupported action; use help awk');
+    });
+    const beginActions=begins.flatMap(b=>compileAction(b.action)),mainActions=main?compileAction(main.action):[],filter=main&&main.pattern?awkExpr(main.pattern):null;let endActions=[];
+    if(end){const loop=end.action.match(/^for\s*\(\s*([A-Za-z_]\w*)\s+in\s+([A-Za-z_]\w*)\s*\)\s*([\s\S]+)$/);if(loop){const body=compileAction(loop[3]);endActions=[()=>{if(Object.prototype.hasOwnProperty.call(env.vars,loop[2]))usageError('awk',loop[2]+' is a scalar');for(const key of (env.arrays[loop[2]]||new Map()).keys()){env.vars[loop[1]]=key;for(const action of body)action();}}];}else endActions=compileAction(end.action);}
+    for(const action of beginActions)action();
+    // A one-character FS is literal; the special space value collapses whitespace.
+    for(const input of shell.inputs(paths,stdin,'awk')){env.FNR=0;for(const line of asLines(input.text)){env.line=line;env.fields=env.split(line);env.NR++;env.FNR++;if(!main||filter&&!filter.test(env))continue;for(const action of mainActions)action();}}
+    for(const action of endActions)action();return out.join('');
   }
-  function awkStatements(source) {const out=[];let start=0,quote=null;for(let i=0;i<source.length;i++){const c=source[i];if(c==='\\'){i++;continue;}if(quote){if(c===quote)quote=null;}else if(c==='"'||c==='\'')quote=c;else if(c===';'){const s=source.slice(start,i).trim();if(s)out.push(s);start=i+1;}}const tail=source.slice(start).trim();if(tail)out.push(tail);return out;}
+  function awkStatements(source) {return awkParts(source,';').map(s=>s.trim()).filter(Boolean);}
   root.LogLabShell=LogLabShell;
 })(globalThis);

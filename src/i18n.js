@@ -355,7 +355,7 @@
   "パスを加工する道具": "Path tools",
   "basenameは末尾の名前、dirnameは親の場所、realpathは整理した絶対パスを表示します。ファイルの改名や移動はしません。": "basename prints the final name, dirname its parent, and realpath a resolved absolute path. They do not rename or move files.",
   "ファイル情報": "File metadata",
-  "fileは形式、statは名前やバイト数、duは場所全体の大きさを調べます。教材のメタデータは仮想で、duは本文のサイズだけを合計します。": "file checks the format; stat reports details such as name and byte count; du measures usage. Metadata is virtual in this lab, and du sums content bytes only.",
+  "fileは形式、statは名前やバイト数、duは割当領域を調べます。教材は4 KiB単位の仮想割当です。du -bは見かけのサイズをバイト単位で表示します。": "file checks format, stat reports names and byte counts, and du measures allocated space. The lab simulates 4 KiB blocks; du -b reports apparent size in bytes.",
   "UTCとUNIX時刻": "UTC and UNIX time",
   "ZはUTC、+09:00はUTCから9時間進んだ表記です。date -u -dでUTCへそろえ、@秒数ならUNIX時刻を指定できます。": "Z means UTC; +09:00 is nine hours ahead. date -u -d converts a supplied timestamp to UTC. An @ prefix supplies UNIX seconds.",
   "stringsとBase64": "strings and Base64",
@@ -432,7 +432,13 @@
   "正規表現、複数ファイル検索、文字の整形、条件付き集計。必要な記録を狙って取り出します。": "Use regular expressions, search across files, transform text and build conditional summaries to find the records you need.",
   "発展編": "Advanced",
   "比較して、組み合わせる": "Compare and combine",
-  "差分・照合、JSONの集約、日時・ファイルの確認を組み合わせ、調査用の結果を作ります。": "Combine differences, matching, JSON aggregation, timestamps and file inspection to produce useful investigation results."
+  "差分・照合、JSONの集約、日時・ファイルの確認を組み合わせ、調査用の結果を作ります。": "Combine differences, matching, JSON aggregation, timestamps and file inspection to produce useful investigation results.",
+  "-Aはタブを^I、CRを^M、行末を$で表示する。CRLFのログで行末の検索が一致しないときに確認する。-Tはタブ、-vは制御文字、-Eは行末だけ。": "-A displays tabs as ^I, CR as ^M and line endings as $. Inspect CRLF logs when end-of-line searches do not match. -T shows only tabs, -v control characters and -E line endings.",
+  "ファイルのバイト列からハッシュを計算する。改行の有無も値に影響する。調査では同じファイルを探す手掛かりになる。新しい完全性確認にはSHA-256を使う。": "Calculate a hash from file bytes, including any newline. It provides a pivot for finding the same file in an investigation. Use SHA-256 for new integrity checks.",
+  "$HOMEはホーム、$USERはユーザー名、$PWDは現在地、$OLDPWDは前の現在地。ダブルクォート内でも展開する。whoamiとidは仮想ユーザーの情報を表示する。": "$HOME is the home directory, $USER the username, $PWD the current location and $OLDPWD the previous location. They also expand inside double quotes. whoami and id show virtual user information.",
+  "trueは0、falseは1で終了し、どちらも本文は出さない。echo $?で直後に確認できる。seq 1 3は1から3を1行ずつ表示する。": "true exits with 0 and false with 1; neither emits text. Read echo $? immediately afterward. seq 1 3 prints the integers 1 through 3 on separate lines.",
+  "print $1, $2は空白で区切り、print $1\":\"$2は連結する。printfは書式で表示し、substrは文字の一部分を取る。END {print sum/NR}のような除算も使える。": "print $1, $2 inserts a space; print $1\":\"$2 concatenates. printf formats output and substr selects part of a string. Division also works, for example END {print sum/NR}.",
+  "LC_ALL=Cでこの教材と同じ順序にする。sort -k1,1nr -k2,2は件数の多い順と名前順の2キー。-hは単位付きサイズ、-Vは版番号を並べる。": "LC_ALL=C reproduces this lab ordering. sort -k1,1nr -k2,2 uses descending count and ascending name keys. -h orders human-readable sizes; -V orders version numbers.",
 };
   let locale = 'ja';
   const languages = ['ja', 'en'];

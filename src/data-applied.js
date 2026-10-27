@@ -108,11 +108,11 @@
     lessons.push({ level: 'applied', fixture: 'ap-workbench', minutes: 4, mode: 'practice', starter: '', newPart: '', ...item });
   }
 
-  lesson({ id: 'ap-01-help', chapter: 'ap-orient', title: '対応するオプションを調べる', mode: 'guide', commands: ['help'],
+  lesson({ id: 'ap-01-help', chapter: 'ap-orient', title: '対応するオプションを調べる', mode: 'guide', commands: ['help','whoami','id','seq'],
     goal: 'ヘルプで検索コマンドの指定方法を確かめられる。',
     explanation: ['応用編では、覚えているコマンドに条件を少しずつ加えます。暗記できなくても、調べながら使えれば大丈夫です。', 'help コマンド名で、この教材が対応している書き方を表示できます。これはLinuxroom・Logroomの独自案内です。一般のLinuxではmanや各コマンドの--helpなどを使います。この教材ではman grepもhelp grepと同じ簡易案内を表示しますが、実機のmanはマニュアル閲覧用です。'],
     concepts: [{ term: '対応構文', text: 'この学習用シェルで使える引数・オプションの組み合わせです。外部マニュアルの全機能があるわけではありません。' }],
-    example: { command: 'help head', note: '-nで行数、-cでバイト数を指定できることが確認できます。' },
+    example: { command: 'whoami; id; seq 1 3; help head', note: 'ユーザー名・ID・1から3の連番を表示し、最後にheadの-nと-cを調べます。' },
     task: 'helpを使ってgrepの対応構文を表示し、-Fと-Eの説明を見つけてください。',
     hints: ['helpの後ろに、調べるコマンド名を置きます。', '今回はgrepの案内を表示します。', 'help grep と入力します。'],
     solution: ['help grep'], success: '知らないオプションを調べる入口ができました。', bridge: '次は、自分が入力したコマンドを振り返ります。',
@@ -578,28 +578,59 @@
     hints:['エラーの番号は2です。>の直前に空白を入れず2>と書きます。','失敗後もメモを読むため、&&ではなく;でつなぎます。','穴埋め：cat missing.log ___/dev/null; cat notes.txt。標準エラーの出力先を変える記号を入れます。'],
     solution:['cat missing.log 2>/dev/null; cat notes.txt'],success:'エラー表示と通常の結果を分けられました。最初のcatは失敗のままである点も確認しましょう。',bridge:'次は直前の終了コードを数字で読みます。',
     validation:{all:[used('cat',{args:['missing.log']}),source('notes.txt'),{type:'status',command:'cat',code:1,stderrRedirected:true},{type:'redirect',op:'>',fd:2,path:'/dev/null'},out(notes)]}});
-  lesson({id:'ap-47-exit-status',chapter:'ap-workspace',title:'直前の終了コードを読む',commands:['grep','echo'],
+  lesson({id:'ap-47-exit-status',chapter:'ap-workspace',title:'直前の終了コードを読む',commands:['grep','echo','true','false'],
     goal:'$?で直前のコマンドの終了コードを確認できる。',
     explanation:['$?には直前に終わったコマンドの終了コードが入ります。echo $?で表示できます。0は成功を表し、0以外の意味はコマンドごとに違います。grepの1は一致なし、diffの1は差ありです。','別のコマンドを実行すると$?も更新されます。確認したい操作の直後に読みます。シングルクォートで\'$?\'と囲むと、展開せず文字そのものを表示します。'],
     concepts:[{term:'$?',text:'直前の終了コードへ展開されるシェルの特別な変数です。プロンプト末尾の$とは役割が異なります。'}],
-    example:{command:'head -n 1 notes.txt; echo $?',note:'headは成功するので、本文に続けて0が表示されます。'},
+    example:{command:'true; echo $?; false; echo $?',note:'trueの成功0とfalseの失敗1が、この順に表示されます。'},
     task:'grepでsession.logからNOT_PRESENTを探し、直後にecho $?で終了コードを表示してください。一致なしの1だけが表示されます。',
     hints:['grepに一致がないため、通常の本文出力は空です。','検索の直後へ; echo $?を続けます。',"穴埋め：grep 'NOT_PRESENT' session.log; echo ___。直前の終了コードを表す変数を入れます。"],
     solution:["grep 'NOT_PRESENT' session.log; echo $?"],success:'画面に本文が出ない理由を、終了コードからも確かめられました。',bridge:'ここまでの読み方・入力・接続を、最後の集計実習で使いましょう。',
     validation:{all:[used('grep'),used('echo'),source('session.log'),{type:'status',command:'grep',code:1},{type:'variable',name:'?',command:'echo',context:'arguments',afterCommand:'grep'},out('1')]}});
 
+
+  D.datasets['ap-review'] = {cwd:base+'/review',files:{
+    [base+'/review/windows.log']:'user\tresult\r\naki\tok\r\nren\tfail\r\n',
+    [base+'/review/artifact.txt']:'abc\n'
+  }};
+  lesson({id:'ap-48-cat-visible',chapter:'ap-read',title:'見えない改行とタブを確かめる',fixture:'ap-review',commands:['cat'],
+    goal:'cat -AでCRLFとタブを可視化し、検索のずれを説明できる。',
+    explanation:['Windows由来のログには、行末がLFだけでなくCRLFになっているものがあります。cat -Aはタブを^I、CRを^M、行末を$で表示します。-Tはタブ、-vは制御文字、-Eは行末だけを見る指定です。',"windows.logのok行も末尾にCRがあるため、grep 'ok$'では一致しません。画面で似て見えるときは、文字を削る前にcat -Aで元データを確かめましょう。"],
+    concepts:[{term:'CRLF',text:'CRとLFという2バイトの改行です。cat -Aでは行末が^M$と見えます。'}],
+    example:{command:'cat -T windows.log',note:'タブだけが^Iになり、列の区切りを確認できます。'},
+    task:'cat -Aでwindows.logを表示し、タブの^Iと各行末の^M$を確認してください。',
+    hints:['catへ見えない文字も表示するオプションを加えます。','すべての表示指定をまとめるのは大文字の-Aです。','穴埋め：cat ___ windows.log。タブ・制御文字・行末を一緒に表示する指定を入れます。'],
+    solution:['cat -A windows.log'],success:'目に見えない文字も、検索が一致しない原因として確認できました。',bridge:'文字の読み方を確認したら、必要な行や列を選びます。',
+    validation:{all:[used('cat',{flags:'A'}),{type:'source',path:base+'/review/windows.log'},out('user^Iresult^M$\naki^Iok^M$\nren^Ifail^M$\n','exact')]}});
+  lesson({id:'ap-49-file-hash',chapter:'ap-workspace',title:'ファイルのハッシュ値を記録する',fixture:'ap-review',commands:['sha256sum','md5sum'],
+    goal:'sha256sumでファイル本文から照合用の値を求められる。',
+    explanation:['sha256sumはファイルのバイト列からSHA-256ハッシュを計算します。ファイル名を変えても本文が同じなら値は同じですが、改行の有無でも値が変わります。', 'ハッシュはThreatHunting-roomなどの調査で、同じファイルを探すための手掛かりになります。一致だけで安全性は判断できません。md5sumも既存の記録を照合するときに使いますが、新しい完全性確認にはSHA-256を選びましょう。'],
+    concepts:[{term:'ファイルハッシュ',text:'ファイル内容から計算した固定長の値です。名前ではなくバイト列を照合します。'}],
+    example:{command:'md5sum artifact.txt',note:'同じファイルのMD5を表示します。SHA-256とは別の方式なので値も長さも異なります。'},
+    task:'sha256sumでartifact.txtのSHA-256を表示してください。ファイルにはabcと末尾の改行が入っています。',
+    hints:['ハッシュを求めるコマンドの後ろにファイル名を置きます。','今回はMD5ではなくSHA-256を選びます。','穴埋め：___ artifact.txt。SHA-256を計算するコマンド名を入れます。'],
+    solution:['sha256sum artifact.txt'],success:'ファイルを照合する手掛かりを、内容から求められました。',bridge:'対象と条件を決め、最後の集計実習へ進みましょう。',
+    validation:{all:[used('sha256sum'),{type:'source',path:base+'/review/artifact.txt'},out('edeaaff3f1774ad2888673770c6d64097e391bc362d7d6fb34982ddf0efd18cb  artifact.txt\n','exact')]}});
+
   const additionsBefore = {
-    'ap-04-tac':['ap-38-ls-human','ap-39-ls-time'],
+    'ap-04-tac':['ap-38-ls-human','ap-39-ls-time','ap-48-cat-visible'],
     'ap-05-more':['ap-40-large-head','ap-41-large-tail'],
     'ap-06-nl':['ap-42-large-count','ap-44-head-bytes'],
     'ap-18-awk-combined':['ap-43-tail-header'],
     'ap-20-tr-case':['ap-37-input-redirection'],
-    'ap-31-flow-filter':['ap-45-and-sequence','ap-46-stderr','ap-47-exit-status']
+    'ap-31-flow-filter':['ap-45-and-sequence','ap-46-stderr','ap-47-exit-status','ap-49-file-hash']
   };
   const addedIds = new Set(Object.values(additionsBefore).flat());
   const original = lessons.filter(item=>!addedIds.has(item.id));
   const byId = new Map(lessons.map(item=>[item.id,item]));
   lessons.splice(0,lessons.length,...original.flatMap(item=>[...(additionsBefore[item.id]||[]).map(id=>byId.get(id)),item]));
+
+  // Explain implementation and platform differences where learners encounter them.
+  lessons.find(item => item.id === "ap-01-help").explanation.push("自由練習ではwhoami、idでユーザー情報を確認できます。seq 1 3は1から3を1行ずつ表示します。echo {a,b}はブレース展開でa bになります。");
+  lessons.find(item => item.id === "ap-12-grep-recursive").explanation.push("この教材ではファイルの走査順を固定しています。実機のgrep -rやfindの出力順はディレクトリの状態によって変わるので、比較する一覧には| sortを添えます。");
+  lessons.find(item => item.id === "ap-33-flow-normalize").explanation.push("大小文字を残したまま並べるとロケールで順序が変わります。この教材と同じ順序を実機で確かめるにはLC_ALL=C sortを使います。小文字への正規化は、順序だけでなく同一人物として数えるルールを決める操作です。");
+  lessons.find(item => item.id === "ap-38-ls-human").explanation.push("ディレクトリをls -lで読むと、先頭のtotalは表示対象の割当ブロックの合計です。この教材は4 KiB単位の割当を仮定し、ディレクトリのサイズは4096、リンク数は2＋直下のディレクトリ数として表示します。実機の値はファイルシステムにより異なります。");
+  lessons.find(item => item.id === "ap-47-exit-status").explanation.push("短い確認にはtrue; echo $?とfalse; echo $?も使えます。trueは0、falseは1で終了します。どちらも本文は出力しません。");
 
   lessons.forEach(D.practiceHint);
   D.lessons.push(...lessons);

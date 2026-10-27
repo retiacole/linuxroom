@@ -15,7 +15,7 @@ test('three complete levels exercise every supported log-analysis command',()=>{
   const actual=new Set();
   for(const level of D.levels){
     const lessons=D.lessons.filter(l=>l.level===level.id);
-    assert.equal(lessons.length,level.id === 'applied' ? 47 : 36,level.id);
+    assert.equal(lessons.length,level.id === 'applied' ? 49 : 36,level.id);
     for(const l of lessons){
       const s=E.createSession(l.id);
       for(const c of l.solution){const r=E.run(s,c);for(const stage of r.trace)actual.add(stage.command);}
@@ -25,7 +25,7 @@ test('three complete levels exercise every supported log-analysis command',()=>{
     }
   }
   const supported=new LogLabShell().supportedCommands;
-  assert.equal(supported.length,49);
+  assert.equal(supported.length,56);
   assert.deepEqual(supported.filter(command=>!actual.has(command)),[],'no command missing from real practice');
 });
 
@@ -33,9 +33,9 @@ test('v0.1 saves preserve36 completions, work files, assistance, and current les
   const old=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/v0.1-progress.json'),'utf8'));
   const progress=E.hydrate(old.progress);
   assert.deepEqual(E.stats(progress,'beginner'),{completed:36,total:36,percent:100});
-  assert.deepEqual(E.stats(progress,'applied'),{completed:0,total:47,percent:0});
+  assert.deepEqual(E.stats(progress,'applied'),{completed:0,total:49,percent:0});
   assert.deepEqual(E.stats(progress,'advanced'),{completed:0,total:36,percent:0});
-  assert.equal(E.stats(progress).total,119);
+  assert.equal(E.stats(progress).total,121);
   assert.equal(progress.currentId,'27-append');
   assert.equal(progress.completed['01-echo'].assisted,true);
   assert.equal(progress.hints['01-echo'],2);

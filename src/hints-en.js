@@ -270,3 +270,12 @@ globalThis.LINUXROOM_EN_HINTS = {
   "最後の1行だけを表示します。": "Display only the final line.",
   "最後のフィールドを指定します。": "Select the last field."
 };
+
+Object.assign(globalThis.LINUXROOM_EN_HINTS, {
+  "catへ見えない文字も表示するオプションを加えます。": "Add an option to cat that reveals hidden characters.",
+  "すべての表示指定をまとめるのは大文字の-Aです。": "Uppercase -A combines all the visibility options.",
+  "タブ・制御文字・行末を一緒に表示する指定を入れます。": "Fill in the option to show tabs, control characters and line endings together.",
+  "ハッシュを求めるコマンドの後ろにファイル名を置きます。": "Place the filename after the checksum command.",
+  "今回はMD5ではなくSHA-256を選びます。": "Choose SHA-256 rather than MD5 for this exercise.",
+  "SHA-256を計算するコマンド名を入れます。": "Fill in the command that calculates SHA-256."
+});

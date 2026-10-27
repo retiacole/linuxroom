@@ -204,7 +204,7 @@
         }
       }
       const shell = new root.LogLabShell(files, {metadata, now: data().datasets[selected?.fixture]?.now, snapshotTime: Number.isFinite(state.snapshotTime) && Math.abs(state.snapshotTime) <= 8640000000000000 ? state.snapshotTime : undefined, lastExitCode: Number.isInteger(state.lastExitCode) && state.lastExitCode >= 0 && state.lastExitCode <= 255 ? state.lastExitCode : 0});
-      shell.directories = new Set(state.directories);
+      shell.directories = new Set([...shell.directories, ...state.directories]);
       shell.directories.add('/');
       for (const path of Object.keys(shell.files)) shell.addParents(path);
       if (!shell.isDir(state.cwd)) return session;

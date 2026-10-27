@@ -468,11 +468,17 @@
     bridge:'次はSOCroom-easyで記録の意味を学び、LogroomでLinuxコマンドを使った調査へ進みましょう。既に読解を学んだ方はLogroomで実践できます。',
     validation:{all:[source('final/audit.jsonl'),source('final/access.log'),{type:'directory',path:base+'/final/reports'},saved('final/reports/failed.txt','job-02 yui 503 90\njob-03 sora 500 60\njob-04 sora 503 150','lines'),saved('final/reports/ranking.txt','2 sora\n1 yui','lines'),saved('final/reports/bytes.txt','300'),out('300')]}});
 
+  // Explain implementation and platform differences where learners encounter them.
+  lessons.find(item => item.id === "ad-04-file").explanation.push("CSVも実機のfileの版で表記が変わり、file 5.45以降ではCSV ASCII textとなる場合があります。この教材は簡略判定なのでASCII textと表示する場合があります。");
+  lessons.find(item => item.id === "ad-06-du").explanation.push("-bのないduやdu -hは割当領域を数えます。この教材は4 KiB単位の仮想割当なので、短い空でないファイルもdu -hでは4.0Kです。実機ではブロックサイズ、疎なファイル、圧縮などで異なります。");
+  lessons.find(item => item.id === "ad-19-xargs-info").explanation.push("空白や改行を含むファイル名にはfind bundle -type f -print0 | xargs -0 fileのようにNULで区切れます。findの-execでも見つかったパスを仮想コマンドへ直接渡せます。");
+  lessons.find(item => item.id === "ad-25-awk-save").explanation.push("同じ件数のときの順序を明示するにはsort -k1,1nr -k2,2とし、2番目のキーでIP順を指定します。sort -hは4.0Kなどの単位付きの数、sort -Vはv2、v10などの版番号を並べるときに使います。");
+
   lessons.forEach(D.practiceHint);
   D.lessons.push(...lessons);
   D.glossary.push(
     {term:'パスを加工する道具',text:'basenameは末尾の名前、dirnameは親の場所、realpathは整理した絶対パスを表示します。ファイルの改名や移動はしません。',example:'realpath -e bundle/../access.log'},
-    {term:'ファイル情報',text:'fileは形式、statは名前やバイト数、duは場所全体の大きさを調べます。教材のメタデータは仮想で、duは本文のサイズだけを合計します。',example:"stat -c '%n %s' ready.txt"},
+    {term:'ファイル情報',text:'fileは形式、statは名前やバイト数、duは割当領域を調べます。教材は4 KiB単位の仮想割当です。du -bは見かけのサイズをバイト単位で表示します。',example:"stat -c '%n %s' ready.txt"},
     {term:'UTCとUNIX時刻',text:'ZはUTC、+09:00はUTCから9時間進んだ表記です。date -u -dでUTCへそろえ、@秒数ならUNIX時刻を指定できます。',example:"date -u -d @1792886400 '+%F %T %Z'"},
     {term:'stringsとBase64',text:'stringsは読める文字の断片を抽出します。base64 -dはBase64表現を元のデータへ戻します。Base64は暗号ではありません。',example:"base64 -d payload.b64 | jq -r '.request_id'"},
     {term:'rev',text:'各行の文字を逆順にします。行の順を逆にするtacとは異なります。',example:"rev object-names.txt | cut -d '.' -f 1 | rev"},
