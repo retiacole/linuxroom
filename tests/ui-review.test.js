@@ -15,7 +15,7 @@ function sourceHTML() {
     const source = names.map(name => fs.readFileSync(path.join(root, 'src', name), 'utf8')).join('\n');
     html = html.replace('/*__' + key + '__*/', () => source.replace(/<\/script/gi, '<\\/script'));
   }
-  return html;
+  return html.replaceAll('__RELEASE_VERSION__', require('../package.json').version);
 }
 
 function createApp(saved) {

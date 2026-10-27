@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-Linuxroom v0.5.0. Virtual shell derived from Logroom.
+Linuxroom v0.6.0. Virtual shell derived from Logroom.
 MIT License
 
 Copyright (c) 2026 Logroom contributors
@@ -50,6 +50,17 @@ SOFTWARE.
 @media(max-width:560px){.sandbox-callout{margin-top:45px;padding:21px;align-items:stretch;flex-direction:column;gap:18px}.sandbox-callout h2{font-size:18px}.sandbox-callout p:last-child{font-size:11px}.sandbox-callout .eyebrow{font-size:8px}.sandbox-callout+.course-levels{margin-top:35px}.terminal-command .history-prompt{font-size:9px}}
 
 .trace-input{margin-top:12px;border:1px solid #e0e8dc;border-radius:6px;background:#fafbf7}.trace-input summary{font-size:10px;color:var(--muted);padding:7px 10px;cursor:pointer}.trace-input summary span{font-size:9px;margin-left:6px;color:#839987}#trace-input{margin:0 10px 10px;max-height:160px;overflow:auto;font-size:10px;line-height:1.9;color:#5b7463}.trace-output-label{font-size:10px;color:var(--muted);margin:12px 0 0}.trace-output-label+#trace-output{margin-top:5px}
+/* Optional study choices do not replace the main next-lesson action. */
+.brand-version{font-size:11px!important;letter-spacing:.05em!important;line-height:1.6}
+.graduation-options,.preparation-review{margin:20px 0;padding:18px;border:1px solid var(--line);border-radius:8px;background:#f5f8f0}
+.graduation-options h4,.preparation-review h3{font-size:15px;line-height:1.6;margin:0 0 10px}
+.graduation-options p,.preparation-review p{font-size:12px;line-height:1.85}.preparation-review .reference-lesson-button{font-size:12px}
+.diagnostic-dialog pre{padding:12px;background:#f1f4ec;white-space:pre-wrap;overflow-wrap:anywhere;max-height:230px;overflow:auto;font:12px/1.8 var(--mono)}
+.diagnostic-dialog label{display:block;font-size:13px}.diagnostic-dialog input{width:100%;padding:10px;border:1px solid var(--line);border-radius:5px;font:14px var(--mono);background:white}
+.diagnostic-input-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:6px}.diagnostic-answers{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin:16px 0}
+.diagnostic-dialog details{margin:20px 0;line-height:1.9}.diagnostic-dialog code{display:block;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
+.diagnostic-dialog>p,.diagnostic-dialog details p{font-size:13px;line-height:1.9}.diagnostic-dialog summary{cursor:pointer;font-weight:600}
+@media(max-width:560px){.diagnostic-answers{grid-template-columns:1fr}.graduation-options,.preparation-review{padding:14px}}
 /* Language selection stays available in the HTML menu, including offline. */
 .language-control{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);white-space:nowrap}.language-control select{font:inherit;min-height:34px;border:1px solid var(--line);border-radius:6px;padding:5px 7px;color:var(--ink);background:var(--white)}select:focus-visible{outline:3px solid #d6a944;outline-offset:3px}.header-actions{flex-wrap:wrap;justify-content:flex-end;gap:4px 10px}html[lang="en"] .nav-button{white-space:normal}html[lang="en"] .lesson-link-title{overflow-wrap:anywhere}html[lang="en"] .hero-sticker{max-width:190px}html[lang="en"] .level-card .button{white-space:normal}html[lang="en"] .key-guide dl{grid-template-columns:145px minmax(0,1fr)}
 @media(max-width:800px){.site-header{height:auto;min-height:83px;padding-top:14px;padding-bottom:14px}.header-actions{max-width:65%;gap:4px}.language-control{justify-content:flex-end;width:100%}.language-control select{font-size:16px}.language-control span{font-size:10px}.nav-button{padding:6px;font-size:10px}html[lang="en"] .welcome h1{font-size:clamp(36px,8vw,64px)}}
@@ -59,7 +70,7 @@ SOFTWARE.
 <body>
   <a class="skip-link" href="#main">本文へ移動</a>
   <header class="site-header">
-    <button id="home-button" class="brand" aria-label="Linuxroom ホーム"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>linuxroom<span id="brand-version" class="brand-version">STEP BY STEP / v0.5.0</span></span></button>
+    <button id="home-button" class="brand" aria-label="Linuxroom ホーム"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>linuxroom<span id="brand-version" class="brand-version">STEP BY STEP / v0.6.0</span></span></button>
     <nav class="header-actions" aria-label="メインメニュー">
       <label class="language-control" for="language-select"><span>Language</span><select id="language-select" aria-label="Language"><option value="ja" data-language-name>日本語</option><option value="en" data-language-name>English</option></select></label>
       <button id="map-button" class="nav-button">学習マップ</button>
@@ -95,10 +106,10 @@ SOFTWARE.
         <p class="level-order-note">初めてなら「初級編 → 応用編 → 発展編」の順がおすすめ。各段階の続きと作業内容は自動保存されます。</p>
       </section>
       <div class="learning-road" aria-label="学習の流れ">
-        <div class="road-current"><span>01 / HERE</span><strong>Linuxroom</strong><p>コマンドを覚え、つないで使う</p></div><span class="road-arrow" aria-hidden="true">→</span>
-        <div><span>02 / READ</span><strong>SOCroom-easy</strong><p>ログの読み方を知る</p></div><span class="road-arrow" aria-hidden="true">→</span>
-        <div><span>03 / ANALYZE</span><strong>Logroom</strong><p>コマンドでログを分析する</p></div><span class="road-arrow" aria-hidden="true">→</span>
-        <div><span>04 / INVESTIGATE</span><strong>SOCroom</strong><p>学んだことを、調査に生かす</p></div>
+        <div class="road-current"><span>01 / READ</span><strong>読む</strong><p>ファイルの場所と形式を確かめる</p></div><span class="road-arrow" aria-hidden="true">→</span>
+        <div><span>02 / FILTER</span><strong>絞る</strong><p>必要な行と列を取り出す</p></div><span class="road-arrow" aria-hidden="true">→</span>
+        <div><span>03 / COUNT</span><strong>集計する</strong><p>対象と数える単位をそろえる</p></div><span class="road-arrow" aria-hidden="true">→</span>
+        <div><span>04 / SAVE</span><strong>残す</strong><p>元の記録と結果を保存する</p></div>
       </div>
       <div class="welcome-bottom"><p>1レッスンは数分。ヒントを見ても大丈夫。<br>「なぜそうなる？」を、実際の出力で確かめます。</p><button id="welcome-map-button" class="text-button">学習内容を見てみる <span aria-hidden="true">↗</span></button></div>
     </section>
@@ -116,7 +127,7 @@ SOFTWARE.
           <div class="lesson-actions"><button id="hint-button" class="button secondary">ヒントを見る <span id="hint-count">0/3</span></button><button id="solution-button" class="text-button">解答例</button></div>
           <div id="hint-list" class="hint-list"></div><div id="solution-box" class="solution-box" hidden></div>
           <div id="lesson-feedback" class="lesson-feedback" role="status" hidden></div>
-          <div id="success-box" class="success-box" hidden><span class="success-label">✓ LESSON COMPLETE</span><h3>できました！</h3><p id="success-text"></p><p id="bridge-text" class="bridge-text"></p><button id="next-lesson" class="button primary">次のレッスンへ →</button><a id="graduation-link" class="button primary" href="https://github.com/retiacole/socroom-easy" target="_blank" rel="noopener noreferrer" hidden>SOCroom-easy を GitHub で開く ↗</a><a id="logroom-link" class="button secondary" href="https://github.com/retiacole/logroom" target="_blank" rel="noopener noreferrer" hidden>Logroom を GitHub で開く ↗</a></div>
+          <div id="success-box" class="success-box" hidden><span class="success-label">✓ LESSON COMPLETE</span><h3>できました！</h3><p id="success-text"></p><p id="bridge-text" class="bridge-text"></p><button id="next-lesson" class="button primary">次のレッスンへ →</button><section id="graduation-options" class="graduation-options" hidden><h4>ここまで来たら、次のおすすめ</h4><p id="graduation-description"></p><a id="graduation-link" class="button secondary" target="_blank" rel="noopener noreferrer" hidden></a><p id="graduation-offline" class="muted"></p><p>別の教材へ進むかどうかは自由です。このroomの続きや復習も選べます。</p><button id="graduation-review" class="text-button">学習マップで復習を選ぶ</button></section></div>
           <button id="retry-lesson" class="text-button retry-button">この課題を最初からやり直す</button>
         </aside>
         <div class="practice-column">
@@ -134,13 +145,30 @@ SOFTWARE.
       </div>
     </section>
   </main>
-  <footer class="site-footer"><span>LINUXROOM <span class="footer-dot">/</span> Small commands. Real understanding.</span><span id="footer-version">Offline learning lab · v0.5.0</span></footer>
+  <footer class="site-footer"><span>LINUXROOM <span class="footer-dot">/</span> Small commands. Real understanding.</span><span id="footer-version">Offline learning lab · v0.6.0</span></footer>
 
-  <dialog id="map-dialog" class="app-dialog map-dialog" aria-labelledby="map-title"><div class="dialog-top"><div><p class="eyebrow">YOUR LEARNING PATH</p><h2 id="map-title">学習マップ</h2></div><button class="close-dialog icon-button" aria-label="学習マップを閉じる">×</button></div><p class="dialog-intro">初級 → 応用 → 発展の順に、操作を積み重ねます。どの段階・課題からでも選べます。</p><div id="map-levels" class="map-levels" role="group" aria-label="学習する段階を選ぶ"></div><p id="map-level-description" class="map-level-description"></p><div class="map-progress-row"><div id="map-progress" class="map-progress"></div><span id="map-overall" class="map-overall"></span></div><div id="chapter-list" class="chapter-list"></div><button id="sandbox-button" class="button secondary full-width">自由練習のターミナルを開く →</button><p class="muted">✓ は修了済み。ヒント・解答例を見た課題も、何度でも復習できます。</p></dialog>
+  <dialog id="map-dialog" class="app-dialog map-dialog" aria-labelledby="map-title"><div class="dialog-top"><div><p class="eyebrow">YOUR LEARNING PATH</p><h2 id="map-title">学習マップ</h2></div><button class="close-dialog icon-button" aria-label="学習マップを閉じる">×</button></div><p class="dialog-intro">初級 → 応用 → 発展の順に、操作を積み重ねます。どの段階・課題からでも選べます。</p><div id="map-levels" class="map-levels" role="group" aria-label="学習する段階を選ぶ"></div><p id="map-level-description" class="map-level-description"></p><div class="map-progress-row"><div id="map-progress" class="map-progress"></div><span id="map-overall" class="map-overall"></span></div><section class="preparation-review"><h3>ログ分析の準備（任意）</h3><p>形式が変わるログを読むための3課題です。必要な操作だけ、好きな順で復習できます。</p><div id="preparation-lessons"></div><button id="diagnostic-open" class="button secondary">別のログで確かめる</button><p class="muted">確認は修了記録に加算されません。ヒントやコマンド帳を使って構いません。</p></section><div id="chapter-list" class="chapter-list"></div><button id="sandbox-button" class="button secondary full-width">自由練習のターミナルを開く →</button><p class="muted">✓ は修了済み。ヒント・解答例を見た課題も、何度でも復習できます。</p></dialog>
   <dialog id="reference-dialog" class="app-dialog reference-dialog" aria-labelledby="reference-title"><div class="dialog-top"><div><p class="eyebrow">KEEP IT HANDY</p><h2 id="reference-title">コマンド帳</h2></div><button class="close-dialog icon-button" aria-label="コマンド帳を閉じる">×</button></div><p class="dialog-intro">覚えていなくても大丈夫。必要なときに見ながら試そう。</p><label class="sr-only" for="reference-search">コマンドや用語を探す</label><input id="reference-search" class="search-input" placeholder="コマンドや用語を探す" type="search"><div id="reference-lessons" class="reference-lessons"></div><div id="reference-list" class="reference-list"></div><div id="prompt-guide" class="key-guide"><h3>プロンプトの読み方</h3><code>analyst@linuxroom:~$</code><dl><dt>analyst</dt><dd>操作しているユーザー名</dd><dt>linuxroom</dt><dd>ホスト名（コンピューター名）</dd><dt>:~</dt><dd>: の後ろは現在地。~ は /home/analyst の省略。cd で移動すると ~/logs などに変わる</dd><dt>$ / #</dt><dd>一般ユーザー / 管理者の目印としてよく使われる。この教材は一般ユーザーの $</dd></dl><p class="muted">プロンプトの見た目は環境によって変わります。プロンプト自体は入力せず、その後ろにコマンドだけを打ちます。</p><h3>ターミナルの操作</h3><dl><dt>Enter</dt><dd>コマンドを実行</dd><dt>↑ / ↓</dt><dd>実行したコマンドを呼び出す</dd><dt>Tab</dt><dd>コマンド・ファイル名を補完</dd><dt>Ctrl + C</dt><dd>入力を消す / 閲覧画面を閉じる</dd><dt>Ctrl + L</dt><dd>ターミナルの表示を消す</dd><dt>less / more で q</dt><dd>閲覧を終えてターミナルへ戻る</dd></dl><p class="muted">実機では man grep などでマニュアルを調べます。この教材では man を help と同じ学習用の案内にしています。</p></div></dialog>
   <dialog id="save-dialog" class="app-dialog save-dialog" aria-labelledby="save-title"><div class="dialog-top"><div><p class="eyebrow">SAVE YOUR PLACE</p><h2 id="save-title">進捗の保存</h2></div><button class="close-dialog icon-button" aria-label="保存画面を閉じる">×</button></div><p>修了した課題と、各課題のファイル・現在地・入力途中のコマンドを、このブラウザに自動保存します。</p><p class="muted">別のブラウザや端末に移すときは、進捗ファイルをダウンロードしてください。</p><div class="save-actions"><button id="export-progress" class="button primary">進捗ファイルをダウンロード ↓</button><button id="import-progress" class="button secondary">進捗ファイルを読み込む ↑</button><input id="import-file" type="file" accept="application/json,.json" hidden></div><p id="save-status" role="status" class="muted"></p></dialog>
   <dialog id="pager-dialog" class="app-dialog pager-dialog" aria-labelledby="pager-title"><div class="dialog-top"><div><p id="pager-command-label" class="eyebrow">FILE VIEWER / less</p><h2 id="pager-title">ファイルを読む</h2></div><button id="pager-close" class="button secondary">q で閉じる</button></div><p class="muted">スクロールして読めます。q を押すとコマンド入力に戻ります。</p><pre id="pager-content" tabindex="0"></pre><div class="pager-bottom">(END) <span>q：終了 · Ctrl + C：終了</span></div></dialog>
   <div id="toast" class="toast" role="status" hidden></div>
+  <dialog id="diagnostic-dialog" class="app-dialog diagnostic-dialog" aria-labelledby="diagnostic-title">
+    <div class="dialog-top"><h2 id="diagnostic-title">別のログで確かめる</h2><button class="close-dialog icon-button" aria-label="確認を閉じる">×</button></div>
+    <p>2026年8月13日・UTCの合成SSHログです。Failed passwordの送信元を数え、最多のIPと件数を調べてください。1行が1回の失敗を表します。</p>
+    <p class="muted">現在の課題や自由練習とは別の作業場所です。閉じても元のファイルや入力は変わりません。この確認の作業はページを閉じると消えます。</p>
+    <code>auth.log</code><pre id="diagnostic-source" tabindex="0"></pre>
+    <form id="diagnostic-command-form"><label for="diagnostic-command">コマンドを試す</label><div class="diagnostic-input-row"><input id="diagnostic-command" spellcheck="false" autocomplete="off" placeholder="例: head auth.log"><button class="button secondary" type="submit">実行</button></div></form>
+    <pre id="diagnostic-output" role="log" aria-live="polite" tabindex="0"></pre>
+    <form id="diagnostic-answer-form"><div class="diagnostic-answers"><label for="diagnostic-ip">最多の送信元IP<input id="diagnostic-ip" autocomplete="off" spellcheck="false"></label><label for="diagnostic-count">失敗の件数<input id="diagnostic-count" inputmode="numeric" autocomplete="off"></label></div><button class="button primary" type="submit">答えと照合する</button></form>
+    <p id="diagnostic-feedback" role="status"></p>
+    <details><summary>ヒント・読み方を確認する</summary>
+      <p>Failed passwordの行だけを選びます。invalid userがある行では途中の列が増えるため、列番号を確かめてください。末尾の「IP port 番号 ssh2」は共通です。</p>
+      <code>grep 'Failed password' auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr</code>
+      <p>別の方法でも構いません。集計前の出力と元の行を比べ、成功のAccepted行を数えていないか確かめます。</p>
+    </details>
+    <button id="diagnostic-reset" class="text-button">この確認だけ最初からやり直す</button><br>
+    <button id="diagnostic-review" class="text-button">準備の3課題へ戻る</button>
+  </dialog>
   <script>/* Browser-only virtual text shell for LogLab. No host processes or network access. */
 (function (root) {
   'use strict';
@@ -1627,7 +1655,7 @@ SOFTWARE.
 (function (root) {
   'use strict';
   const D = root.LINUXROOM_DATA;
-  D.release = '0.5.0';
+  D.release = typeof module === 'object' && module.exports ? require('../package.json').version : '0.6.0';
   D.levels = [
     {id:'beginner', title:'初級編', subtitle:'一つずつ、つなげる', description:'現在地とファイル操作から、検索・列の抽出・集計・保存まで。短いコマンドを一段ずつ組み立てます。'},
     {id:'applied', title:'応用編', subtitle:'条件を選んで、整える', description:'正規表現、複数ファイル検索、文字の整形、条件付き集計。必要な記録を狙って取り出します。'},
@@ -3634,6 +3662,44 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
 (function (root) {
   'use strict';
   const messages = {
+  "読む": "Read",
+  "ファイルの場所と形式を確かめる": "Check the location and format of files",
+  "絞る": "Filter",
+  "必要な行と列を取り出す": "Extract the rows and fields you need",
+  "集計する": "Summarize",
+  "対象と数える単位をそろえる": "Choose the scope and unit to count",
+  "残す": "Save",
+  "元の記録と結果を保存する": "Keep the source records and results",
+  "ここまで来たら、次のおすすめ": "An optional next step",
+  "別の教材へ進むかどうかは自由です。このroomの続きや復習も選べます。": "Moving to another tool is optional. You can continue or review this room.",
+  "学習マップで復習を選ぶ": "Choose a review lesson from the map",
+  "ログ分析の準備（任意）": "Prepare for log analysis (optional)",
+  "この確認だけ最初からやり直す": "Reset only this optional check",
+  "形式が変わるログを読むための3課題です。必要な操作だけ、好きな順で復習できます。": "Three lessons for reading logs with varying formats. Review only the skills you need, in any order.",
+  "別のログで確かめる": "Try a different log",
+  "確認は修了記録に加算されません。ヒントやコマンド帳を使って構いません。": "This check does not add to your completion record. Hints and the command reference are welcome.",
+  "確認を閉じる": "Close the check",
+  "2026年8月13日・UTCの合成SSHログです。Failed passwordの送信元を数え、最多のIPと件数を調べてください。1行が1回の失敗を表します。": "This synthetic SSH log uses August 13, 2026, UTC. Count sources of Failed password events and find the most frequent IP and its count. Each matching line represents one failed attempt.",
+  "現在の課題や自由練習とは別の作業場所です。閉じても元のファイルや入力は変わりません。この確認の作業はページを閉じると消えます。": "This workspace is separate from your lesson and free practice. Closing it leaves their files and input unchanged. Work in this check is discarded when the page closes.",
+  "コマンドを試す": "Try a command",
+  "例: head auth.log": "Example: head auth.log",
+  "最多の送信元IP": "Most frequent source IP",
+  "失敗の件数": "Failed attempt count",
+  "答えと照合する": "Check your answer",
+  "ヒント・読み方を確認する": "Hints and how to read the result",
+  "Failed passwordの行だけを選びます。invalid userがある行では途中の列が増えるため、列番号を確かめてください。末尾の「IP port 番号 ssh2」は共通です。": "Select only Failed password lines. The words invalid user add fields, so check the field positions. Both formats end in IP port number ssh2.",
+  "別の方法でも構いません。集計前の出力と元の行を比べ、成功のAccepted行を数えていないか確かめます。": "Other methods are valid. Compare the intermediate output with the source lines and check that you excluded successful Accepted events.",
+  "準備の3課題へ戻る": "Return to the three preparation lessons",
+  "この段階の実習ができました。好きな課題を復習したり、自由練習を続けたりできます。": "You completed this stage’s final exercise. Review any lesson or continue in free practice.",
+  "ログの意味を読む練習を続けたいときは、SOCroom-easyの中級もおすすめです。開いた画面で中級を選べます。": "To practice interpreting logs, try SOCroom-easy’s intermediate level. Select Intermediate on its opening screen.",
+  "覚えたコマンドで証拠を集める調査も試したいときは、Logroomがおすすめです。": "Try Logroom when you want to collect evidence using the commands you have learned.",
+  "SOCroom-easyを開く（中級から）": "Open SOCroom-easy (start with Intermediate)",
+  "Logroomを開く": "Open Logroom",
+  "オフラインでは、次の教材のHTMLを入手し、同じフォルダへ置いてください。": "Offline: download the next tool’s HTML and place it in the same folder.",
+  "リンクは別のタブで開きます。完了記録の共有や自動移動はありません。": "The link opens in another tab. Completion records are not shared and navigation is never automatic.",
+  "件数とIPは一致しました。どの列を使ったか、成功行を除いた理由、元の3行を自分の言葉で確かめましょう。": "The IP and count match. Explain the field you used, why you excluded successful events, and which three source lines support the result.",
+  "元の行と比べ直しましょう。Failed passwordだけを数え、invalid userによる列のずれにも注意します。": "Compare with the source lines again. Count only Failed password events and account for the shifted fields in invalid user lines.",
+
   "初級編": "Beginner",
   "一つずつ、コマンドを覚える": "Learn one command at a time",
   "ファイルを読むところから、パイプをつないで集計するところまで。": "From reading files to building pipelines and summaries.",
@@ -4537,8 +4603,8 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
     $('map-overall').textContent = t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了');
     $('welcome-progress').textContent = s.completed ? t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了。今日も一歩ずつ。') : '';
     $('course-summary').textContent = levels.length + t(' 段階 · 全 ') + s.total + t(' レッスン');
-    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.5.0');
-    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.5.0');
+    $('brand-version').textContent = 'STEP BY STEP / v' + DATA.release;
+    $('footer-version').textContent = 'Offline learning lab · v' + DATA.release;
     $('start-learning').replaceChildren(document.createTextNode(ui.started ? t('続きから学ぶ ') : t('最初のレッスンをはじめる ')), node('span', '', '→'));
     renderLevelCards();
   }
@@ -4745,10 +4811,17 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
     const last = !next;
     $('next-lesson').hidden = last;
     $('next-lesson').textContent = next && levelOf(next) !== levelOf(currentLesson) ? levelById.get(levelOf(next)).title + t('へ進む →') : t('次のレッスンへ →');
-    $('graduation-link').hidden = !last;
-    $('logroom-link').hidden = !last;
-    if (last) $('bridge-text').textContent = (currentLesson.bridge || t('次は SOCroom-easy でログの読み方を学び、Logroom でコマンドを使ったログ分析へ進みましょう。')) + t(' 各 GitHub ページから教材を入手できます。');
-    else if (levelOf(next) !== levelOf(currentLesson)) $('bridge-text').textContent = levelById.get(levelOf(currentLesson)).title + t('の最後の実習ができました。次は') + levelById.get(levelOf(next)).title + t('です。今までのコマンドに新しい操作を足していきましょう。');
+    const levelEnd = last || levelOf(next) !== levelOf(currentLesson);
+    $('graduation-options').hidden = !levelEnd;
+    $('graduation-link').hidden = !levelEnd;
+    if (levelEnd) {
+      $('bridge-text').textContent = last ? t('この段階の実習ができました。好きな課題を復習したり、自由練習を続けたりできます。') : levelById.get(levelOf(currentLesson)).title + t('の最後の実習ができました。次は') + levelById.get(levelOf(next)).title + t('です。今までのコマンドに新しい操作を足していきましょう。');
+      const beginner = levelOf(currentLesson) === 'beginner', offline = location.protocol === 'file:';
+      $('graduation-description').textContent = t(beginner ? 'ログの意味を読む練習を続けたいときは、SOCroom-easyの中級もおすすめです。開いた画面で中級を選べます。' : '覚えたコマンドで証拠を集める調査も試したいときは、Logroomがおすすめです。');
+      $('graduation-link').textContent = beginner ? t('SOCroom-easyを開く（中級から）') : t('Logroomを開く');
+      $('graduation-link').href = offline ? (beginner ? 'socroom-easy.html' : 'logroom.html') : 'https://retiacole.github.io/' + (beginner ? 'socroom-easy' : 'logroom') + '/';
+      $('graduation-offline').textContent = t(offline ? 'オフラインでは、次の教材のHTMLを入手し、同じフォルダへ置いてください。' : 'リンクは別のタブで開きます。完了記録の共有や自動移動はありません。');
+    }
     if (newlyCompleted) toast('✓ ' + currentLesson.title + t(' を修了しました'));
   }
 
@@ -4994,6 +5067,12 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
   function renderMapContents() {
     stats();
     const selected = levelLessons(activeLevel);
+    $('preparation-lessons').replaceChildren(...['ap-07-grep-fixed', 'ad-21-awk-nf', 'ad-12-diff'].map(id => {
+      const lesson = byId.get(id), button = node('button', 'reference-lesson-button', lesson.title);
+      button.dataset.preparationLesson = id;
+      button.addEventListener('click', () => renderLesson(id, {focus: true}));
+      return button;
+    }));
     $('map-levels').replaceChildren(...levels.map(level => {
       const s = levelStats(level.id);
       const button = node('button', 'map-level-button');
@@ -5034,6 +5113,37 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
   function renderMap() {
     renderMapContents();
     openDialog('map-dialog');
+  }
+
+  // Optional practice has its own shell; saved lesson and sandbox sessions are untouched.
+  const diagnosticText = [
+    'Aug 13 09:00:00 edge-02 sshd[5101]: Failed password for invalid user visitor from 198.51.100.62 port 40101 ssh2',
+    'Aug 13 09:00:20 edge-02 sshd[5102]: Failed password for ops from 203.0.113.24 port 40102 ssh2',
+    'Aug 13 09:01:00 edge-02 sshd[5103]: Accepted publickey for ops from 192.0.2.17 port 40103 ssh2',
+    'Aug 13 09:01:20 edge-02 sshd[5104]: Failed password for deploy from 198.51.100.62 port 40104 ssh2',
+    'Aug 13 09:02:00 edge-02 sshd[5105]: Failed password for invalid user test from 203.0.113.24 port 40105 ssh2',
+    'Aug 13 09:02:20 edge-02 sshd[5106]: Failed password for ops from 198.51.100.62 port 40106 ssh2',
+    'Aug 13 09:03:00 edge-02 sshd[5107]: Accepted password for deploy from 198.51.100.62 port 40107 ssh2'
+  ].join('\n') + '\n';
+  let diagnosticShell = null, diagnosticResult = null;
+  function renderDiagnosticFeedback() {
+    $('diagnostic-feedback').textContent = diagnosticResult === null ? '' : t(diagnosticResult ? '件数とIPは一致しました。どの列を使ったか、成功行を除いた理由、元の3行を自分の言葉で確かめましょう。' : '元の行と比べ直しましょう。Failed passwordだけを数え、invalid userによる列のずれにも注意します。');
+  }
+  function resetDiagnostic() {
+    diagnosticShell = new globalThis.LogLabShell({'/home/analyst/auth.log': diagnosticText});
+    diagnosticShell.cwd = '/home/analyst';
+    diagnosticResult = null;
+    $('diagnostic-source').textContent = diagnosticText;
+    ['diagnostic-command', 'diagnostic-ip', 'diagnostic-count'].forEach(id => { $(id).value = ''; });
+    $('diagnostic-output').textContent = '';
+    renderDiagnosticFeedback();
+  }
+  function openDiagnostic() {
+    closeAllDialogs();
+    if (!diagnosticShell) resetDiagnostic();
+    renderDiagnosticFeedback();
+    openDialog('diagnostic-dialog');
+    $('diagnostic-command').focus();
   }
 
   const builtInReferences = [
@@ -5239,6 +5349,7 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
       activeLevel = selectedLevel;
       if (openDialogs.includes('map-dialog')) renderMapContents();
       if (openDialogs.includes('reference-dialog')) renderReferences();
+      if (openDialogs.includes('diagnostic-dialog')) renderDiagnosticFeedback();
       openDialogs.forEach(id => { if (!$(id).open) openDialog(id); });
       if (!$('storage-warning').hidden) storageFailure();
       $('toast').hidden = true;
@@ -5246,6 +5357,23 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
       window.scrollTo(scroll.x, scroll.y);
       $('language-select').focus({preventScroll: true});
     });
+    $('diagnostic-open').addEventListener('click', openDiagnostic);
+    $('diagnostic-reset').addEventListener('click', () => { resetDiagnostic(); $('diagnostic-command').focus(); });
+    $('diagnostic-review').addEventListener('click', () => { closeDialog($('diagnostic-dialog')); renderMap(); });
+    $('graduation-review').addEventListener('click', renderMap);
+    $('diagnostic-command-form').addEventListener('submit', event => {
+      event.preventDefault();
+      if (!diagnosticShell) return;
+      const input = $('diagnostic-command').value;
+      const result = diagnosticShell.run(input);
+      $('diagnostic-output').textContent = '$ ' + input + '\n' + result.stdout + result.stderr;
+    });
+    $('diagnostic-answer-form').addEventListener('submit', event => {
+      event.preventDefault();
+      diagnosticResult = $('diagnostic-ip').value.normalize('NFKC').trim() === '198.51.100.62' && /^3(?:件|times)?$/.test($('diagnostic-count').value.normalize('NFKC').replace(/\s/g, ''));
+      renderDiagnosticFeedback();
+    });
+    ['diagnostic-ip', 'diagnostic-count'].forEach(id => $(id).addEventListener('input', () => {diagnosticResult = null; renderDiagnosticFeedback();}));
     $('home-button').addEventListener('click', home);
     $('start-learning').addEventListener('click', () => renderLesson(ui.started && validId(progress.currentId) ? progress.currentId : lessons[0].id, { focus: true }));
     ['map-button', 'welcome-map-button'].forEach(id => $(id).addEventListener('click', renderMap));

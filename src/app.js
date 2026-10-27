@@ -128,8 +128,8 @@
     $('map-overall').textContent = t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了');
     $('welcome-progress').textContent = s.completed ? t('全体 ') + s.completed + ' / ' + s.total + t(' レッスン修了。今日も一歩ずつ。') : '';
     $('course-summary').textContent = levels.length + t(' 段階 · 全 ') + s.total + t(' レッスン');
-    $('brand-version').textContent = 'STEP BY STEP / v' + (DATA.release || '0.5.0');
-    $('footer-version').textContent = 'Offline learning lab · v' + (DATA.release || '0.5.0');
+    $('brand-version').textContent = 'STEP BY STEP / v' + DATA.release;
+    $('footer-version').textContent = 'Offline learning lab · v' + DATA.release;
     $('start-learning').replaceChildren(document.createTextNode(ui.started ? t('続きから学ぶ ') : t('最初のレッスンをはじめる ')), node('span', '', '→'));
     renderLevelCards();
   }
@@ -336,10 +336,17 @@
     const last = !next;
     $('next-lesson').hidden = last;
     $('next-lesson').textContent = next && levelOf(next) !== levelOf(currentLesson) ? levelById.get(levelOf(next)).title + t('へ進む →') : t('次のレッスンへ →');
-    $('graduation-link').hidden = !last;
-    $('logroom-link').hidden = !last;
-    if (last) $('bridge-text').textContent = (currentLesson.bridge || t('次は SOCroom-easy でログの読み方を学び、Logroom でコマンドを使ったログ分析へ進みましょう。')) + t(' 各 GitHub ページから教材を入手できます。');
-    else if (levelOf(next) !== levelOf(currentLesson)) $('bridge-text').textContent = levelById.get(levelOf(currentLesson)).title + t('の最後の実習ができました。次は') + levelById.get(levelOf(next)).title + t('です。今までのコマンドに新しい操作を足していきましょう。');
+    const levelEnd = last || levelOf(next) !== levelOf(currentLesson);
+    $('graduation-options').hidden = !levelEnd;
+    $('graduation-link').hidden = !levelEnd;
+    if (levelEnd) {
+      $('bridge-text').textContent = last ? t('この段階の実習ができました。好きな課題を復習したり、自由練習を続けたりできます。') : levelById.get(levelOf(currentLesson)).title + t('の最後の実習ができました。次は') + levelById.get(levelOf(next)).title + t('です。今までのコマンドに新しい操作を足していきましょう。');
+      const beginner = levelOf(currentLesson) === 'beginner', offline = location.protocol === 'file:';
+      $('graduation-description').textContent = t(beginner ? 'ログの意味を読む練習を続けたいときは、SOCroom-easyの中級もおすすめです。開いた画面で中級を選べます。' : '覚えたコマンドで証拠を集める調査も試したいときは、Logroomがおすすめです。');
+      $('graduation-link').textContent = beginner ? t('SOCroom-easyを開く（中級から）') : t('Logroomを開く');
+      $('graduation-link').href = offline ? (beginner ? 'socroom-easy.html' : 'logroom.html') : 'https://retiacole.github.io/' + (beginner ? 'socroom-easy' : 'logroom') + '/';
+      $('graduation-offline').textContent = t(offline ? 'オフラインでは、次の教材のHTMLを入手し、同じフォルダへ置いてください。' : 'リンクは別のタブで開きます。完了記録の共有や自動移動はありません。');
+    }
     if (newlyCompleted) toast('✓ ' + currentLesson.title + t(' を修了しました'));
   }
 
@@ -585,6 +592,12 @@
   function renderMapContents() {
     stats();
     const selected = levelLessons(activeLevel);
+    $('preparation-lessons').replaceChildren(...['ap-07-grep-fixed', 'ad-21-awk-nf', 'ad-12-diff'].map(id => {
+      const lesson = byId.get(id), button = node('button', 'reference-lesson-button', lesson.title);
+      button.dataset.preparationLesson = id;
+      button.addEventListener('click', () => renderLesson(id, {focus: true}));
+      return button;
+    }));
     $('map-levels').replaceChildren(...levels.map(level => {
       const s = levelStats(level.id);
       const button = node('button', 'map-level-button');
@@ -625,6 +638,37 @@
   function renderMap() {
     renderMapContents();
     openDialog('map-dialog');
+  }
+
+  // Optional practice has its own shell; saved lesson and sandbox sessions are untouched.
+  const diagnosticText = [
+    'Aug 13 09:00:00 edge-02 sshd[5101]: Failed password for invalid user visitor from 198.51.100.62 port 40101 ssh2',
+    'Aug 13 09:00:20 edge-02 sshd[5102]: Failed password for ops from 203.0.113.24 port 40102 ssh2',
+    'Aug 13 09:01:00 edge-02 sshd[5103]: Accepted publickey for ops from 192.0.2.17 port 40103 ssh2',
+    'Aug 13 09:01:20 edge-02 sshd[5104]: Failed password for deploy from 198.51.100.62 port 40104 ssh2',
+    'Aug 13 09:02:00 edge-02 sshd[5105]: Failed password for invalid user test from 203.0.113.24 port 40105 ssh2',
+    'Aug 13 09:02:20 edge-02 sshd[5106]: Failed password for ops from 198.51.100.62 port 40106 ssh2',
+    'Aug 13 09:03:00 edge-02 sshd[5107]: Accepted password for deploy from 198.51.100.62 port 40107 ssh2'
+  ].join('\n') + '\n';
+  let diagnosticShell = null, diagnosticResult = null;
+  function renderDiagnosticFeedback() {
+    $('diagnostic-feedback').textContent = diagnosticResult === null ? '' : t(diagnosticResult ? '件数とIPは一致しました。どの列を使ったか、成功行を除いた理由、元の3行を自分の言葉で確かめましょう。' : '元の行と比べ直しましょう。Failed passwordだけを数え、invalid userによる列のずれにも注意します。');
+  }
+  function resetDiagnostic() {
+    diagnosticShell = new globalThis.LogLabShell({'/home/analyst/auth.log': diagnosticText});
+    diagnosticShell.cwd = '/home/analyst';
+    diagnosticResult = null;
+    $('diagnostic-source').textContent = diagnosticText;
+    ['diagnostic-command', 'diagnostic-ip', 'diagnostic-count'].forEach(id => { $(id).value = ''; });
+    $('diagnostic-output').textContent = '';
+    renderDiagnosticFeedback();
+  }
+  function openDiagnostic() {
+    closeAllDialogs();
+    if (!diagnosticShell) resetDiagnostic();
+    renderDiagnosticFeedback();
+    openDialog('diagnostic-dialog');
+    $('diagnostic-command').focus();
   }
 
   const builtInReferences = [
@@ -830,6 +874,7 @@
       activeLevel = selectedLevel;
       if (openDialogs.includes('map-dialog')) renderMapContents();
       if (openDialogs.includes('reference-dialog')) renderReferences();
+      if (openDialogs.includes('diagnostic-dialog')) renderDiagnosticFeedback();
       openDialogs.forEach(id => { if (!$(id).open) openDialog(id); });
       if (!$('storage-warning').hidden) storageFailure();
       $('toast').hidden = true;
@@ -837,6 +882,23 @@
       window.scrollTo(scroll.x, scroll.y);
       $('language-select').focus({preventScroll: true});
     });
+    $('diagnostic-open').addEventListener('click', openDiagnostic);
+    $('diagnostic-reset').addEventListener('click', () => { resetDiagnostic(); $('diagnostic-command').focus(); });
+    $('diagnostic-review').addEventListener('click', () => { closeDialog($('diagnostic-dialog')); renderMap(); });
+    $('graduation-review').addEventListener('click', renderMap);
+    $('diagnostic-command-form').addEventListener('submit', event => {
+      event.preventDefault();
+      if (!diagnosticShell) return;
+      const input = $('diagnostic-command').value;
+      const result = diagnosticShell.run(input);
+      $('diagnostic-output').textContent = '$ ' + input + '\n' + result.stdout + result.stderr;
+    });
+    $('diagnostic-answer-form').addEventListener('submit', event => {
+      event.preventDefault();
+      diagnosticResult = $('diagnostic-ip').value.normalize('NFKC').trim() === '198.51.100.62' && /^3(?:件|times)?$/.test($('diagnostic-count').value.normalize('NFKC').replace(/\s/g, ''));
+      renderDiagnosticFeedback();
+    });
+    ['diagnostic-ip', 'diagnostic-count'].forEach(id => $(id).addEventListener('input', () => {diagnosticResult = null; renderDiagnosticFeedback();}));
     $('home-button').addEventListener('click', home);
     $('start-learning').addEventListener('click', () => renderLesson(ui.started && validId(progress.currentId) ? progress.currentId : lessons[0].id, { focus: true }));
     ['map-button', 'welcome-map-button'].forEach(id => $(id).addEventListener('click', renderMap));

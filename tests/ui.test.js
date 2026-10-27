@@ -8,12 +8,12 @@ const html = fs.readFileSync(path.join(__dirname,'../linuxroom.html'),'utf8');
 const KEY = 'linuxroom.progress.v1';
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
-async function createApp(saved, blockedStorage=false) {
+async function createApp(saved, blockedStorage=false, url='https://linuxroom.test/') {
   const errors=[];
   const console = new VirtualConsole();
   console.on('jsdomError',error=>errors.push(error.message));
   const dom = new JSDOM(html, {
-    url:'https://linuxroom.test/', runScripts:'dangerously', pretendToBeVisual:true, virtualConsole:console,
+    url, runScripts:'dangerously', pretendToBeVisual:true, virtualConsole:console,
     beforeParse(window) {
       window.TextEncoder = globalThis.TextEncoder; window.TextDecoder = globalThis.TextDecoder;
       window.confirm = () => true; window.scrollTo = () => {};
@@ -151,7 +151,8 @@ test('graduation buttons cross beginner to applied to advanced in order',async()
       const last=app.w.LINUXROOM_DATA.lessons.filter(l=>l.level===from).at(-1);
       app.openLesson(last);for(const c of last.solution)app.run(c);
       app.click('check-answer');assert.equal(app.d.getElementById('success-box').hidden,false);
-      assert.equal(app.d.getElementById('graduation-link').hidden,true);
+      assert.equal(app.d.getElementById('graduation-link').hidden,false);
+      assert.equal(app.d.getElementById('graduation-link').getAttribute('target'),'_blank');
       app.click('next-lesson');
       assert.equal(app.d.getElementById('lesson-title').textContent,app.w.LINUXROOM_DATA.lessons.find(l=>l.level===to).title);
     }
@@ -171,4 +172,69 @@ test('a v0.1 progress record resumes even when the separate UI record is missing
     assert.equal(Object.keys(JSON.parse(app.w.localStorage.getItem(KEY)).completed).length,36);
     assert.deepEqual(app.errors,[]);
   }finally{app.dom.window.close();}
+});
+
+test('optional preparation keeps saved work and the isolated check does not award completion',async()=>{
+  const app=await createApp();
+  try{
+    app.click('start-learning');
+    app.run('echo retained > /tmp/own.txt');
+    const draft='cat /tmp/own.txt';
+    app.d.getElementById('command-input').value=draft;
+    app.d.getElementById('command-input').dispatchEvent(new app.w.Event('input',{bubbles:true}));
+    app.click('map-button');
+    const prep=[...app.d.querySelectorAll('[data-preparation-lesson]')];
+    assert.deepEqual(prep.map(b=>b.dataset.preparationLesson),['ap-07-grep-fixed','ad-21-awk-nf','ad-12-diff']);
+    app.click('diagnostic-open');
+    const submit=id=>app.d.getElementById(id).dispatchEvent(new app.w.Event('submit',{bubbles:true,cancelable:true}));
+    app.d.getElementById('diagnostic-command').value="grep 'Failed password' auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr";
+    submit('diagnostic-command-form');
+    assert.match(app.d.getElementById('diagnostic-output').textContent,/3 198\.51\.100\.62/);
+    assert.match(app.d.getElementById('diagnostic-output').textContent,/2 203\.0\.113\.24/);
+    app.d.getElementById('diagnostic-command').value='cat /tmp/own.txt';
+    submit('diagnostic-command-form');
+    assert.doesNotMatch(app.d.getElementById('diagnostic-output').textContent,/retained/);
+    app.d.getElementById('diagnostic-ip').value='198.51.100.62';
+    app.d.getElementById('diagnostic-count').value='3';
+    submit('diagnostic-answer-form');
+    assert.match(app.d.getElementById('diagnostic-feedback').textContent,/一致/);
+    app.d.getElementById('diagnostic-count').value='4';
+    app.d.getElementById('diagnostic-count').dispatchEvent(new app.w.Event('input',{bubbles:true}));
+    assert.equal(app.d.getElementById('diagnostic-feedback').textContent,'');
+    submit('diagnostic-answer-form');
+    assert.match(app.d.getElementById('diagnostic-feedback').textContent,/比べ直し/);
+    app.d.getElementById('diagnostic-command').value='rm auth.log';
+    submit('diagnostic-command-form');
+    app.click('diagnostic-reset');
+    assert.equal(app.d.getElementById('diagnostic-ip').value,'');
+    assert.equal(app.d.getElementById('diagnostic-feedback').textContent,'');
+    app.d.getElementById('diagnostic-command').value='cat auth.log';
+    submit('diagnostic-command-form');
+    assert.match(app.d.getElementById('diagnostic-output').textContent,/Failed password/);
+    app.d.querySelector('#diagnostic-dialog .close-dialog').click();
+    assert.equal(app.d.getElementById('command-input').value,draft);
+    app.run('cat /tmp/own.txt');
+    assert.match(app.d.getElementById('terminal-output').textContent,/retained/);
+    assert.deepEqual(Object.keys(JSON.parse(app.w.localStorage.getItem(KEY)).completed),[]);
+    app.click('map-button');app.d.querySelector('[data-preparation-lesson="ad-21-awk-nf"]').click();
+    assert.equal(JSON.parse(app.w.localStorage.getItem(KEY)).currentId,'ad-21-awk-nf');
+    assert.equal(app.w.LINUXROOM_DATA.lessons.length,121);
+    assert.deepEqual(app.errors,[]);
+  }finally{app.w.close();}
+});
+
+test('version is visible at the top and graduation suggestions remain optional offline',async()=>{
+  const app=await createApp(null,false,'file:///training/linuxroom.html');
+  try{
+    assert.equal(app.d.getElementById('brand-version').textContent,'STEP BY STEP / v'+require('../package.json').version);
+    assert.equal(app.d.getElementById('graduation-options').hidden,true);
+    const final=app.w.LINUXROOM_DATA.lessons.find(l=>l.id==='36-final-ranking');
+    app.openLesson(final);for(const c of final.solution)app.run(c);app.click('check-answer');
+    assert.equal(app.d.getElementById('graduation-link').getAttribute('href'),'socroom-easy.html');
+    assert.equal(app.d.getElementById('next-lesson').hidden,false);
+    app.click('next-lesson');
+    assert.equal(app.d.getElementById('lesson-title').textContent,app.w.LINUXROOM_DATA.lessons.find(l=>l.level==='applied').title);
+    assert.equal(app.d.getElementById('success-box').hidden,true);
+    assert.deepEqual(app.errors,[]);
+  }finally{app.w.close();}
 });

@@ -2,9 +2,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const root = __dirname;
+const version = require('./package.json').version;
 let html = fs.readFileSync(path.join(root, 'src/ui.html'), 'utf8');
 const license = fs.readFileSync(path.join(root, 'LICENSE'), 'utf8');
-html = html.replace(/<!doctype html>/i, value => `${value}\n<!--\nLinuxroom v0.5.0. Virtual shell derived from Logroom.\n${license.replace(/-->/g, '-- >')}\n-->`);
+html = html.replace(/<!doctype html>/i, value => `${value}\n<!--\nLinuxroom v${version}. Virtual shell derived from Logroom.\n${license.replace(/-->/g, '-- >')}\n-->`);
 for (const [marker, file] of Object.entries({CSS:'style.css', SHELL:'shell.js', DATA:'data.js', I18N:'i18n.js', ENGINE:'engine.js', APP:'app.js'})) {
   const placeholder = `/*__${marker}__*/`;
   if (!html.includes(placeholder)) throw new Error(`Missing build placeholder ${placeholder}`);
@@ -13,6 +14,7 @@ for (const [marker, file] of Object.entries({CSS:'style.css', SHELL:'shell.js', 
   if (file.endsWith('.js')) content = content.replace(/<\/script/gi, '<\\/script');
   html = html.replace(placeholder, () => content);
 }
+html = html.replaceAll('__RELEASE_VERSION__', version);
 if (/\/\*__[A-Z]+__\*\//.test(html)) throw new Error('Unresolved placeholder');
 fs.writeFileSync(path.join(root, 'linuxroom.html'), html);
 const docs = path.join(root, 'docs');

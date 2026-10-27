@@ -2,7 +2,7 @@
   <img src="docs/images/linuxroom-banner.png" width="960" alt="Pixel art of the Linuxroom character casting fire magic in ancient ruins">
 </p>
 
-# Linuxroom v0.5.0
+# Linuxroom v0.6.0
 
 English · [日本語](README.md)
 
@@ -11,7 +11,7 @@ English · [日本語](README.md)
 **Build your Linux command skills, one step at a time.**<br>
 *ひとつずつ、つないでいこう。*
 
-**[Play Now](https://retiacole.github.io/linuxroom/)** · [Download the offline HTML](https://github.com/retiacole/linuxroom/raw/refs/tags/v0.5.0/linuxroom.html)
+**[Play Now](https://retiacole.github.io/linuxroom/)** · [Download the offline HTML](https://github.com/retiacole/linuxroom/raw/refs/heads/main/linuxroom.html)
 
 Learn Linux commands one small step at a time. Linuxroom is a self-contained browser lab for navigating files, searching records, extracting fields, building pipelines and saving results. Inspect the actual input and output at each pipeline stage.
 
@@ -98,3 +98,9 @@ This app and curriculum were created using OpenAI Codex (AI). Its virtual shell 
 <p align="center">
   <img src="assets/linuxroom-journey.png" width="100%" alt="The Room series characters walking together through the countryside">
 </p>
+
+## Optional review and next steps
+
+The map includes a three-lesson preparation set: `ap-07-grep-fixed`, `ad-21-awk-nf`, and `ad-12-diff`. Choose any of them in any order. The separate “Try a different log” check lets you investigate a small SSH dataset in its own virtual shell, with optional hints. It does not alter your completion record, lesson workspace, or free-practice files. Work in this check lasts only until the page closes.
+
+After each stage’s final exercise, optional suggestions point beginner learners to SOCroom-easy Intermediate and applied/advanced learners to Logroom. The existing next-lesson action continues from Beginner to Applied and from Applied to Advanced. You may instead review any lesson or use free practice, including after Advanced. There is no automatic navigation, cross-tool progress check, or shared completion record. Online links open another tab; offline links expect separately downloaded sibling HTML files. The version at the top is populated from package.json during the build.

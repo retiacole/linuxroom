@@ -2,7 +2,7 @@
   <img src="docs/images/linuxroom-banner.png" width="960" alt="遺跡で炎の魔法を使うLinuxroomのキャラクターを描いたピクセルアート">
 </p>
 
-# Linuxroom v0.5.0
+# Linuxroom v0.6.0
 
 [English README](README.en.md) · 日本語
 
@@ -11,7 +11,7 @@
 **ひとつずつ、つないでいこう。**<br>
 *Build your Linux command skills, one step at a time.*
 
-**[すぐにやってみる](https://retiacole.github.io/linuxroom/)** · [オフライン版をダウンロード](https://github.com/retiacole/linuxroom/raw/refs/tags/v0.5.0/linuxroom.html)
+**[すぐにやってみる](https://retiacole.github.io/linuxroom/)** · [オフライン版をダウンロード](https://github.com/retiacole/linuxroom/raw/refs/heads/main/linuxroom.html)
 
 Linuxコマンドに初めて触れる人が、ファイルの移動・閲覧から、検索・列の抽出・集計・保存までを段階的に練習する教材です。前のコマンドに処理を一つずつ足し、パイプの途中結果を見ながら組み立てます。
 
@@ -120,9 +120,15 @@ v0.2の108課題もIDとクリア履歴を維持します。400行のログを�
 
 正解も含めた全データをHTMLに同梱しています。自習用であり、改ざん防止付きの試験や認定には使いません。
 
-## 次の教材
+## 任意の復習と卒業後のおすすめ
 
-推奨順は Linuxroom → [SOCroom-easy](https://github.com/retiacole/socroom-easy) → [Logroom](https://github.com/retiacole/logroom) → SOCroom です。Linuxroomでコマンド操作、SOCroom-easyでログの読み方、Logroomでコマンドを使ったログ調査を練習します。外部教材へのリンクを開くときだけ通信が発生します。ほかの教材本体はこの配布物に含みません。
+学習マップの「ログ分析の準備」から、既存の固定文字列検索（`ap-07-grep-fixed`）、可変列の抽出（`ad-21-awk-nf`）、差分の読み方（`ad-12-diff`）へ直接進めます。好きな順で必要な課題だけ選べる復習セットで、新しい必修コースではありません。
+
+「別のログで確かめる」は、通常の失敗行と`invalid user`を含むSSHログを使う短い確認です。独立した仮想端末でコマンドを試し、IPと件数を照合できます。ヒントを使ってよく、修了数や習得状態には加算しません。元の課題・自由練習の入力やファイルは変更せず、この確認の作業だけはページを閉じると消えます。
+
+各段階の最後の実習を終えると、既存の「次のレッスンへ」に加え、任意のおすすめが表示されます。初級後は [SOCroom-easy中級](https://retiacole.github.io/socroom-easy/)、応用・発展後は [Logroom](https://retiacole.github.io/logroom/) が候補です。そのままLinuxroomの次の段階を続けたり、学習マップで復習を選んだりできます。自動移動、他教材の完了チェック、進捗の共有はありません。
+
+オンラインのリンクは別タブで開きます。オフラインでは、別途入手した`socroom-easy.html`または`logroom.html`を同じフォルダへ置いてください。他の教材本体はこの配布物には含まれません。最上部のバージョンは`package.json`からビルド時に反映されます。
 
 ## 開発
 

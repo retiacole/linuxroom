@@ -198,3 +198,31 @@ test('old saves default to Japanese and blocked storage still allows switching a
 });
 
 function appKeys(app) {return Object.keys(JSON.parse(app.save().progress).completed).sort();}
+
+test('optional check stays open across languages without changing evidence, answers or lesson work', () => {
+  const app = createApp();
+  try {
+    app.click('start-learning');
+    app.run('echo retained > /tmp/own.txt');
+    app.click('map-button'); app.click('diagnostic-open');
+    app.d.getElementById('diagnostic-ip').value = '198.51.100.62';
+    app.d.getElementById('diagnostic-count').value = '3';
+    app.d.getElementById('diagnostic-answer-form').dispatchEvent(new app.w.Event('submit', {bubbles: true, cancelable: true}));
+    const source = app.d.getElementById('diagnostic-source').textContent;
+    const before = app.save().progress;
+    app.language('en');
+    assert.equal(app.d.getElementById('diagnostic-dialog').open, true);
+    assert.doesNotMatch(app.d.getElementById('diagnostic-dialog').textContent, japanese);
+    assert.match(app.d.getElementById('diagnostic-feedback').textContent, /IP and count match/);
+    assert.equal(app.d.getElementById('diagnostic-source').textContent, source);
+    assert.equal(app.d.getElementById('diagnostic-ip').value, '198.51.100.62');
+    assert.equal(app.d.getElementById('diagnostic-count').value, '3');
+    assert.equal(app.save().progress, before);
+    app.language('ja');
+    assert.match(app.d.getElementById('diagnostic-feedback').textContent, /一致/);
+    app.d.querySelector('#diagnostic-dialog .close-dialog').click();
+    app.run('cat /tmp/own.txt');
+    assert.match(app.d.getElementById('terminal-output').textContent, /retained/);
+    assert.deepEqual(app.errors, []);
+  } finally {app.w.close();}
+});

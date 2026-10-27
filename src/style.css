@@ -17,6 +17,17 @@
 @media(max-width:560px){.sandbox-callout{margin-top:45px;padding:21px;align-items:stretch;flex-direction:column;gap:18px}.sandbox-callout h2{font-size:18px}.sandbox-callout p:last-child{font-size:11px}.sandbox-callout .eyebrow{font-size:8px}.sandbox-callout+.course-levels{margin-top:35px}.terminal-command .history-prompt{font-size:9px}}
 
 .trace-input{margin-top:12px;border:1px solid #e0e8dc;border-radius:6px;background:#fafbf7}.trace-input summary{font-size:10px;color:var(--muted);padding:7px 10px;cursor:pointer}.trace-input summary span{font-size:9px;margin-left:6px;color:#839987}#trace-input{margin:0 10px 10px;max-height:160px;overflow:auto;font-size:10px;line-height:1.9;color:#5b7463}.trace-output-label{font-size:10px;color:var(--muted);margin:12px 0 0}.trace-output-label+#trace-output{margin-top:5px}
+/* Optional study choices do not replace the main next-lesson action. */
+.brand-version{font-size:11px!important;letter-spacing:.05em!important;line-height:1.6}
+.graduation-options,.preparation-review{margin:20px 0;padding:18px;border:1px solid var(--line);border-radius:8px;background:#f5f8f0}
+.graduation-options h4,.preparation-review h3{font-size:15px;line-height:1.6;margin:0 0 10px}
+.graduation-options p,.preparation-review p{font-size:12px;line-height:1.85}.preparation-review .reference-lesson-button{font-size:12px}
+.diagnostic-dialog pre{padding:12px;background:#f1f4ec;white-space:pre-wrap;overflow-wrap:anywhere;max-height:230px;overflow:auto;font:12px/1.8 var(--mono)}
+.diagnostic-dialog label{display:block;font-size:13px}.diagnostic-dialog input{width:100%;padding:10px;border:1px solid var(--line);border-radius:5px;font:14px var(--mono);background:white}
+.diagnostic-input-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:6px}.diagnostic-answers{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin:16px 0}
+.diagnostic-dialog details{margin:20px 0;line-height:1.9}.diagnostic-dialog code{display:block;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
+.diagnostic-dialog>p,.diagnostic-dialog details p{font-size:13px;line-height:1.9}.diagnostic-dialog summary{cursor:pointer;font-weight:600}
+@media(max-width:560px){.diagnostic-answers{grid-template-columns:1fr}.graduation-options,.preparation-review{padding:14px}}
 /* Language selection stays available in the HTML menu, including offline. */
 .language-control{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);white-space:nowrap}.language-control select{font:inherit;min-height:34px;border:1px solid var(--line);border-radius:6px;padding:5px 7px;color:var(--ink);background:var(--white)}select:focus-visible{outline:3px solid #d6a944;outline-offset:3px}.header-actions{flex-wrap:wrap;justify-content:flex-end;gap:4px 10px}html[lang="en"] .nav-button{white-space:normal}html[lang="en"] .lesson-link-title{overflow-wrap:anywhere}html[lang="en"] .hero-sticker{max-width:190px}html[lang="en"] .level-card .button{white-space:normal}html[lang="en"] .key-guide dl{grid-template-columns:145px minmax(0,1fr)}
 @media(max-width:800px){.site-header{height:auto;min-height:83px;padding-top:14px;padding-bottom:14px}.header-actions{max-width:65%;gap:4px}.language-control{justify-content:flex-end;width:100%}.language-control select{font-size:16px}.language-control span{font-size:10px}.nav-button{padding:6px;font-size:10px}html[lang="en"] .welcome h1{font-size:clamp(36px,8vw,64px)}}

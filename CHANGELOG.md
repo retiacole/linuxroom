@@ -1,5 +1,12 @@
 # 更新履歴
 
+## v0.6.0 — 2026-10-28
+
+- 各段階の最終実習に、続行・復習と併存する任意の次教材案内を追加。
+- 学習マップで既存3課題を「ログ分析の準備」として選べるようにし、独立した短いSSH確認を追加。121課題のID・順序・進捗形式は維持。
+- 最上部のバージョンを明瞭にし、package.jsonと配布HTMLをビルド時に同期。日本語・英語とオフラインに対応。
+- Added optional graduation suggestions, a reusable three-lesson review set, and an isolated SSH self-check. Existing lessons, progression, saved work, and same-room continuation are preserved.
+
 ## v0.5.0 — 2026-10-27
 
 実Linuxとの比較レビューを受け、自由練習での差を修正しました。初級36・応用49・発展36の計121課題、56コマンドです。既存119課題のIDと相対的な順序、保存済みの進捗は維持します。

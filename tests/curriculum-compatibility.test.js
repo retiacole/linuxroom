@@ -44,5 +44,5 @@ test('platform caveats are available in both teaching languages',()=>{
     const note=text.join('\n');
     for (const term of ['9.4','9.11','cut -b']) assert.ok(note.includes(term),'cut version caveat: '+term);
   }
-  assert.equal(D.release,'0.5.0');
+  assert.equal(D.release,require('../package.json').version);
 });

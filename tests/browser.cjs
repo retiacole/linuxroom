@@ -81,7 +81,8 @@ fs.mkdirSync(artifactDir, {recursive:true});
     assert.match(await page.locator('#terminal-output').textContent(),/diff/);
     await solve(lessons.at(-1));
     assert.equal(await page.locator('#graduation-link').isVisible(),true);
-    assert.equal(await page.locator('#logroom-link').isVisible(),true);
+    assert.equal(await page.locator('#next-lesson').isVisible(),false);
+    assert.match(await page.locator('#graduation-link').getAttribute('href'), /logroom/);
     await page.locator('#toast').waitFor({state:'hidden'});
     await page.screenshot({path:path.join(artifactDir,'advanced.png'),fullPage:true});
     // An error and unmatched search must not break subsequent command input.
