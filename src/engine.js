@@ -82,8 +82,20 @@
     }
   }
 
+  // Only the line-number prefix varies between grep -n and cat -n/nl.
+  // Keep each record's text and order exact; never renumber filtered results.
+  function numberedLines(value) {
+    const rows = String(value).replace(/\n$/, '').split('\n');
+    const parsed = rows.map(row => row.match(/^[ \t]*([1-9]\d*)(?::|\t| +)(.*)$/));
+    return parsed.every(Boolean) ? parsed.map(row => row[1] + ':' + row[2]) : null;
+  }
+
   function matches(actual, expected, mode) {
     actual = String(actual); expected = String(expected);
+    if (mode === 'numberedLines') {
+      const got = numberedLines(actual), wanted = numberedLines(expected);
+      return Boolean(got && wanted && got.join('\n') === wanted.join('\n'));
+    }
     if (mode === 'exact') return actual === expected;
     if (mode === 'contains') return actual.includes(expected);
     if (mode === 'lines') {
@@ -95,7 +107,7 @@
 
   function outputDifference(actual, expected, mode) {
     const tidy = value => mode === 'exact' ? String(value) : String(value).trim();
-    const lines = value => tidy(value).split('\n').map(line => mode === 'lines' ? line.trim().replace(/\s+/g, ' ') : line);
+    const lines = value => (mode === 'numberedLines' && numberedLines(value)) || tidy(value).split('\n').map(line => mode === 'lines' ? line.trim().replace(/\s+/g, ' ') : line);
     const shown = value => value.length > 70 ? value.slice(0, 67) + '…' : value;
     if (mode === 'contains') return t('必要な文字列「') + shown(String(expected).trim()) + t('」が見つかりません。');
     const got = lines(actual), wanted = lines(expected);
@@ -124,6 +136,22 @@
       }
     }
     return found;
+  }
+
+  function outputReadsSource(session, result, condition, lesson) {
+    const last = result.trace.at(-1);
+    if (!last || result.stdout !== last.stdout) return false;
+    const pipeline = result.trace.filter(stage => stage.pipeline === last.pipeline);
+    const first = pipeline[0];
+    if (!first.reads.includes(condition.path) || first.reads.some(path => path !== condition.path)) return false;
+    if (condition.unchanged && session.shell.files[condition.path] !== data().datasets[lesson.fixture].files[condition.path]) return false;
+    // In this scope only declared readers/filters may produce the final output.
+    // An unrelated read, a literal printf, or a stage reopening another file
+    // must not serve as evidence that the displayed rows came from the source.
+    return pipeline.every((stage, index) => stageAccepted(stage, lesson) &&
+      condition.commands.includes(stage.command) &&
+      !stage.redirections.some(redirection => (redirection.fd === undefined || redirection.fd === 1) && redirection.op !== '<') &&
+      (index === 0 || (!stage.reads.length && stage.stdin === pipeline[index - 1].stdout)));
   }
 
   function check(session) {
@@ -155,7 +183,7 @@
           message = '$' + condition.name + t(' を') + (condition.context === 'arguments' ? t('引数として展開して値を確認している') : t('展開して値を確認している')); break;
         case 'pipeline': { const counts = new Map(); for (const stage of result.trace) counts.set(stage.pipeline, (counts.get(stage.pipeline) || 0) + 1); passed = [...counts.values()].some(count => count >= condition.minStages); message = t('必要な段階をパイプでつないでいる'); break; }
         case 'pagerClosed': passed = session.pagerOpened && session.pagerClosed && !session.pagerOpen; message = t('ファイルを開き、q で表示を閉じている'); break;
-        case 'source': { const sourceStages = condition.scope === 'last' ? result.trace : session.evidence; passed = sourceStages.some(stage => stageAccepted(stage, lesson) && stage.reads.includes(condition.path)); message = t('指定された元ファイルを実際に読み込んでいる'); break; }
+        case 'source': { const sourceStages = condition.scope === 'last' ? result.trace : session.evidence; passed = condition.scope === 'output' ? outputReadsSource(session, result, condition, lesson) : sourceStages.some(stage => stageAccepted(stage, lesson) && stage.reads.includes(condition.path)); message = t('指定された元ファイルを実際に読み込んでいる'); break; }
         default: message = t('未対応の判定条件です');
       }
       return {passed, message};

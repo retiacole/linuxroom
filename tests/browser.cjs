@@ -25,7 +25,15 @@ fs.mkdirSync(artifactDir, {recursive:true});
     await page.locator('#command-input').press('Enter');
     await page.locator('#check-answer').click();
     assert.equal(await page.locator('#success-box').isVisible(),true);
-    await page.locator('#next-lesson').click();
+    const firstTitle = await page.locator('#lesson-title').textContent();
+    await page.locator('#command-input').fill('echo ready');
+    await page.locator('#command-input').evaluate(input => input.setSelectionRange(0, 0));
+    await page.locator('#command-input').press('ArrowRight');
+    assert.equal(await page.locator('#command-input').evaluate(input => input.selectionStart),1,'right arrow still moves the text cursor');
+    assert.equal(await page.locator('#lesson-title').textContent(),firstTitle);
+    await page.locator('#command-input').fill('');
+    await page.locator('#command-input').press('ArrowRight');
+    assert.notEqual(await page.locator('#lesson-title').textContent(),firstTitle);
     const lessons = await page.evaluate(() => globalThis.LINUXROOM_DATA.lessons);
     const escaped = value => value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
     async function openLesson(lesson) {
@@ -50,6 +58,16 @@ fs.mkdirSync(artifactDir, {recursive:true});
     for(const id of ['ap-37-input-redirection','ap-39-ls-time','ap-45-and-sequence','ap-46-stderr','ap-47-exit-status','ap-48-cat-visible','ap-49-file-hash'])await solve(lessons.find(l=>l.id===id));
     await page.reload();
     await page.locator('#check-answer').click();assert.equal(await page.locator('#success-box').isVisible(),true,'review lesson evidence survives a real reload');
+    // Preserve original source line numbers when using a cat -n pipeline.
+    await openLesson(lessons.find(lesson => lesson.id === '12-grep-number'));
+    await page.locator('#command-input').fill("grep 'ERROR' app.log | cat -n");
+    await page.locator('#command-input').press('Enter');
+    assert.equal(await page.locator('#success-box').isVisible(),false,'numbering after filtering does not retain source line numbers');
+    await page.locator('#command-input').fill("cat -n app.log | grep 'ERROR'");
+    await page.locator('#command-input').press('Enter');
+    assert.equal(await page.locator('#success-box').isVisible(),true,'cat -n before filtering is accepted');
+    await page.locator('#command-input').press('ArrowRight');
+    assert.equal(await page.locator('#lesson-title').textContent(),lessons.find(lesson => lesson.id === '13-grep-case').title);
     // Separate pager entry/exit, then progressively longer pipelines and persistence.
     const pager = lessons.find(lesson => lesson.validation.all.some(c => c.type === 'pagerClosed'));
     await solve(pager);

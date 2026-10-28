@@ -335,6 +335,7 @@
     const next = nextLesson(currentLesson);
     const last = !next;
     $('next-lesson').hidden = last;
+    $('next-shortcut').hidden = last;
     $('next-lesson').textContent = next && levelOf(next) !== levelOf(currentLesson) ? levelById.get(levelOf(next)).title + t('へ進む →') : t('次のレッスンへ →');
     const levelEnd = last || levelOf(next) !== levelOf(currentLesson);
     $('graduation-options').hidden = !levelEnd;
@@ -543,6 +544,19 @@
       laterSave();
     }
     $('run-feedback').textContent = matches.length === 1 ? t('補完しました。') : t('候補: ') + matches.slice(0, 12).join('  ') + (matches.length > 12 ? ' …' : '');
+  }
+
+  function nextLessonKeys(event) {
+    if (event.key !== 'ArrowRight' || event.defaultPrevented || event.repeat || event.isComposing || event.keyCode === 229 || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
+    if (!currentLesson || !progress.completed[currentLesson.id] || $('workspace').hidden || $('success-box').hidden || $('next-lesson').hidden || currentSession.pagerOpen || document.querySelector('dialog[open]')) return;
+    const input = $('command-input');
+    if (input.value !== '') return;
+    // Keep native arrows for editable controls, selectors, and selected text.
+    const target = event.target;
+    if (target !== input && target?.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[role="slider"],[role="spinbutton"],[role="listbox"],[role="tablist"],[role="radiogroup"]')) return;
+    if (window.getSelection()?.isCollapsed === false) return;
+    event.preventDefault();
+    $('next-lesson').click();
   }
 
   function inputKeys(event) {
@@ -922,6 +936,7 @@
     $('example-fill').addEventListener('click', () => { if (currentLesson && currentLesson.example) fillInput(currentLesson.example.command); });
     $('command-form').addEventListener('submit', runCommand);
     $('command-input').addEventListener('keydown', inputKeys);
+    document.addEventListener('keydown', nextLessonKeys);
     $('command-input').addEventListener('input', laterSave);
     $('jump-terminal').addEventListener('click', () => {
       $('command-input').scrollIntoView({ block: 'center' });

@@ -1,5 +1,11 @@
 # 更新履歴
 
+## v0.6.2 — 2026-10-28
+
+- 初級・応用・発展の修了画面で、コマンド入力欄が空なら右矢印キー（→）で次へ進めます。編集中・文字選択中・ダイアログ表示中・長押しでは移動せず、既存の「次へ」と同じ行き先へ進みます。
+- 初級12/36で `cat -n app.log | grep 'ERROR'` を別解として受理。元ファイルの行番号・本文・順序と実際の読込を確かめ、抽出後の振り直しを不合格にします。日英の解説にも補足しました。
+- Added the right-arrow completion shortcut across all three levels and accepted source-preserving numbered pipelines in beginner lesson 12. Editing controls, dialogs, held keys and original evidence requirements remain protected.
+
 ## v0.6.1 — 2026-10-28
 
 - 日本語の検索課題に不足していた並べ替え指示を追加し、指示の順序と8課題の「次へ」の案内を修正。

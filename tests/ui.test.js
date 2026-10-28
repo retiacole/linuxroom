@@ -240,3 +240,79 @@ test('version is visible at the top and graduation suggestions remain optional o
     assert.deepEqual(app.errors,[]);
   }finally{app.w.close();}
 });
+
+function rightArrow(app, options = {}, target = app.d.getElementById('command-input')) {
+  const event = new app.w.KeyboardEvent('keydown', {key:'ArrowRight',bubbles:true,cancelable:true,...options});
+  target.dispatchEvent(event);
+  return event.defaultPrevented;
+}
+
+test('right arrow advances completed lessons in all three levels and focuses the next command input',async()=>{
+  const app=await createApp();
+  try {
+    const data=app.w.LINUXROOM_DATA;
+    for(const level of data.levels){
+      const [first,next]=data.lessons.filter(lesson=>lesson.level===level.id);
+      app.openLesson(first);
+      assert.equal(rightArrow(app),false,'unfinished lessons do not advance');
+      for(const command of first.solution)app.run(command);
+      app.click('check-answer');
+      assert.equal(app.d.getElementById('success-box').hidden,false);
+      assert.equal(app.d.getElementById('next-shortcut').hidden,false);
+      assert.equal(rightArrow(app),true,level.id);
+      assert.equal(app.d.getElementById('lesson-title').textContent,next.title);
+      assert.equal(app.d.activeElement.id,'command-input');
+      assert.equal(JSON.parse(app.w.localStorage.getItem(KEY)).currentId,next.id);
+    }
+    assert.deepEqual(app.errors,[]);
+  }finally{app.dom.window.close();}
+});
+
+test('next-lesson shortcut preserves editing, native controls, selection, dialogs and the home screen',async()=>{
+  const app=await createApp();
+  try {
+    app.click('start-learning');app.run('echo ready');
+    const input=app.d.getElementById('command-input'),title=app.d.getElementById('lesson-title').textContent;
+    for(const value of ['echo ready',' ']){input.value=value;input.setSelectionRange(2,2);assert.equal(rightArrow(app),false);assert.equal(input.value,value);}
+    input.value='';
+    for(const options of [{shiftKey:true},{ctrlKey:true},{altKey:true},{metaKey:true},{repeat:true},{isComposing:true},{keyCode:229}])assert.equal(rightArrow(app,options),false,JSON.stringify(options));
+    const handled=new app.w.KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true,cancelable:true});handled.preventDefault();input.dispatchEvent(handled);
+    assert.equal(rightArrow(app,{},app.d.getElementById('language-select')),false);
+    const editor=app.d.createElement('div');editor.contentEditable='true';editor.setAttribute('contenteditable','true');app.d.body.append(editor);
+    assert.equal(rightArrow(app,{},editor),false);editor.remove();
+    const range=app.d.createRange();range.selectNodeContents(app.d.getElementById('lesson-title'));app.w.getSelection().removeAllRanges();app.w.getSelection().addRange(range);
+    assert.equal(app.w.getSelection().isCollapsed,false);
+    assert.equal(rightArrow(app,{},app.d.body),false);app.w.getSelection().removeAllRanges();
+    app.click('reference-button');assert.equal(rightArrow(app),false);app.d.querySelector('#reference-dialog .close-dialog').click();
+    app.run('less /home/analyst/logs/names.txt');assert.equal(app.d.getElementById('pager-dialog').open,true);assert.equal(rightArrow(app),false);app.run('q');
+    assert.equal(app.d.getElementById('lesson-title').textContent,title);
+    app.click('home-button');assert.equal(rightArrow(app,{},app.d.body),false);
+    assert.equal(app.d.getElementById('workspace').hidden,true);
+    assert.deepEqual(app.errors,[]);
+  }finally{app.dom.window.close();}
+});
+
+test('holding right does not skip completed lessons and level boundaries use the existing next action',async()=>{
+  const app=await createApp();
+  try {
+    const data=app.w.LINUXROOM_DATA;
+    for(const lesson of data.lessons.slice(0,2)){app.openLesson(lesson);for(const command of lesson.solution)app.run(command);}
+    app.openLesson(data.lessons[0]);assert.equal(rightArrow(app),true);
+    assert.equal(app.d.getElementById('lesson-title').textContent,data.lessons[1].title);
+    assert.equal(rightArrow(app,{repeat:true}),false);
+    assert.equal(app.d.getElementById('lesson-title').textContent,data.lessons[1].title);
+    for(let index=0;index<data.levels.length;index++){
+      const last=data.lessons.filter(lesson=>lesson.level===data.levels[index].id).at(-1);
+      app.openLesson(last);for(const command of last.solution)app.run(command);app.click('check-answer');
+      assert.equal(app.d.getElementById('success-box').hidden,false,last.id);
+      if(index+1<data.levels.length){
+        assert.equal(rightArrow(app),true);
+        assert.equal(app.d.getElementById('lesson-title').textContent,data.lessons.find(lesson=>lesson.level===data.levels[index+1].id).title);
+      }else{
+        assert.equal(app.d.getElementById('next-shortcut').hidden,true);
+        assert.equal(rightArrow(app),false);assert.equal(app.d.getElementById('lesson-title').textContent,last.title);
+      }
+    }
+    assert.deepEqual(app.errors,[]);
+  }finally{app.dom.window.close();}
+});

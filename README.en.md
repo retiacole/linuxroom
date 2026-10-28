@@ -2,7 +2,7 @@
   <img src="docs/images/linuxroom-banner.png" width="960" alt="Pixel art of the Linuxroom character casting fire magic in ancient ruins">
 </p>
 
-# Linuxroom v0.6.1
+# Linuxroom v0.6.2
 
 Without a saved language choice, the app opens in Japanese when the browser’s primary language is Japanese, and in English otherwise. Saved language choices take priority; older saves without a language use the browser default.
 
@@ -45,12 +45,15 @@ All 56 supported commands are practiced in solutions or runnable examples. The c
 
 The final exercises connect multiple sources and produce saved detail, counts and totals. After the beginner level, you can also continue to [SOCroom-easy](https://github.com/retiacole/socroom-easy) for reading logs and [Logroom](https://github.com/retiacole/logroom) for command-based log analysis.
 
+Beginner lesson 12/36 accepts both `grep -n 'ERROR' app.log` and `cat -n app.log | grep 'ERROR'`. Number the original file before filtering to preserve the source line numbers.
+
 ## Terminal controls
 
 | Key | Action |
 | --- | --- |
 | Enter | Run the command |
 | ↑ / ↓ | Recall command history |
+| → | After completing a lesson at any level, go to the next lesson when the command input is empty. Editing, selection and open dialogs keep their normal controls. |
 | Tab | Complete a command or filename; an empty input keeps normal Tab navigation |
 | Ctrl + C | Clear the draft or close a viewer |
 | Ctrl + L | Clear the terminal display |

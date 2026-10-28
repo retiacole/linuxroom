@@ -199,13 +199,13 @@
   });
   lesson({ id: '12-grep-number', chapter: 'filter', title: '元の行番号も表示する',
     goal: 'grep -nで元ファイルの行番号を付けられる。',
-    explanation: ['grepに-nを加えると、元ファイルで何行目だったかも表示されます。例えば2:で始まる行は、元の2行目です。', '同じ-nでも意味はコマンドごとに異なります。headでは行数、grepでは行番号です。'],
+    explanation: ['grepに-nを加えると、元ファイルで何行目だったかも表示されます。例えば2:で始まる行は、元の2行目です。', '同じ-nでも意味はコマンドごとに異なります。headでは行数、grepでは行番号です。', "別の方法として、cat -n app.log | grep 'ERROR' のように元ファイルへ番号を付けてから絞っても構いません。grepで絞った後にcat -nを使うと、抽出後の1行目から番号が振られるため、この課題の元の行番号にはなりません。"],
     concepts: [{ term: '行番号', text: '元ファイルの先頭を1行目として数えた位置です。抽出後の番号ではありません。' }],
     example: { command: "grep -n 'INFO' app.log", note: '1行目と4行目にINFOがあることが分かります。' },
     starter: grep, newPart: '-n', task: '大文字のERRORを含む行を、元の行番号付きで表示してください。',
     hints: ['前の検索に-nを足します。', 'grepと検索語の間に-nを置けます。', "grep -n 'ERROR' app.log と入力します。"],
     solution: ["grep -n 'ERROR' app.log"], success: '抽出した行を、元ファイルの場所と結び付けられました。', bridge: '次は、大文字と小文字を同じものとして探します。',
-    validation: { all: [used('grep', { flags: 'n' }), out(lines(records.map((line, i) => (i + 1) + ':' + line).filter(line => line.includes('ERROR'))))] }
+    validation: { all: [used('grep'), { type: 'source', path: logdir + '/app.log', scope: 'output', commands: ['cat', 'grep', 'nl', 'head', 'tail', 'tee', 'sort', 'uniq'], unchanged: true }, out(lines(records.map((line, i) => (i + 1) + ':' + line).filter(line => line.includes('ERROR'))), 'numberedLines')] }
   });
   lesson({ id: '13-grep-case', chapter: 'filter', title: '大文字と小文字をまとめて探す',
     goal: 'grep -iで大文字・小文字を区別せず検索できる。',

@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-Linuxroom v0.6.1. Virtual shell derived from Logroom.
+Linuxroom v0.6.2. Virtual shell derived from Logroom.
 MIT License
 
 Copyright (c) 2026 Logroom contributors
@@ -70,7 +70,7 @@ SOFTWARE.
 <body>
   <a class="skip-link" href="#main">本文へ移動</a>
   <header class="site-header">
-    <button id="home-button" class="brand" aria-label="Linuxroom ホーム"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>linuxroom<span id="brand-version" class="brand-version">STEP BY STEP / v0.6.1</span></span></button>
+    <button id="home-button" class="brand" aria-label="Linuxroom ホーム"><span class="brand-mark" aria-hidden="true">&gt;_</span><span>linuxroom<span id="brand-version" class="brand-version">STEP BY STEP / v0.6.2</span></span></button>
     <nav class="header-actions" aria-label="メインメニュー">
       <label class="language-control" for="language-select"><span>Language</span><select id="language-select" aria-label="Language"><option value="ja" data-language-name>日本語</option><option value="en" data-language-name>English</option></select></label>
       <button id="map-button" class="nav-button">学習マップ</button>
@@ -127,7 +127,7 @@ SOFTWARE.
           <div class="lesson-actions"><button id="hint-button" class="button secondary">ヒントを見る <span id="hint-count">0/3</span></button><button id="solution-button" class="text-button">解答例</button></div>
           <div id="hint-list" class="hint-list"></div><div id="solution-box" class="solution-box" hidden></div>
           <div id="lesson-feedback" class="lesson-feedback" role="status" hidden></div>
-          <div id="success-box" class="success-box" hidden><span class="success-label">✓ LESSON COMPLETE</span><h3>できました！</h3><p id="success-text"></p><p id="bridge-text" class="bridge-text"></p><button id="next-lesson" class="button primary">次のレッスンへ →</button><section id="graduation-options" class="graduation-options" hidden><h4>ここまで来たら、次のおすすめ</h4><p id="graduation-description"></p><a id="graduation-link" class="button secondary" target="_blank" rel="noopener noreferrer" hidden></a><p id="graduation-offline" class="muted"></p><p>別の教材へ進むかどうかは自由です。このroomの続きや復習も選べます。</p><button id="graduation-review" class="text-button">学習マップで復習を選ぶ</button></section></div>
+          <div id="success-box" class="success-box" hidden><span class="success-label">✓ LESSON COMPLETE</span><h3>できました！</h3><p id="success-text"></p><p id="bridge-text" class="bridge-text"></p><button id="next-lesson" class="button primary" aria-keyshortcuts="ArrowRight" aria-describedby="next-shortcut">次のレッスンへ →</button><p id="next-shortcut" class="muted">コマンド入力欄が空なら、→ キーでも次へ進めます。</p><section id="graduation-options" class="graduation-options" hidden><h4>ここまで来たら、次のおすすめ</h4><p id="graduation-description"></p><a id="graduation-link" class="button secondary" target="_blank" rel="noopener noreferrer" hidden></a><p id="graduation-offline" class="muted"></p><p>別の教材へ進むかどうかは自由です。このroomの続きや復習も選べます。</p><button id="graduation-review" class="text-button">学習マップで復習を選ぶ</button></section></div>
           <button id="retry-lesson" class="text-button retry-button">この課題を最初からやり直す</button>
         </aside>
         <div class="practice-column">
@@ -145,10 +145,10 @@ SOFTWARE.
       </div>
     </section>
   </main>
-  <footer class="site-footer"><span>LINUXROOM <span class="footer-dot">/</span> Small commands. Real understanding.</span><span id="footer-version">Offline learning lab · v0.6.1</span></footer>
+  <footer class="site-footer"><span>LINUXROOM <span class="footer-dot">/</span> Small commands. Real understanding.</span><span id="footer-version">Offline learning lab · v0.6.2</span></footer>
 
   <dialog id="map-dialog" class="app-dialog map-dialog" aria-labelledby="map-title"><div class="dialog-top"><div><p class="eyebrow">YOUR LEARNING PATH</p><h2 id="map-title">学習マップ</h2></div><button class="close-dialog icon-button" aria-label="学習マップを閉じる">×</button></div><p class="dialog-intro">初級 → 応用 → 発展の順に、操作を積み重ねます。どの段階・課題からでも選べます。</p><div id="map-levels" class="map-levels" role="group" aria-label="学習する段階を選ぶ"></div><p id="map-level-description" class="map-level-description"></p><div class="map-progress-row"><div id="map-progress" class="map-progress"></div><span id="map-overall" class="map-overall"></span></div><section class="preparation-review"><h3>ログ分析の準備（任意）</h3><p>形式が変わるログを読むための3課題です。必要な操作だけ、好きな順で復習できます。</p><div id="preparation-lessons"></div><button id="diagnostic-open" class="button secondary">別のログで確かめる</button><p class="muted">確認は修了記録に加算されません。ヒントやコマンド帳を使って構いません。</p></section><div id="chapter-list" class="chapter-list"></div><button id="sandbox-button" class="button secondary full-width">自由練習のターミナルを開く →</button><p class="muted">✓ は修了済み。ヒント・解答例を見た課題も、何度でも復習できます。</p></dialog>
-  <dialog id="reference-dialog" class="app-dialog reference-dialog" aria-labelledby="reference-title"><div class="dialog-top"><div><p class="eyebrow">KEEP IT HANDY</p><h2 id="reference-title">コマンド帳</h2></div><button class="close-dialog icon-button" aria-label="コマンド帳を閉じる">×</button></div><p class="dialog-intro">覚えていなくても大丈夫。必要なときに見ながら試そう。</p><label class="sr-only" for="reference-search">コマンドや用語を探す</label><input id="reference-search" class="search-input" placeholder="コマンドや用語を探す" type="search"><div id="reference-lessons" class="reference-lessons"></div><div id="reference-list" class="reference-list"></div><div id="prompt-guide" class="key-guide"><h3>プロンプトの読み方</h3><code>analyst@linuxroom:~$</code><dl><dt>analyst</dt><dd>操作しているユーザー名</dd><dt>linuxroom</dt><dd>ホスト名（コンピューター名）</dd><dt>:~</dt><dd>: の後ろは現在地。~ は /home/analyst の省略。cd で移動すると ~/logs などに変わる</dd><dt>$ / #</dt><dd>一般ユーザー / 管理者の目印としてよく使われる。この教材は一般ユーザーの $</dd></dl><p class="muted">プロンプトの見た目は環境によって変わります。プロンプト自体は入力せず、その後ろにコマンドだけを打ちます。</p><h3>ターミナルの操作</h3><dl><dt>Enter</dt><dd>コマンドを実行</dd><dt>↑ / ↓</dt><dd>実行したコマンドを呼び出す</dd><dt>Tab</dt><dd>コマンド・ファイル名を補完</dd><dt>Ctrl + C</dt><dd>入力を消す / 閲覧画面を閉じる</dd><dt>Ctrl + L</dt><dd>ターミナルの表示を消す</dd><dt>less / more で q</dt><dd>閲覧を終えてターミナルへ戻る</dd></dl><p class="muted">実機では man grep などでマニュアルを調べます。この教材では man を help と同じ学習用の案内にしています。</p></div></dialog>
+  <dialog id="reference-dialog" class="app-dialog reference-dialog" aria-labelledby="reference-title"><div class="dialog-top"><div><p class="eyebrow">KEEP IT HANDY</p><h2 id="reference-title">コマンド帳</h2></div><button class="close-dialog icon-button" aria-label="コマンド帳を閉じる">×</button></div><p class="dialog-intro">覚えていなくても大丈夫。必要なときに見ながら試そう。</p><label class="sr-only" for="reference-search">コマンドや用語を探す</label><input id="reference-search" class="search-input" placeholder="コマンドや用語を探す" type="search"><div id="reference-lessons" class="reference-lessons"></div><div id="reference-list" class="reference-list"></div><div id="prompt-guide" class="key-guide"><h3>プロンプトの読み方</h3><code>analyst@linuxroom:~$</code><dl><dt>analyst</dt><dd>操作しているユーザー名</dd><dt>linuxroom</dt><dd>ホスト名（コンピューター名）</dd><dt>:~</dt><dd>: の後ろは現在地。~ は /home/analyst の省略。cd で移動すると ~/logs などに変わる</dd><dt>$ / #</dt><dd>一般ユーザー / 管理者の目印としてよく使われる。この教材は一般ユーザーの $</dd></dl><p class="muted">プロンプトの見た目は環境によって変わります。プロンプト自体は入力せず、その後ろにコマンドだけを打ちます。</p><h3>ターミナルの操作</h3><dl><dt>Enter</dt><dd>コマンドを実行</dd><dt>↑ / ↓</dt><dd>実行したコマンドを呼び出す</dd><dt>→</dt><dd>課題修了後、コマンド入力欄が空なら次へ進む</dd><dt>Tab</dt><dd>コマンド・ファイル名を補完</dd><dt>Ctrl + C</dt><dd>入力を消す / 閲覧画面を閉じる</dd><dt>Ctrl + L</dt><dd>ターミナルの表示を消す</dd><dt>less / more で q</dt><dd>閲覧を終えてターミナルへ戻る</dd></dl><p class="muted">実機では man grep などでマニュアルを調べます。この教材では man を help と同じ学習用の案内にしています。</p></div></dialog>
   <dialog id="save-dialog" class="app-dialog save-dialog" aria-labelledby="save-title"><div class="dialog-top"><div><p class="eyebrow">SAVE YOUR PLACE</p><h2 id="save-title">進捗の保存</h2></div><button class="close-dialog icon-button" aria-label="保存画面を閉じる">×</button></div><p>修了した課題と、各課題のファイル・現在地・入力途中のコマンドを、このブラウザに自動保存します。</p><p class="muted">別のブラウザや端末に移すときは、進捗ファイルをダウンロードしてください。</p><div class="save-actions"><button id="export-progress" class="button primary">進捗ファイルをダウンロード ↓</button><button id="import-progress" class="button secondary">進捗ファイルを読み込む ↑</button><input id="import-file" type="file" accept="application/json,.json" hidden></div><p id="save-status" role="status" class="muted"></p></dialog>
   <dialog id="pager-dialog" class="app-dialog pager-dialog" aria-labelledby="pager-title"><div class="dialog-top"><div><p id="pager-command-label" class="eyebrow">FILE VIEWER / less</p><h2 id="pager-title">ファイルを読む</h2></div><button id="pager-close" class="button secondary">q で閉じる</button></div><p class="muted">スクロールして読めます。q を押すとコマンド入力に戻ります。</p><pre id="pager-content" tabindex="0"></pre><div class="pager-bottom">(END) <span>q：終了 · Ctrl + C：終了</span></div></dialog>
   <div id="toast" class="toast" role="status" hidden></div>
@@ -1371,13 +1371,13 @@ SOFTWARE.
   });
   lesson({ id: '12-grep-number', chapter: 'filter', title: '元の行番号も表示する',
     goal: 'grep -nで元ファイルの行番号を付けられる。',
-    explanation: ['grepに-nを加えると、元ファイルで何行目だったかも表示されます。例えば2:で始まる行は、元の2行目です。', '同じ-nでも意味はコマンドごとに異なります。headでは行数、grepでは行番号です。'],
+    explanation: ['grepに-nを加えると、元ファイルで何行目だったかも表示されます。例えば2:で始まる行は、元の2行目です。', '同じ-nでも意味はコマンドごとに異なります。headでは行数、grepでは行番号です。', "別の方法として、cat -n app.log | grep 'ERROR' のように元ファイルへ番号を付けてから絞っても構いません。grepで絞った後にcat -nを使うと、抽出後の1行目から番号が振られるため、この課題の元の行番号にはなりません。"],
     concepts: [{ term: '行番号', text: '元ファイルの先頭を1行目として数えた位置です。抽出後の番号ではありません。' }],
     example: { command: "grep -n 'INFO' app.log", note: '1行目と4行目にINFOがあることが分かります。' },
     starter: grep, newPart: '-n', task: '大文字のERRORを含む行を、元の行番号付きで表示してください。',
     hints: ['前の検索に-nを足します。', 'grepと検索語の間に-nを置けます。', "grep -n 'ERROR' app.log と入力します。"],
     solution: ["grep -n 'ERROR' app.log"], success: '抽出した行を、元ファイルの場所と結び付けられました。', bridge: '次は、大文字と小文字を同じものとして探します。',
-    validation: { all: [used('grep', { flags: 'n' }), out(lines(records.map((line, i) => (i + 1) + ':' + line).filter(line => line.includes('ERROR'))))] }
+    validation: { all: [used('grep'), { type: 'source', path: logdir + '/app.log', scope: 'output', commands: ['cat', 'grep', 'nl', 'head', 'tail', 'tee', 'sort', 'uniq'], unchanged: true }, out(lines(records.map((line, i) => (i + 1) + ':' + line).filter(line => line.includes('ERROR'))), 'numberedLines')] }
   });
   lesson({ id: '13-grep-case', chapter: 'filter', title: '大文字と小文字をまとめて探す',
     goal: 'grep -iで大文字・小文字を区別せず検索できる。',
@@ -1655,7 +1655,7 @@ SOFTWARE.
 (function (root) {
   'use strict';
   const D = root.LINUXROOM_DATA;
-  D.release = typeof module === 'object' && module.exports ? require('../package.json').version : '0.6.1';
+  D.release = typeof module === 'object' && module.exports ? require('../package.json').version : '0.6.2';
   D.levels = [
     {id:'beginner', title:'初級編', subtitle:'一つずつ、つなげる', description:'現在地とファイル操作から、検索・列の抽出・集計・保存まで。短いコマンドを一段ずつ組み立てます。'},
     {id:'applied', title:'応用編', subtitle:'条件を選んで、整える', description:'正規表現、複数ファイル検索、文字の整形、条件付き集計。必要な記録を狙って取り出します。'},
@@ -2843,7 +2843,7 @@ SOFTWARE.
     ['09-tail', 'Read the last lines', 'Display the last 3 lines of app.log.', 'tail shows the end of a file. -n sets how many lines to display.', 'For records stored in time order, the end contains the most recent entries.'],
     ['10-less', 'Open, read and close a file', 'Open app.log with less, read it, and press q to close the viewer.', 'less opens a file viewer. You can scroll without printing the entire file into the terminal transcript.', 'Press q to return to the command input. This exercise checks both opening and closing the viewer.'],
     ['11-grep', 'Select lines containing text', 'Display the 6 lines of app.log that contain uppercase ERROR.', 'grep selects complete lines that match a pattern. Matching is case sensitive by default.', 'ERROR and error differ. Keep the search word in quotes and pass the target file after it.'],
-    ['12-grep-number', 'Include original line numbers', 'Display the lines containing uppercase ERROR with their original line numbers.', 'grep -n prefixes each matching line with its position in the original file.', 'Line numbers help you locate the original record. They are not the numbering of the filtered result.'],
+    ['12-grep-number', 'Include original line numbers', 'Display the lines containing uppercase ERROR with their original line numbers.', 'grep -n prefixes each matching line with its position in the original file.', "Line numbers help you locate the original record. Another valid method is cat -n app.log | grep 'ERROR': number the original file before filtering. Applying cat -n after grep numbers the filtered result from 1, so it does not preserve the original line numbers required here."],
     ['13-grep-case', 'Ignore letter case', 'Display all 7 lines containing either ERROR or error.', 'grep -i ignores uppercase and lowercase differences in the search.', 'Keep the same search term and file, and change just the option to compare the result.'],
     ['14-grep-invert', 'Exclude a kind of record', 'Display the 8 lines of app.log that do not contain INFO.', 'grep -v inverts the match: lines that match the pattern are omitted.', 'This keeps ERROR, error and WARN records because they do not contain INFO.'],
     ['15-pipe-count', 'Count the selected lines', 'Use grep to select uppercase ERROR lines, then count them with wc -l.', 'A pipe, |, passes standard output from the command on the left into standard input on the right.', 'wc -l counts newline characters. Let it read the piped result instead of naming the original file again.'],
@@ -3668,6 +3668,8 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
 (function (root) {
   'use strict';
   const messages = {
+  "コマンド入力欄が空なら、→ キーでも次へ進めます。": "With an empty command input, press → to continue to the next lesson.",
+  "課題修了後、コマンド入力欄が空なら次へ進む": "After completing a lesson, continue to the next one when the command input is empty",
   "読む": "Read",
   "ファイルの場所と形式を確かめる": "Check the location and format of files",
   "絞る": "Filter",
@@ -4308,8 +4310,20 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
     }
   }
 
+  // Only the line-number prefix varies between grep -n and cat -n/nl.
+  // Keep each record's text and order exact; never renumber filtered results.
+  function numberedLines(value) {
+    const rows = String(value).replace(/\n$/, '').split('\n');
+    const parsed = rows.map(row => row.match(/^[ \t]*([1-9]\d*)(?::|\t| +)(.*)$/));
+    return parsed.every(Boolean) ? parsed.map(row => row[1] + ':' + row[2]) : null;
+  }
+
   function matches(actual, expected, mode) {
     actual = String(actual); expected = String(expected);
+    if (mode === 'numberedLines') {
+      const got = numberedLines(actual), wanted = numberedLines(expected);
+      return Boolean(got && wanted && got.join('\n') === wanted.join('\n'));
+    }
     if (mode === 'exact') return actual === expected;
     if (mode === 'contains') return actual.includes(expected);
     if (mode === 'lines') {
@@ -4321,7 +4335,7 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
 
   function outputDifference(actual, expected, mode) {
     const tidy = value => mode === 'exact' ? String(value) : String(value).trim();
-    const lines = value => tidy(value).split('\n').map(line => mode === 'lines' ? line.trim().replace(/\s+/g, ' ') : line);
+    const lines = value => (mode === 'numberedLines' && numberedLines(value)) || tidy(value).split('\n').map(line => mode === 'lines' ? line.trim().replace(/\s+/g, ' ') : line);
     const shown = value => value.length > 70 ? value.slice(0, 67) + '…' : value;
     if (mode === 'contains') return t('必要な文字列「') + shown(String(expected).trim()) + t('」が見つかりません。');
     const got = lines(actual), wanted = lines(expected);
@@ -4350,6 +4364,22 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
       }
     }
     return found;
+  }
+
+  function outputReadsSource(session, result, condition, lesson) {
+    const last = result.trace.at(-1);
+    if (!last || result.stdout !== last.stdout) return false;
+    const pipeline = result.trace.filter(stage => stage.pipeline === last.pipeline);
+    const first = pipeline[0];
+    if (!first.reads.includes(condition.path) || first.reads.some(path => path !== condition.path)) return false;
+    if (condition.unchanged && session.shell.files[condition.path] !== data().datasets[lesson.fixture].files[condition.path]) return false;
+    // In this scope only declared readers/filters may produce the final output.
+    // An unrelated read, a literal printf, or a stage reopening another file
+    // must not serve as evidence that the displayed rows came from the source.
+    return pipeline.every((stage, index) => stageAccepted(stage, lesson) &&
+      condition.commands.includes(stage.command) &&
+      !stage.redirections.some(redirection => (redirection.fd === undefined || redirection.fd === 1) && redirection.op !== '<') &&
+      (index === 0 || (!stage.reads.length && stage.stdin === pipeline[index - 1].stdout)));
   }
 
   function check(session) {
@@ -4381,7 +4411,7 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
           message = '$' + condition.name + t(' を') + (condition.context === 'arguments' ? t('引数として展開して値を確認している') : t('展開して値を確認している')); break;
         case 'pipeline': { const counts = new Map(); for (const stage of result.trace) counts.set(stage.pipeline, (counts.get(stage.pipeline) || 0) + 1); passed = [...counts.values()].some(count => count >= condition.minStages); message = t('必要な段階をパイプでつないでいる'); break; }
         case 'pagerClosed': passed = session.pagerOpened && session.pagerClosed && !session.pagerOpen; message = t('ファイルを開き、q で表示を閉じている'); break;
-        case 'source': { const sourceStages = condition.scope === 'last' ? result.trace : session.evidence; passed = sourceStages.some(stage => stageAccepted(stage, lesson) && stage.reads.includes(condition.path)); message = t('指定された元ファイルを実際に読み込んでいる'); break; }
+        case 'source': { const sourceStages = condition.scope === 'last' ? result.trace : session.evidence; passed = condition.scope === 'output' ? outputReadsSource(session, result, condition, lesson) : sourceStages.some(stage => stageAccepted(stage, lesson) && stage.reads.includes(condition.path)); message = t('指定された元ファイルを実際に読み込んでいる'); break; }
         default: message = t('未対応の判定条件です');
       }
       return {passed, message};
@@ -4824,6 +4854,7 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
     const next = nextLesson(currentLesson);
     const last = !next;
     $('next-lesson').hidden = last;
+    $('next-shortcut').hidden = last;
     $('next-lesson').textContent = next && levelOf(next) !== levelOf(currentLesson) ? levelById.get(levelOf(next)).title + t('へ進む →') : t('次のレッスンへ →');
     const levelEnd = last || levelOf(next) !== levelOf(currentLesson);
     $('graduation-options').hidden = !levelEnd;
@@ -5032,6 +5063,19 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
       laterSave();
     }
     $('run-feedback').textContent = matches.length === 1 ? t('補完しました。') : t('候補: ') + matches.slice(0, 12).join('  ') + (matches.length > 12 ? ' …' : '');
+  }
+
+  function nextLessonKeys(event) {
+    if (event.key !== 'ArrowRight' || event.defaultPrevented || event.repeat || event.isComposing || event.keyCode === 229 || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
+    if (!currentLesson || !progress.completed[currentLesson.id] || $('workspace').hidden || $('success-box').hidden || $('next-lesson').hidden || currentSession.pagerOpen || document.querySelector('dialog[open]')) return;
+    const input = $('command-input');
+    if (input.value !== '') return;
+    // Keep native arrows for editable controls, selectors, and selected text.
+    const target = event.target;
+    if (target !== input && target?.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[role="slider"],[role="spinbutton"],[role="listbox"],[role="tablist"],[role="radiogroup"]')) return;
+    if (window.getSelection()?.isCollapsed === false) return;
+    event.preventDefault();
+    $('next-lesson').click();
   }
 
   function inputKeys(event) {
@@ -5411,6 +5455,7 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
     $('example-fill').addEventListener('click', () => { if (currentLesson && currentLesson.example) fillInput(currentLesson.example.command); });
     $('command-form').addEventListener('submit', runCommand);
     $('command-input').addEventListener('keydown', inputKeys);
+    document.addEventListener('keydown', nextLessonKeys);
     $('command-input').addEventListener('input', laterSave);
     $('jump-terminal').addEventListener('click', () => {
       $('command-input').scrollIntoView({ block: 'center' });

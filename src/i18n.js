@@ -2,6 +2,8 @@
 (function (root) {
   'use strict';
   const messages = {
+  "コマンド入力欄が空なら、→ キーでも次へ進めます。": "With an empty command input, press → to continue to the next lesson.",
+  "課題修了後、コマンド入力欄が空なら次へ進む": "After completing a lesson, continue to the next one when the command input is empty",
   "読む": "Read",
   "ファイルの場所と形式を確かめる": "Check the location and format of files",
   "絞る": "Filter",
