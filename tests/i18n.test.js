@@ -9,13 +9,14 @@ const KEY = 'linuxroom.progress.v1';
 const UI_KEY = 'linuxroom.ui.v1';
 const japanese = /[ぁ-んァ-ン一-龥]/;
 
-function createApp(saved, blocked = false) {
+function createApp(saved, blocked = false, browser = {languages: ['ja-JP'], language: 'ja-JP'}) {
   const errors = [];
   const virtualConsole = new VirtualConsole();
   virtualConsole.on('jsdomError', error => errors.push(error.message));
   const dom = new JSDOM(html, {
     url: 'https://linuxroom.test/', runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole,
     beforeParse(w) {
+      Object.defineProperty(w, 'navigator', {value: browser});
       w.TextEncoder = TextEncoder; w.TextDecoder = TextDecoder;
       w.confirm = () => true; w.scrollTo = () => {};
       w.HTMLElement.prototype.scrollIntoView = function () {};
@@ -223,6 +224,46 @@ test('optional check stays open across languages without changing evidence, answ
     app.d.querySelector('#diagnostic-dialog .close-dialog').click();
     app.run('cat /tmp/own.txt');
     assert.match(app.d.getElementById('terminal-output').textContent, /retained/);
+    assert.deepEqual(app.errors, []);
+  } finally {app.w.close();}
+});
+
+
+test('fresh and legacy visits use the primary browser language, with English as the fallback', () => {
+  for (const [browser, expected] of [
+    [{languages: ['ja-JP', 'en-US'], language: 'en-US'}, 'ja'],
+    [{languages: ['JA-jp']}, 'ja'],
+    [{languages: ['fr-FR', 'ja-JP'], language: 'ja-JP'}, 'en'],
+    [{languages: ['th-TH']}, 'en'],
+    [{languages: ['', null, 'ja'], language: 'en-US'}, 'ja'],
+    [{languages: [], language: 'ja-JP'}, 'ja'],
+    [{language: 'en-GB'}, 'en'],
+    [null, 'en']
+  ]) {
+    const app = createApp(undefined, false, browser);
+    try {
+      assert.equal(app.d.documentElement.lang, expected, JSON.stringify(browser));
+      assert.equal(app.d.getElementById('language-select').value, expected);
+      assert.deepEqual(app.errors, []);
+    } finally {app.w.close();}
+  }
+  const legacy = createApp({progress: '{}', ui: JSON.stringify({started: false, locale: 'invalid'})}, false, {languages: ['en-US']});
+  try {assert.equal(legacy.d.documentElement.lang, 'en'); assert.deepEqual(legacy.errors, []);} finally {legacy.w.close();}
+});
+
+test('saved language choices override the browser and blocked storage still allows automatic language', () => {
+  for (const [browser, saved, expected] of [
+    [{languages: ['en-US']}, 'ja', 'ja'],
+    [{languages: ['ja-JP']}, 'en', 'en']
+  ]) {
+    const app = createApp({progress: '{}', ui: JSON.stringify({locale: saved})}, false, browser);
+    try {assert.equal(app.d.documentElement.lang, expected); assert.deepEqual(app.errors, []);} finally {app.w.close();}
+  }
+  const app = createApp(undefined, true, {languages: ['ja-JP']});
+  try {
+    assert.equal(app.d.documentElement.lang, 'ja');
+    app.language('en');
+    assert.equal(app.d.documentElement.lang, 'en');
     assert.deepEqual(app.errors, []);
   } finally {app.w.close();}
 });

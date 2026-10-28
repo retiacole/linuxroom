@@ -478,7 +478,15 @@
   "print $1, $2は空白で区切り、print $1\":\"$2は連結する。printfは書式で表示し、substrは文字の一部分を取る。END {print sum/NR}のような除算も使える。": "print $1, $2 inserts a space; print $1\":\"$2 concatenates. printf formats output and substr selects part of a string. Division also works, for example END {print sum/NR}.",
   "LC_ALL=Cでこの教材と同じ順序にする。sort -k1,1nr -k2,2は件数の多い順と名前順の2キー。-hは単位付きサイズ、-Vは版番号を並べる。": "LC_ALL=C reproduces this lab ordering. sort -k1,1nr -k2,2 uses descending count and ascending name keys. -h orders human-readable sizes; -V orders version numbers.",
 };
-  let locale = 'ja';
+  function browserLocale() {
+    try {
+      const browser = root.navigator;
+      const preferred = Array.isArray(browser?.languages) ? browser.languages.find(value => typeof value === 'string' && value.trim()) : null;
+      const language = preferred || (typeof browser?.language === 'string' ? browser.language : '');
+      return /^ja(?:-|$)/i.test(language.trim()) ? 'ja' : 'en';
+    } catch (_) { return 'en'; }
+  }
+  let locale = browserLocale();
   const languages = ['ja', 'en'];
   const D = root.LINUXROOM_DATA;
   const copy = value => JSON.parse(JSON.stringify(value));

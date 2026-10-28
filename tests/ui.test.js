@@ -15,6 +15,8 @@ async function createApp(saved, blockedStorage=false, url='https://linuxroom.tes
   const dom = new JSDOM(html, {
     url, runScripts:'dangerously', pretendToBeVisual:true, virtualConsole:console,
     beforeParse(window) {
+      Object.defineProperty(window.navigator, 'languages', {value: ['ja-JP']});
+      Object.defineProperty(window.navigator, 'language', {value: 'ja-JP'});
       window.TextEncoder = globalThis.TextEncoder; window.TextDecoder = globalThis.TextDecoder;
       window.confirm = () => true; window.scrollTo = () => {};
       window.HTMLElement.prototype.scrollIntoView = function(){};

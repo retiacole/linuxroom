@@ -11,7 +11,7 @@ fs.mkdirSync(artifactDir, {recursive:true});
 (async () => {
   const browser = await chromium.launch({headless:true, ...(process.env.LINUXROOM_BROWSER_CHANNEL ? {channel:process.env.LINUXROOM_BROWSER_CHANNEL} : {})});
   try {
-    const page = await browser.newPage({viewport:{width:1440,height:1000}, deviceScaleFactor:1});
+    const page = await browser.newPage({locale:'ja-JP',viewport:{width:1440,height:1000}, deviceScaleFactor:1});
     const targetUrl = process.env.LINUXROOM_URL || pathToFileURL(path.join(root, 'linuxroom.html')).href;
     const errors = [], requests = [];
     page.on('pageerror', error => errors.push(error.message));

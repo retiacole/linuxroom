@@ -18,7 +18,7 @@
   const modeLabels = { guide: 'まねて、試す', practice: '少し変えて、使う', challenge: '自分で、組み立てる' };
   const sessions = new Map();
   let progress = Engine.createProgress();
-  let ui = { started: false, locale: 'ja', drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
+  let ui = { started: false, locale: i18n.locale, drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
   let activeLevel = levels[0].id;
   let currentSession = null;
   let currentLesson = null;
@@ -46,10 +46,10 @@
 
   function validId(id) { return id === 'sandbox' || byId.has(id); }
   function safeUI(raw) {
-    const clean = { started: false, locale: 'ja', drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
+    const clean = { started: false, locale: i18n.locale, drafts: {}, transcripts: {}, solutions: {}, currentByLevel: {} };
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return clean;
     clean.started = raw.started === true;
-    clean.locale = i18n.languages.includes(raw.locale) ? raw.locale : 'ja';
+    clean.locale = i18n.languages.includes(raw.locale) ? raw.locale : i18n.locale;
     levels.forEach(level => {
       const id = raw.currentByLevel && raw.currentByLevel[level.id];
       if (byId.has(id) && levelOf(byId.get(id)) === level.id) clean.currentByLevel[level.id] = id;

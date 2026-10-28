@@ -2,7 +2,9 @@
   <img src="docs/images/linuxroom-banner.png" width="960" alt="Pixel art of the Linuxroom character casting fire magic in ancient ruins">
 </p>
 
-# Linuxroom v0.6.0
+# Linuxroom v0.6.1
+
+Without a saved language choice, the app opens in Japanese when the browser’s primary language is Japanese, and in English otherwise. Saved language choices take priority; older saves without a language use the browser default.
 
 English · [日本語](README.md)
 

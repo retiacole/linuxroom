@@ -25,6 +25,8 @@ function createApp(saved) {
   const dom = new JSDOM(sourceHTML(), {
     url: 'https://linuxroom.test/', runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole,
     beforeParse(window) {
+      Object.defineProperty(window.navigator, 'languages', {value: ['ja-JP']});
+      Object.defineProperty(window.navigator, 'language', {value: 'ja-JP'});
       window.TextEncoder = globalThis.TextEncoder;
       window.TextDecoder = globalThis.TextDecoder;
       window.confirm = () => true;
