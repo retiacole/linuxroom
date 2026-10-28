@@ -75,8 +75,26 @@ test('the newest-first file listing rejects reversed or name-sorted output', () 
   assert.equal(grade('ap-39-ls-time',['ls -lt snapshots/*.log | sort']).result.passed,false,'sorting the rows after ls must not discard the required time order');
 });
 
-test('practice hints have blanks and explanations identify real-system differences', () => {
-  for(const lesson of D.lessons.filter(l=>l.mode!=='guide')) assert.match(lesson.hints[2],/穴埋め.*___/,lesson.id);
+test('practice hints retain useful commands when a blank would hide the entire step', () => {
+  const directHints = new Map([
+    ['04-ls', ['ls']],
+    ['10-less', ['less app.log', 'q']],
+    ['ap-02-history', ['echo ready', 'history']],
+    ['ap-03-clear', ['clear']],
+    ['ap-05-more', ['more server.log', 'q']]
+  ]);
+  for(const lesson of D.lessons.filter(l=>l.mode!=='guide')) {
+    const hint = lesson.hints[2];
+    assert.doesNotMatch(hint, /^穴埋め：___。/, lesson.id);
+    if (directHints.has(lesson.id)) {
+      for (const command of directHints.get(lesson.id)) assert.ok(hint.includes(command), lesson.id + ': ' + command);
+    } else {
+      assert.match(hint, /穴埋め.*___/, lesson.id);
+    }
+  }
+});
+
+test('explanations identify real-system differences', () => {
   for(const [id,term] of [['04-ls','ls -1'],['17-awk',"cut -d ' ' -f 3"],['ad-04-file','版'],['ad-12-diff','更新日時'],['01-echo','analyst@linuxroom:~$']]) {
     assert.ok(D.lessons.find(l=>l.id===id).explanation.join('\n').includes(term),id);
   }

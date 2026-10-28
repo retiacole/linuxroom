@@ -172,9 +172,9 @@ run("echo 'ip,count\na,2\nlong-name,14' | column -ts,",'ip         count\na     
 run("echo 'a,,b\nc,d,e' | column -t -s,",'a     b\nc  d  e\n');
 rejects('column /tmp/csv',/only table mode/);
 run("echo 'a\n\nb' | nl -ba",'     1\ta\n     2\t\n     3\tb\n');
-run("echo 'a\n\nb' | nl",'     1\ta\n\n     2\tb\n');
+run("echo 'a\n\nb' | nl",'     1\ta\n       \n     2\tb\n');
 run("echo 'a\nb' | nl -ba -w2 -s': '",' 1: a\n 2: b\n');
-run('nl /tmp/nonewline','     1\tlast line');
+run('nl /tmp/nonewline','     1\tlast line\n');
 run('diff /tmp/before.log /tmp/before.log','');
 run('diff /tmp/before.log /tmp/after.log','1a2\n> login failed\n',1);
 run('diff -u /tmp/before.log /tmp/after.log','--- /tmp/before.log\n+++ /tmp/after.log\n@@ -1,3 +1,4 @@\n ready\n+login failed\n login ok\n service ready\n',1);

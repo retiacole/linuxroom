@@ -9,6 +9,20 @@ function output(s,command){const result=s.run(command);assert.equal(result.code,
 function real(command,args,text){const run=spawnSync(command,args,{input:text,encoding:'utf8',env:{...process.env,LC_ALL:'C'}});assert.equal(run.status,0,run.stderr);return run.stdout;}
 const gnu=name=>['g'+name,name].find(command=>{const r=spawnSync(command,['--version'],{encoding:'utf8'});return r.status===0&&r.stdout.includes('GNU');});
 
+test('nl pads unnumbered empty lines and counts only numbered lines',()=>{
+  const s=shell({input:'first\n\n\nlast'});
+  assert.equal(output(s,"nl -w 1 -s ': ' input"),'1: first\n   \n   \n2: last\n');
+  assert.equal(output(s,"nl -ba -w 1 -s ': ' input"),'1: first\n2: \n3: \n4: last\n');
+  assert.equal(output(shell({input:''}),"nl -w 1 -s ': ' input"),'');
+});
+test('nl blank-line padding agrees with GNU for default and custom separators',{skip:!gnu('nl')},()=>{
+  for(const text of ['first\n\n\nlast','first\n\n\nlast\n','\n',''])for(const args of [[],['-w','1','-s',': '],['-bt','-w','3','-s',''],['-w','1','-s','日'],['-w','1','-s','😀'],['-ba','-w','1','-s',': ']]){
+    const result=shell({input:text}).execute('nl',[...args,'input'],'',{hasStdin:false});
+    assert.equal(result.code,0,JSON.stringify(result));
+    assert.equal(result.stdout,real(gnu('nl'),args,text),JSON.stringify(args));
+  }
+});
+
 test('cat exposes CRLF, tabs and controls without transforming generated line-number tabs',()=>{
   const s=shell({'input':'x\ty\r\n\x01\x7f\n'});
   assert.equal(output(s,'cat -A input'),'x^Iy^M$\n^A^?$\n');

@@ -1,5 +1,13 @@
 # 更新履歴
 
+## 未リリース
+
+- 日本語の検索課題に不足していた並べ替え指示を追加し、指示の順序と8課題の「次へ」の案内を修正。
+- コマンド全体が空欄になる場合は具体的な3段目のヒントを保持し、英語表示にも対応。`tail -n +2`で使う別の短い`metrics.csv`を明示。
+- 採点メッセージに必要なオプションを表示し、`grep -A`と`grep -B`などの条件を区別。
+- `nl`の未採番空行の余白と末尾改行をGNU coreutilsに合わせて修正。
+- Corrected Japanese exercise instructions and lesson transitions, preserved useful final hints in both languages, clarified required grading flags, and aligned `nl` blank-line padding and final newlines with GNU coreutils.
+
 ## v0.6.0 — 2026-10-28
 
 - 各段階の最終実習に、続行・復習と併存する任意の次教材案内を追加。

@@ -792,7 +792,7 @@
   function runNl(shell,args,stdin) {
     let all=false,width=6,separator='\t',after=false;const paths=[];
     for(let i=0;i<args.length;i++){const arg=args[i];if(!after&&arg==='--'){after=true;continue;}if(!after&&arg.startsWith('-')&&arg!=='-'){const f=arg[1];if(!'bws'.includes(f))usageError('nl','unsupported option '+arg);const t=takeValue(args,i,arg.slice(2),'nl','-'+f);i=t.next;if(f==='b'){if(t.value!=='a'&&t.value!=='t')usageError('nl','-b supports a or t');all=t.value==='a';}else if(f==='w'){if(!/^\d+$/.test(t.value)||+t.value<1||+t.value>100)usageError('nl','width must be 1–100');width=+t.value;}else separator=t.value;}else paths.push(arg);}
-    if(paths.length>1)usageError('nl','only one input file is supported');let n=0;return lineChunks(shell.inputs(paths,stdin,'nl')[0].text).map(chunk=>{const body=chunk.endsWith('\n')?chunk.slice(0,-1):chunk;if(!all&&body==='')return chunk;return String(++n).padStart(width)+separator+chunk;}).join('');
+    if(paths.length>1)usageError('nl','only one input file is supported');let n=0;const blankPrefix=' '.repeat(width+bytes(separator));return lineChunks(shell.inputs(paths,stdin,'nl')[0].text).map(chunk=>{const body=chunk.endsWith('\n')?chunk.slice(0,-1):chunk;if(!all&&body==='')return blankPrefix+'\n';return String(++n).padStart(width)+separator+body+'\n';}).join('');
   }
   function runDiff(shell,args,stdin) {
     const {flags,rest}=simpleOptions(args,'u','diff');if(rest.length!==2)usageError('diff','exactly two files are required');let a,b;try{a=lineChunks(rest[0]==='-'?stdin:shell.read(rest[0],'diff'));b=lineChunks(rest[1]==='-'?stdin:shell.read(rest[1],'diff'));}catch(e){if(e instanceof ShellError)e.code=2;throw e;}

@@ -146,7 +146,7 @@
     example: { command: 'tac notes.txt', note: 'finish、review、空行、startの順になります。' },
     starter: 'tail -n 3 session.log', newPart: 'tac | head', task: 'session.logの最後の3行を、最も後の時刻から順に表示してください。tacとheadを使います。',
     hints: ['tac session.logで全行を逆順にします。', 'その出力をhead -n 3に渡します。', 'tac session.log | head -n 3 と入力します。'],
-    solution: ['tac session.log | head -n 3'], success: '並び順を変えてから、読む量を制限できました。', bridge: '次は別の閲覧コマンドで、読む画面から戻る練習です。',
+    solution: ['tac session.log | head -n 3'], success: '並び順を変えてから、読む量を制限できました。', bridge: '次は400行の長い記録から、先頭の数行だけを取り出します。',
     validation: { all: [used('tac'), used('head'), pipe(2), out('10:07 INFO api-2 session=end user=REN\n10:06 WARN api-2 retry user=REN\n10:05 ERROR api-2 failed user=REN')] }
   });
   lesson({ id: 'ap-05-more', chapter: 'ap-read', title: 'moreで開いて終了する', commands: ['more'], fixture:'ap-more', fixtureRevision:2, fixtureAdditions:[base+'/server.log'],
@@ -156,7 +156,7 @@
     example: { command: 'cat /home/analyst/applied/server.log', note: '400行を一度に表示すると先頭が流れます。本文全体を読むときはmoreで開いてみましょう。' },
     task: 'moreで/home/analyst/applied/server.logを開き、確認後にqで閉じてください。',
     hints: ['moreの引数に/home/analyst/applied/server.logを指定します。', '開いただけで終わらず、qで戻ります。', 'more server.log を実行し、qで閉じます。'],
-    solution: ['more /home/analyst/applied/server.log', 'q'], success: '別の閲覧コマンドでも、開く・読む・戻るを実行できました。', bridge: '次は、引用するときに便利な行番号を付けます。',
+    solution: ['more /home/analyst/applied/server.log', 'q'], success: '別の閲覧コマンドでも、開く・読む・戻るを実行できました。', bridge: '次は、長い記録の中で条件に一致する行数を数えます。',
     validation: { all: [used('more', { scope: 'any' }), { type: 'pagerClosed' }, out(lines(volumeRows))] }
   });
   lesson({ id: 'ap-06-nl', chapter: 'ap-read', title: '空行にも行番号を付ける', commands: ['nl'],
@@ -227,7 +227,7 @@
     // Directory traversal order varies on real systems; explicitly sort the displayed result.
     concepts: [{ term: 'グロブ', text: '*.logのようなファイル名のパターン。*は任意の文字列です。正規表現とは書き方や用途が異なります。' }],
     example: { command: "grep -rl --include '*.txt' 'ERROR' archive", note: '説明文にERRORを含むreadme.txtだけが対象になります。' },
-    task: '最後にsortで名前順にそろえてください。archive以下を再帰的に調べ、ERRORを含む.logファイルの名前だけを表示してください。',
+    task: 'archive以下を再帰的に調べ、ERRORを含む.logファイルの名前だけを表示してください。最後に | sort で名前順にそろえてください。',
     hints: ['本文ではなく名前を表示する-lと、下まで探す-rを組み合わせます。', "--include '*.log'で対象を絞ります。", "grep -rl --include '*.log' 'ERROR' archive | sort と入力します。"],
     solution: ["grep -rl --include '*.log' 'ERROR' archive | sort"], success: '内容とファイル名の両方の条件で、対象を探せました。', bridge: '同じ探索に使えるrgの基本を試します。',
     validation: { all: [used('sort'), used('grep', { flags: 'rl' }), out('archive/day1/app.log\narchive/day2/proxy.log')] }
@@ -248,7 +248,7 @@
     // Directory traversal order varies on real systems; explicitly sort the displayed result.
     concepts: [{ term: '-g', text: '検索対象をファイル名などのパターンで制限します。パターンは引用符で囲んでrgへ渡します。' }],
     example: { command: "rg -g '*.txt' 'ERROR' archive", note: 'readme.txtの説明文だけが見つかります。' },
-    starter: "rg -n 'ERROR' archive/day1/app.log", newPart: "-g '*.log' archive", task: 'archive以下の.logファイルだけをrgで調べ、ERRORの行をファイル名付きで表示してください。行番号は不要です。',
+    starter: "rg -n 'ERROR' archive/day1/app.log", newPart: "-g '*.log' archive", task: 'archive以下の.logファイルだけをrgで調べ、ERRORの行をファイル名付きで表示してください。行番号は不要です。最後に | sort で名前順にそろえてください。',
     hints: ['対象をファイルからarchiveディレクトリへ変えます。', "-g '*.log'を加えます。", "rg -g '*.log' 'ERROR' archive | sort と入力します。"],
     solution: ["rg -g '*.log' 'ERROR' archive | sort"], success: '複数の記録から、出所が分かる形で行を集められました。', bridge: '次は本文ではなく、ファイルの存在そのものを調べます。',
     validation: { all: [used('sort'), used('rg', { args: ['-g', '*.log'] }), out('archive/day1/app.log:08:01 ERROR upload\narchive/day2/proxy.log:09:01 ERROR timeout')] }
@@ -259,7 +259,7 @@
     // Directory traversal order varies on real systems; explicitly sort the displayed result.
     concepts: [{ term: '-type f', text: 'ディレクトリではなくファイルを対象にする指定です。-type dならディレクトリです。' }],
     example: { command: "find archive -type f -name '*.txt'", note: '本文の内容に関係なく、.txtファイルのパスを表示します。' },
-    task: '最後にsortで名前順にそろえてください。findでarchive以下の.logファイルをすべて表示してください。ERRORがないファイルも含めます。',
+    task: 'findでarchive以下の.logファイルをすべて表示してください。ERRORがないファイルも含めます。最後に | sort で名前順にそろえてください。',
     hints: ['探し始める場所はarchiveです。', "-type fと-name '*.log'を付けます。", "find archive -type f -name '*.log' | sort と入力します。"],
     solution: ["find archive -type f -name '*.log' | sort"], success: '検索で一致しなかったファイルも含めて、対象一覧を作れました。', bridge: '次は見つけた記録を、列の値で絞ります。',
     validation: { all: [used('sort'), used('find'), out('archive/day1/app.log\narchive/day2/app.log\narchive/day2/proxy.log')] }
@@ -282,7 +282,7 @@
     example: { command: "awk -F ',' 'NR > 1 {print $4}' metrics.csv", note: '見出しを除き、4列目のサービス名を取り出します。' },
     task: 'metrics.csvの見出しを除き、3列目の利用者名を順番どおり表示してください。',
     hints: ['-Fでカンマを区切りにします。', 'NR > 1で2行目以降を選び、$3を表示します。', "awk -F ',' 'NR > 1 {print $3}' metrics.csv と入力します。"],
-    solution: ["awk -F ',' 'NR > 1 {print $3}' metrics.csv"], success: '区切りと見出しを意識して、必要な列を取り出せました。', bridge: '次は複数の列を条件にします。',
+    solution: ["awk -F ',' 'NR > 1 {print $3}' metrics.csv"], success: '区切りと見出しを意識して、必要な列を取り出せました。', bridge: '次はtailを使い、見出しを除いて2行目から読みます。',
     validation: { all: [used('awk'), source('metrics.csv'), out('Aki\nREN\naki\nMei\nREN\nAki\nmei\nRen\nREN\nren')] }
   });
   lesson({ id: 'ap-18-awk-combined', chapter: 'ap-fields', title: '文字と数値の条件を組み合わせる', commands: ['awk'],
@@ -302,7 +302,7 @@
     example: { command: "sort -t ',' -k3,3n timings.csv", note: '9、30、100、120の数値が小さい順になります。' },
     newPart: '-k3,3nr', task: 'timings.csvを、3列目の処理時間が大きい順に並べて表示してください。',
     hints: ['区切り文字は-tで指定します。', '3列目を数値の逆順にする指定は-k3,3nrです。', "sort -t ',' -k3,3nr timings.csv と入力します。"],
-    solution: ["sort -t ',' -k3,3nr timings.csv"], success: '先頭のIDに引っ張られず、必要な数値の順にできました。', bridge: '集計の前に表記の違いをそろえる練習です。',
+    solution: ["sort -t ',' -k3,3nr timings.csv"], success: '先頭のIDに引っ張られず、必要な数値の順にできました。', bridge: '次は、ファイルの本文を標準入力へ渡す方法を確かめます。',
     validation: { all: [used('sort'), source('timings.csv'), out('q02,ren,120\nq04,aki,100\nq03,mei,30\nq01,aki,9')] }
   });
 
@@ -415,7 +415,7 @@
     example: { command: 'mkdir reports/example-empty && rmdir reports/example-empty', note: '例用の空ディレクトリを作成後、削除します。&&は最初が成功したときだけ次を実行する接続です。' },
     task: 'mkdirでreports/emptyを作り、rmdirで削除してください。reportsと既存の記録は残します。',
     hints: ['最初にmkdir reports/emptyを実行します。', '次に同じパスをrmdirへ渡します。', 'mkdir reports/empty の後、rmdir reports/empty を実行します。'],
-    solution: ['mkdir reports/empty', 'rmdir reports/empty'], success: 'ファイルと空ディレクトリの片付けを使い分けられました。', bridge: '最後は、同じ記録を材料にパイプを一段ずつ完成させます。',
+    solution: ['mkdir reports/empty', 'rmdir reports/empty'], success: 'ファイルと空ディレクトリの片付けを使い分けられました。', bridge: '次は、成功したときだけ進む接続と、結果に関係なく進む接続を使い分けます。',
     validation: { all: [used('mkdir', { args: ['reports/empty'], scope: 'any' }), used('rmdir'), { type: 'absent', path: base + '/reports/empty' }, { type: 'directory', path: base + '/reports' }, saved('reports/existing.txt', '保存済みの記録\n', 'exact')] }
   });
 
@@ -513,7 +513,7 @@
     example:{command:'ls -l snapshots/*.log',note:'名前順ではa-old、m-middle、z-newですが、調査では新しいファイルから見たい場合があります。'},
     starter:'ls -l snapshots/*.log',newPart:'t',task:'ls -ltでsnapshots/*.logの詳細を、新しいz-new、m-middle、a-oldの順に表示してください。',
     hints:['並べ方を時刻へ変える指定は-tです。','-lと-tを合わせ、日時と名前を読みます。','穴埋め：ls -l___ snapshots/*.log。新しい順にするオプションを補います。'],
-    solution:['ls -lt snapshots/*.log'],success:'更新の新しい記録を、名前順に惑わされず見つけられました。',bridge:'記録が長いときは、読む範囲も選びましょう。',
+    solution:['ls -lt snapshots/*.log'],success:'更新の新しい記録を、名前順に惑わされず見つけられました。',bridge:'次は、タブや改行など見えない文字を確かめます。',
     validation:{all:[used('ls',{flags:'lt'}),out('-rw-r--r-- 1 analyst analyst 9 Oct 25 09:30 snapshots/z-new.log\n-rw-r--r-- 1 analyst analyst 9 Oct 25 09:00 snapshots/m-middle.log\n-rw-r--r-- 1 analyst analyst 9 Oct 25 08:00 snapshots/a-old.log','lines')]}});
   lesson({id:'ap-40-large-head',chapter:'ap-read',title:'400行の記録の先頭で形式を知る',fixture:'ap-volume',commands:['head'],
     goal:'長い記録の最初だけを読み、形式を確かめられる。',
@@ -544,7 +544,7 @@
     validation:{all:[used('grep',{flags:'c'}),{type:'source',path:volumeBase+'/server.log'},out('10')]}});
   lesson({id:'ap-43-tail-header',chapter:'ap-fields',title:'見出しを除いて2行目から読む',fixture:'ap-volume',commands:['tail'],
     goal:'tail -n +2の開始行指定を使える。',
-    explanation:['tail -n 2は末尾の2行ですが、tail -n +2は先頭から数えて2行目以降です。+が付くと「何行残すか」から「何行目からか」に意味が変わります。','metrics.csvの1行目は見出しです。集計の前に見出しだけを除くときに使えます。この課題のCSVは引用符内の改行を含みません。'],
+    explanation:['tail -n 2は末尾の2行ですが、tail -n +2は先頭から数えて2行目以降です。+が付くと「何行残すか」から「何行目からか」に意味が変わります。','ここではvolume/にある別の短いmetrics.csvを使います。「時刻,種類,件数」の3列で、1行目の見出しにデータ3行が続きます。集計の前に見出しだけを除くときに使えます。この課題のCSVは引用符内の改行を含みません。'],
     concepts:[{term:'-n +2',text:'1行目を除いて、2行目から末尾まで表示します。'}],
     example:{command:'tail -n 2 metrics.csv',note:'最後の2行だけで、最初のデータ行も落ちます。見出しだけを除く指定と比べましょう。'},
     starter:'tail -n 2 metrics.csv',newPart:'+2',task:'tailでmetrics.csvの見出しだけを除き、データ3行をすべて表示してください。',
@@ -585,7 +585,7 @@
     example:{command:'true; echo $?; false; echo $?',note:'trueの成功0とfalseの失敗1が、この順に表示されます。'},
     task:'grepでsession.logからNOT_PRESENTを探し、直後にecho $?で終了コードを表示してください。一致なしの1だけが表示されます。',
     hints:['grepに一致がないため、通常の本文出力は空です。','検索の直後へ; echo $?を続けます。',"穴埋め：grep 'NOT_PRESENT' session.log; echo ___。直前の終了コードを表す変数を入れます。"],
-    solution:["grep 'NOT_PRESENT' session.log; echo $?"],success:'画面に本文が出ない理由を、終了コードからも確かめられました。',bridge:'ここまでの読み方・入力・接続を、最後の集計実習で使いましょう。',
+    solution:["grep 'NOT_PRESENT' session.log; echo $?"],success:'画面に本文が出ない理由を、終了コードからも確かめられました。',bridge:'次は、ファイルの内容から照合に使えるハッシュ値を求めます。',
     validation:{all:[used('grep'),used('echo'),source('session.log'),{type:'status',command:'grep',code:1},{type:'variable',name:'?',command:'echo',context:'arguments',afterCommand:'grep'},out('1')]}});
 
 
@@ -600,7 +600,7 @@
     example:{command:'cat -T windows.log',note:'タブだけが^Iになり、列の区切りを確認できます。'},
     task:'cat -Aでwindows.logを表示し、タブの^Iと各行末の^M$を確認してください。',
     hints:['catへ見えない文字も表示するオプションを加えます。','すべての表示指定をまとめるのは大文字の-Aです。','穴埋め：cat ___ windows.log。タブ・制御文字・行末を一緒に表示する指定を入れます。'],
-    solution:['cat -A windows.log'],success:'目に見えない文字も、検索が一致しない原因として確認できました。',bridge:'文字の読み方を確認したら、必要な行や列を選びます。',
+    solution:['cat -A windows.log'],success:'目に見えない文字も、検索が一致しない原因として確認できました。',bridge:'次は、記録の行を逆順にして末尾から読みます。',
     validation:{all:[used('cat',{flags:'A'}),{type:'source',path:base+'/review/windows.log'},out('user^Iresult^M$\naki^Iok^M$\nren^Ifail^M$\n','exact')]}});
   lesson({id:'ap-49-file-hash',chapter:'ap-workspace',title:'ファイルのハッシュ値を記録する',fixture:'ap-review',commands:['sha256sum','md5sum'],
     goal:'sha256sumでファイル本文から照合用の値を求められる。',

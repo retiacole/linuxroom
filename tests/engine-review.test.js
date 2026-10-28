@@ -17,6 +17,31 @@ test('English filesystem errors retain useful Japanese guidance',()=>{
   assert.match(E.run(s,'not-installed').feedback,/help/);
 });
 
+test('grading feedback distinguishes required flags when command output is correct',()=>{
+  const context=E.createSession('ap-10-grep-before-after');
+  E.run(context,"grep -B 1 '10:02' session.log");
+  const grade=E.check(context);
+  assert.equal(grade.passed,false);
+  assert.deepEqual(grade.details.slice(0,2),[
+    {passed:false,message:'grep -A を使って今回の操作を実行している'},
+    {passed:true,message:'grep -B を使って今回の操作を実行している'}
+  ]);
+  for(const command of D.lessons.find(l=>l.id===context.lessonId).solution) E.run(context,command);
+  assert.equal(E.check(context).passed,true);
+
+  const ranking=D.lessons.find(l=>l.id==='24-pipeline-rank');
+  const session=E.createSession(ranking.id);
+  E.run(session,ranking.solution[0].replace('sort -nr','sort -k1,1nr'));
+  const alternate=E.check(session);
+  assert.equal(alternate.passed,false,'this exercise explicitly practices sort -nr');
+  assert.equal(alternate.details.at(-1).passed,true,'the equivalent output still matches');
+  assert.deepEqual(alternate.details.filter(d=>!d.passed),[
+    {passed:false,message:'sort -nr を使って今回の操作を実行している'}
+  ]);
+  E.run(session,ranking.solution[0]);
+  assert.equal(E.check(session).passed,true);
+});
+
 test('output feedback identifies extra, missing, reordered, and newline-different data',()=>{
   lesson('test-diagnostic',[{type:'output',value:'alpha\nbeta',match:'lines'}],s=>{
     E.run(s,'echo alpha');assert.match(E.check(s).details[0].message,/足りない行.*beta/);

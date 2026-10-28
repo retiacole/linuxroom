@@ -8,12 +8,13 @@
     {id:'applied', title:'応用編', subtitle:'条件を選んで、整える', description:'正規表現、複数ファイル検索、文字の整形、条件付き集計。必要な記録を狙って取り出します。'},
     {id:'advanced', title:'発展編', subtitle:'比較して、組み合わせる', description:'差分・照合、JSONの集約、日時・ファイルの確認を組み合わせ、調査用の結果を作ります。'}
   ];
-  // Practice hints retain a blank so revealing the last hint still asks the learner to recall a step.
+  // Practice hints retain a blank unless that would hide the entire command and remove all context.
   D.practiceHint = lesson => {
     if (lesson.mode === 'guide' || lesson.hints[2].includes('穴埋め')) return lesson;
     const command = lesson.solution.at(-1);
     const segment = lesson.newPart && command.includes(lesson.newPart) ? lesson.newPart : command.match(/^\S+/)?.[0];
     const puzzle = segment ? command.replace(segment, '___') : command;
+    if (puzzle === '___') return lesson;
     lesson.hints[2] = '穴埋め：' + puzzle + '。___に、ここまでで学んだ操作や指定を補ってください。';
     return lesson;
   };

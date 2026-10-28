@@ -963,7 +963,7 @@ SOFTWARE.
   function runNl(shell,args,stdin) {
     let all=false,width=6,separator='\t',after=false;const paths=[];
     for(let i=0;i<args.length;i++){const arg=args[i];if(!after&&arg==='--'){after=true;continue;}if(!after&&arg.startsWith('-')&&arg!=='-'){const f=arg[1];if(!'bws'.includes(f))usageError('nl','unsupported option '+arg);const t=takeValue(args,i,arg.slice(2),'nl','-'+f);i=t.next;if(f==='b'){if(t.value!=='a'&&t.value!=='t')usageError('nl','-b supports a or t');all=t.value==='a';}else if(f==='w'){if(!/^\d+$/.test(t.value)||+t.value<1||+t.value>100)usageError('nl','width must be 1–100');width=+t.value;}else separator=t.value;}else paths.push(arg);}
-    if(paths.length>1)usageError('nl','only one input file is supported');let n=0;return lineChunks(shell.inputs(paths,stdin,'nl')[0].text).map(chunk=>{const body=chunk.endsWith('\n')?chunk.slice(0,-1):chunk;if(!all&&body==='')return chunk;return String(++n).padStart(width)+separator+chunk;}).join('');
+    if(paths.length>1)usageError('nl','only one input file is supported');let n=0;const blankPrefix=' '.repeat(width+bytes(separator));return lineChunks(shell.inputs(paths,stdin,'nl')[0].text).map(chunk=>{const body=chunk.endsWith('\n')?chunk.slice(0,-1):chunk;if(!all&&body==='')return blankPrefix+'\n';return String(++n).padStart(width)+separator+body+'\n';}).join('');
   }
   function runDiff(shell,args,stdin) {
     const {flags,rest}=simpleOptions(args,'u','diff');if(rest.length!==2)usageError('diff','exactly two files are required');let a,b;try{a=lineChunks(rest[0]==='-'?stdin:shell.read(rest[0],'diff'));b=lineChunks(rest[1]==='-'?stdin:shell.read(rest[1],'diff'));}catch(e){if(e instanceof ShellError)e.code=2;throw e;}
@@ -1661,12 +1661,13 @@ SOFTWARE.
     {id:'applied', title:'応用編', subtitle:'条件を選んで、整える', description:'正規表現、複数ファイル検索、文字の整形、条件付き集計。必要な記録を狙って取り出します。'},
     {id:'advanced', title:'発展編', subtitle:'比較して、組み合わせる', description:'差分・照合、JSONの集約、日時・ファイルの確認を組み合わせ、調査用の結果を作ります。'}
   ];
-  // Practice hints retain a blank so revealing the last hint still asks the learner to recall a step.
+  // Practice hints retain a blank unless that would hide the entire command and remove all context.
   D.practiceHint = lesson => {
     if (lesson.mode === 'guide' || lesson.hints[2].includes('穴埋め')) return lesson;
     const command = lesson.solution.at(-1);
     const segment = lesson.newPart && command.includes(lesson.newPart) ? lesson.newPart : command.match(/^\S+/)?.[0];
     const puzzle = segment ? command.replace(segment, '___') : command;
+    if (puzzle === '___') return lesson;
     lesson.hints[2] = '穴埋め：' + puzzle + '。___に、ここまでで学んだ操作や指定を補ってください。';
     return lesson;
   };
@@ -1836,7 +1837,7 @@ SOFTWARE.
     example: { command: 'tac notes.txt', note: 'finish、review、空行、startの順になります。' },
     starter: 'tail -n 3 session.log', newPart: 'tac | head', task: 'session.logの最後の3行を、最も後の時刻から順に表示してください。tacとheadを使います。',
     hints: ['tac session.logで全行を逆順にします。', 'その出力をhead -n 3に渡します。', 'tac session.log | head -n 3 と入力します。'],
-    solution: ['tac session.log | head -n 3'], success: '並び順を変えてから、読む量を制限できました。', bridge: '次は別の閲覧コマンドで、読む画面から戻る練習です。',
+    solution: ['tac session.log | head -n 3'], success: '並び順を変えてから、読む量を制限できました。', bridge: '次は400行の長い記録から、先頭の数行だけを取り出します。',
     validation: { all: [used('tac'), used('head'), pipe(2), out('10:07 INFO api-2 session=end user=REN\n10:06 WARN api-2 retry user=REN\n10:05 ERROR api-2 failed user=REN')] }
   });
   lesson({ id: 'ap-05-more', chapter: 'ap-read', title: 'moreで開いて終了する', commands: ['more'], fixture:'ap-more', fixtureRevision:2, fixtureAdditions:[base+'/server.log'],
@@ -1846,7 +1847,7 @@ SOFTWARE.
     example: { command: 'cat /home/analyst/applied/server.log', note: '400行を一度に表示すると先頭が流れます。本文全体を読むときはmoreで開いてみましょう。' },
     task: 'moreで/home/analyst/applied/server.logを開き、確認後にqで閉じてください。',
     hints: ['moreの引数に/home/analyst/applied/server.logを指定します。', '開いただけで終わらず、qで戻ります。', 'more server.log を実行し、qで閉じます。'],
-    solution: ['more /home/analyst/applied/server.log', 'q'], success: '別の閲覧コマンドでも、開く・読む・戻るを実行できました。', bridge: '次は、引用するときに便利な行番号を付けます。',
+    solution: ['more /home/analyst/applied/server.log', 'q'], success: '別の閲覧コマンドでも、開く・読む・戻るを実行できました。', bridge: '次は、長い記録の中で条件に一致する行数を数えます。',
     validation: { all: [used('more', { scope: 'any' }), { type: 'pagerClosed' }, out(lines(volumeRows))] }
   });
   lesson({ id: 'ap-06-nl', chapter: 'ap-read', title: '空行にも行番号を付ける', commands: ['nl'],
@@ -1917,7 +1918,7 @@ SOFTWARE.
     // Directory traversal order varies on real systems; explicitly sort the displayed result.
     concepts: [{ term: 'グロブ', text: '*.logのようなファイル名のパターン。*は任意の文字列です。正規表現とは書き方や用途が異なります。' }],
     example: { command: "grep -rl --include '*.txt' 'ERROR' archive", note: '説明文にERRORを含むreadme.txtだけが対象になります。' },
-    task: '最後にsortで名前順にそろえてください。archive以下を再帰的に調べ、ERRORを含む.logファイルの名前だけを表示してください。',
+    task: 'archive以下を再帰的に調べ、ERRORを含む.logファイルの名前だけを表示してください。最後に | sort で名前順にそろえてください。',
     hints: ['本文ではなく名前を表示する-lと、下まで探す-rを組み合わせます。', "--include '*.log'で対象を絞ります。", "grep -rl --include '*.log' 'ERROR' archive | sort と入力します。"],
     solution: ["grep -rl --include '*.log' 'ERROR' archive | sort"], success: '内容とファイル名の両方の条件で、対象を探せました。', bridge: '同じ探索に使えるrgの基本を試します。',
     validation: { all: [used('sort'), used('grep', { flags: 'rl' }), out('archive/day1/app.log\narchive/day2/proxy.log')] }
@@ -1938,7 +1939,7 @@ SOFTWARE.
     // Directory traversal order varies on real systems; explicitly sort the displayed result.
     concepts: [{ term: '-g', text: '検索対象をファイル名などのパターンで制限します。パターンは引用符で囲んでrgへ渡します。' }],
     example: { command: "rg -g '*.txt' 'ERROR' archive", note: 'readme.txtの説明文だけが見つかります。' },
-    starter: "rg -n 'ERROR' archive/day1/app.log", newPart: "-g '*.log' archive", task: 'archive以下の.logファイルだけをrgで調べ、ERRORの行をファイル名付きで表示してください。行番号は不要です。',
+    starter: "rg -n 'ERROR' archive/day1/app.log", newPart: "-g '*.log' archive", task: 'archive以下の.logファイルだけをrgで調べ、ERRORの行をファイル名付きで表示してください。行番号は不要です。最後に | sort で名前順にそろえてください。',
     hints: ['対象をファイルからarchiveディレクトリへ変えます。', "-g '*.log'を加えます。", "rg -g '*.log' 'ERROR' archive | sort と入力します。"],
     solution: ["rg -g '*.log' 'ERROR' archive | sort"], success: '複数の記録から、出所が分かる形で行を集められました。', bridge: '次は本文ではなく、ファイルの存在そのものを調べます。',
     validation: { all: [used('sort'), used('rg', { args: ['-g', '*.log'] }), out('archive/day1/app.log:08:01 ERROR upload\narchive/day2/proxy.log:09:01 ERROR timeout')] }
@@ -1949,7 +1950,7 @@ SOFTWARE.
     // Directory traversal order varies on real systems; explicitly sort the displayed result.
     concepts: [{ term: '-type f', text: 'ディレクトリではなくファイルを対象にする指定です。-type dならディレクトリです。' }],
     example: { command: "find archive -type f -name '*.txt'", note: '本文の内容に関係なく、.txtファイルのパスを表示します。' },
-    task: '最後にsortで名前順にそろえてください。findでarchive以下の.logファイルをすべて表示してください。ERRORがないファイルも含めます。',
+    task: 'findでarchive以下の.logファイルをすべて表示してください。ERRORがないファイルも含めます。最後に | sort で名前順にそろえてください。',
     hints: ['探し始める場所はarchiveです。', "-type fと-name '*.log'を付けます。", "find archive -type f -name '*.log' | sort と入力します。"],
     solution: ["find archive -type f -name '*.log' | sort"], success: '検索で一致しなかったファイルも含めて、対象一覧を作れました。', bridge: '次は見つけた記録を、列の値で絞ります。',
     validation: { all: [used('sort'), used('find'), out('archive/day1/app.log\narchive/day2/app.log\narchive/day2/proxy.log')] }
@@ -1972,7 +1973,7 @@ SOFTWARE.
     example: { command: "awk -F ',' 'NR > 1 {print $4}' metrics.csv", note: '見出しを除き、4列目のサービス名を取り出します。' },
     task: 'metrics.csvの見出しを除き、3列目の利用者名を順番どおり表示してください。',
     hints: ['-Fでカンマを区切りにします。', 'NR > 1で2行目以降を選び、$3を表示します。', "awk -F ',' 'NR > 1 {print $3}' metrics.csv と入力します。"],
-    solution: ["awk -F ',' 'NR > 1 {print $3}' metrics.csv"], success: '区切りと見出しを意識して、必要な列を取り出せました。', bridge: '次は複数の列を条件にします。',
+    solution: ["awk -F ',' 'NR > 1 {print $3}' metrics.csv"], success: '区切りと見出しを意識して、必要な列を取り出せました。', bridge: '次はtailを使い、見出しを除いて2行目から読みます。',
     validation: { all: [used('awk'), source('metrics.csv'), out('Aki\nREN\naki\nMei\nREN\nAki\nmei\nRen\nREN\nren')] }
   });
   lesson({ id: 'ap-18-awk-combined', chapter: 'ap-fields', title: '文字と数値の条件を組み合わせる', commands: ['awk'],
@@ -1992,7 +1993,7 @@ SOFTWARE.
     example: { command: "sort -t ',' -k3,3n timings.csv", note: '9、30、100、120の数値が小さい順になります。' },
     newPart: '-k3,3nr', task: 'timings.csvを、3列目の処理時間が大きい順に並べて表示してください。',
     hints: ['区切り文字は-tで指定します。', '3列目を数値の逆順にする指定は-k3,3nrです。', "sort -t ',' -k3,3nr timings.csv と入力します。"],
-    solution: ["sort -t ',' -k3,3nr timings.csv"], success: '先頭のIDに引っ張られず、必要な数値の順にできました。', bridge: '集計の前に表記の違いをそろえる練習です。',
+    solution: ["sort -t ',' -k3,3nr timings.csv"], success: '先頭のIDに引っ張られず、必要な数値の順にできました。', bridge: '次は、ファイルの本文を標準入力へ渡す方法を確かめます。',
     validation: { all: [used('sort'), source('timings.csv'), out('q02,ren,120\nq04,aki,100\nq03,mei,30\nq01,aki,9')] }
   });
 
@@ -2105,7 +2106,7 @@ SOFTWARE.
     example: { command: 'mkdir reports/example-empty && rmdir reports/example-empty', note: '例用の空ディレクトリを作成後、削除します。&&は最初が成功したときだけ次を実行する接続です。' },
     task: 'mkdirでreports/emptyを作り、rmdirで削除してください。reportsと既存の記録は残します。',
     hints: ['最初にmkdir reports/emptyを実行します。', '次に同じパスをrmdirへ渡します。', 'mkdir reports/empty の後、rmdir reports/empty を実行します。'],
-    solution: ['mkdir reports/empty', 'rmdir reports/empty'], success: 'ファイルと空ディレクトリの片付けを使い分けられました。', bridge: '最後は、同じ記録を材料にパイプを一段ずつ完成させます。',
+    solution: ['mkdir reports/empty', 'rmdir reports/empty'], success: 'ファイルと空ディレクトリの片付けを使い分けられました。', bridge: '次は、成功したときだけ進む接続と、結果に関係なく進む接続を使い分けます。',
     validation: { all: [used('mkdir', { args: ['reports/empty'], scope: 'any' }), used('rmdir'), { type: 'absent', path: base + '/reports/empty' }, { type: 'directory', path: base + '/reports' }, saved('reports/existing.txt', '保存済みの記録\n', 'exact')] }
   });
 
@@ -2203,7 +2204,7 @@ SOFTWARE.
     example:{command:'ls -l snapshots/*.log',note:'名前順ではa-old、m-middle、z-newですが、調査では新しいファイルから見たい場合があります。'},
     starter:'ls -l snapshots/*.log',newPart:'t',task:'ls -ltでsnapshots/*.logの詳細を、新しいz-new、m-middle、a-oldの順に表示してください。',
     hints:['並べ方を時刻へ変える指定は-tです。','-lと-tを合わせ、日時と名前を読みます。','穴埋め：ls -l___ snapshots/*.log。新しい順にするオプションを補います。'],
-    solution:['ls -lt snapshots/*.log'],success:'更新の新しい記録を、名前順に惑わされず見つけられました。',bridge:'記録が長いときは、読む範囲も選びましょう。',
+    solution:['ls -lt snapshots/*.log'],success:'更新の新しい記録を、名前順に惑わされず見つけられました。',bridge:'次は、タブや改行など見えない文字を確かめます。',
     validation:{all:[used('ls',{flags:'lt'}),out('-rw-r--r-- 1 analyst analyst 9 Oct 25 09:30 snapshots/z-new.log\n-rw-r--r-- 1 analyst analyst 9 Oct 25 09:00 snapshots/m-middle.log\n-rw-r--r-- 1 analyst analyst 9 Oct 25 08:00 snapshots/a-old.log','lines')]}});
   lesson({id:'ap-40-large-head',chapter:'ap-read',title:'400行の記録の先頭で形式を知る',fixture:'ap-volume',commands:['head'],
     goal:'長い記録の最初だけを読み、形式を確かめられる。',
@@ -2234,7 +2235,7 @@ SOFTWARE.
     validation:{all:[used('grep',{flags:'c'}),{type:'source',path:volumeBase+'/server.log'},out('10')]}});
   lesson({id:'ap-43-tail-header',chapter:'ap-fields',title:'見出しを除いて2行目から読む',fixture:'ap-volume',commands:['tail'],
     goal:'tail -n +2の開始行指定を使える。',
-    explanation:['tail -n 2は末尾の2行ですが、tail -n +2は先頭から数えて2行目以降です。+が付くと「何行残すか」から「何行目からか」に意味が変わります。','metrics.csvの1行目は見出しです。集計の前に見出しだけを除くときに使えます。この課題のCSVは引用符内の改行を含みません。'],
+    explanation:['tail -n 2は末尾の2行ですが、tail -n +2は先頭から数えて2行目以降です。+が付くと「何行残すか」から「何行目からか」に意味が変わります。','ここではvolume/にある別の短いmetrics.csvを使います。「時刻,種類,件数」の3列で、1行目の見出しにデータ3行が続きます。集計の前に見出しだけを除くときに使えます。この課題のCSVは引用符内の改行を含みません。'],
     concepts:[{term:'-n +2',text:'1行目を除いて、2行目から末尾まで表示します。'}],
     example:{command:'tail -n 2 metrics.csv',note:'最後の2行だけで、最初のデータ行も落ちます。見出しだけを除く指定と比べましょう。'},
     starter:'tail -n 2 metrics.csv',newPart:'+2',task:'tailでmetrics.csvの見出しだけを除き、データ3行をすべて表示してください。',
@@ -2275,7 +2276,7 @@ SOFTWARE.
     example:{command:'true; echo $?; false; echo $?',note:'trueの成功0とfalseの失敗1が、この順に表示されます。'},
     task:'grepでsession.logからNOT_PRESENTを探し、直後にecho $?で終了コードを表示してください。一致なしの1だけが表示されます。',
     hints:['grepに一致がないため、通常の本文出力は空です。','検索の直後へ; echo $?を続けます。',"穴埋め：grep 'NOT_PRESENT' session.log; echo ___。直前の終了コードを表す変数を入れます。"],
-    solution:["grep 'NOT_PRESENT' session.log; echo $?"],success:'画面に本文が出ない理由を、終了コードからも確かめられました。',bridge:'ここまでの読み方・入力・接続を、最後の集計実習で使いましょう。',
+    solution:["grep 'NOT_PRESENT' session.log; echo $?"],success:'画面に本文が出ない理由を、終了コードからも確かめられました。',bridge:'次は、ファイルの内容から照合に使えるハッシュ値を求めます。',
     validation:{all:[used('grep'),used('echo'),source('session.log'),{type:'status',command:'grep',code:1},{type:'variable',name:'?',command:'echo',context:'arguments',afterCommand:'grep'},out('1')]}});
 
 
@@ -2290,7 +2291,7 @@ SOFTWARE.
     example:{command:'cat -T windows.log',note:'タブだけが^Iになり、列の区切りを確認できます。'},
     task:'cat -Aでwindows.logを表示し、タブの^Iと各行末の^M$を確認してください。',
     hints:['catへ見えない文字も表示するオプションを加えます。','すべての表示指定をまとめるのは大文字の-Aです。','穴埋め：cat ___ windows.log。タブ・制御文字・行末を一緒に表示する指定を入れます。'],
-    solution:['cat -A windows.log'],success:'目に見えない文字も、検索が一致しない原因として確認できました。',bridge:'文字の読み方を確認したら、必要な行や列を選びます。',
+    solution:['cat -A windows.log'],success:'目に見えない文字も、検索が一致しない原因として確認できました。',bridge:'次は、記録の行を逆順にして末尾から読みます。',
     validation:{all:[used('cat',{flags:'A'}),{type:'source',path:base+'/review/windows.log'},out('user^Iresult^M$\naki^Iok^M$\nren^Ifail^M$\n','exact')]}});
   lesson({id:'ap-49-file-hash',chapter:'ap-workspace',title:'ファイルのハッシュ値を記録する',fixture:'ap-review',commands:['sha256sum','md5sum'],
     goal:'sha256sumでファイル本文から照合用の値を求められる。',
@@ -2890,7 +2891,7 @@ SOFTWARE.
     ['ap-15-find', 'Find files by name', 'Use find to display all .log files below archive, including files without ERROR. Sort the names.', 'find selects filesystem entries by properties such as type and name. It does not search their contents.', 'Use -type f for files and quote the pattern supplied to -name.'],
     ['ap-16-awk-condition', 'Select fields from matching rows', 'Use awk to display field 3, the server name, from session.log rows whose second field is ERROR.', 'An awk condition before the action limits which rows run that action.', 'Compare $2 to the quoted string "ERROR", then print $3.'],
     ['ap-17-awk-separator', 'Read comma-separated fields', 'Skip the metrics.csv header and display field 3, the user name, in the original order.', 'awk -F sets the input field separator. NR is the current input record number.', 'A condition NR > 1 skips the first line without discarding any data rows.'],
-    ['ap-43-tail-header', 'Skip a header with tail', 'Use tail to omit only the metrics.csv header and display all 3 data rows.', 'tail -n +2 begins at line 2 and continues to the end.', 'The plus sign changes the meaning from the last two lines to starting at the second line.'],
+    ['ap-43-tail-header', 'Skip a header with tail', 'Use tail to omit only the metrics.csv header and display all 3 data rows.', 'tail -n +2 begins at line 2 and continues to the end.', 'The plus sign changes the meaning from the last two lines to starting at the second line. This exercise uses a different, shorter metrics.csv in volume/: three columns (time, level, count), with a header followed by three data rows.'],
     ['ap-18-awk-combined', 'Combine text and numeric conditions', 'For portal rows taking at least 150 milliseconds, display time, user and duration separated by spaces.', 'Use && inside the awk program to require both a string comparison and a numeric comparison.', 'Print the required fields in order, separated by commas in the awk print statement.'],
     ['ap-19-sort-key', 'Sort numerically by a field', 'Sort timings.csv by the duration in field 3, largest first.', 'sort -t sets the delimiter. -k3,3nr selects exactly the third field and compares it numerically in reverse order.', 'Restricting the key to one field prevents later fields from becoming part of that key.'],
     ['ap-37-input-redirection', 'Read a file through standard input', 'Give names.txt to wc -l using < and display only 6, without a filename.', '< opens a file as standard input. It is different from passing the filename as a command argument.', 'wc does not append a filename label when it reads standard input.'],
@@ -3388,6 +3389,7 @@ globalThis.LINUXROOM_EN_HINTS = {
   "pwd を入力してEnterを押します。": "Type pwd and press Enter.",
   "現在地を確認するなら、lsの後ろにパスは不要です。": "To list the current directory, no path is needed after ls.",
   "一覧にはinbox、logs、notes、welcome.txtがあります。": "The list includes inbox, logs, notes and welcome.txt.",
+  "ls と入力します。": "Type ls.",
   "移動はcd、行き先はlogsです。": "Use cd to move; the destination is logs.",
   "何も表示されなくても、現在地が変われば成功です。": "No output is fine: changing the directory is success.",
   "cdの行き先に..を指定します。": "Give .. as the destination for cd.",
@@ -3401,6 +3403,7 @@ globalThis.LINUXROOM_EN_HINTS = {
   "-n 3はそのまま使えます。": "Keep -n 3 as it is.",
   "まずless app.logで開きます。": "First open the file with less app.log.",
   "開いたままでは完了しません。入力画面へ戻りましょう。": "Leaving the viewer open does not finish the exercise. Return to the command input.",
+  "less app.log を実行し、開いた画面でqを押します。": "Run less app.log, then press q in the viewer.",
   "grepの検索語をERRORにします。": "Set the grep search pattern to ERROR.",
   "ERRORとerrorは、今の設定では別の文字です。": "With the current options, ERROR and error are different.",
   "grep 'ERROR' app.log と入力します。": "Type grep 'ERROR' app.log.",
@@ -3464,8 +3467,10 @@ globalThis.LINUXROOM_EN_HINTS = {
   "help grep と入力します。": "Type help grep.",
   "2回に分けて実行します。まずecho readyです。": "Run two commands separately. Start with echo ready.",
   "そのあとhistoryだけを入力します。": "Then enter history by itself.",
+  "echo ready を実行してから、history を実行します。": "Run echo ready, then run history.",
   "表示だけを消すコマンドはclearです。": "clear removes only the display.",
   "ファイル名は指定しません。": "Do not specify a filename.",
+  "clear と入力します。": "Type clear.",
   "-lと-hは-lhにまとめられます。": "You can combine -l and -h as -lh.",
   "対象はsamples/payload.logです。": "The target is samples/payload.log.",
   "並べ方を時刻へ変える指定は-tです。": "-t changes the ordering to modification time.",
@@ -3478,6 +3483,7 @@ globalThis.LINUXROOM_EN_HINTS = {
   "先頭を読むheadから末尾を読むコマンドへ変えます。": "Change head, which reads the beginning, to the command that reads the end.",
   "moreの引数に/home/analyst/applied/server.logを指定します。": "Give /home/analyst/applied/server.log as the argument to more.",
   "開いただけで終わらず、qで戻ります。": "Opening it is not enough; press q to return.",
+  "more server.log を実行し、qで閉じます。": "Run more server.log, then press q to close it.",
   "検索語はERRORです。": "The search pattern is ERROR.",
   "本文を表示するgrepへ-cを足します。": "Add -c to the grep command that normally displays matching lines.",
   "行数の-nではなくバイト数の-cです。": "Use -c for bytes rather than -n for lines.",
@@ -4353,7 +4359,7 @@ Object.assign(globalThis.LINUXROOM_EN_HINTS, {
         case 'directory': passed = session.shell.isDir(session.shell.resolve(condition.path)); message = t('指定されたディレクトリを用意している'); break;
         case 'absent': {const path = session.shell.resolve(condition.path); passed = !session.shell.isFile(path) && !session.shell.isDir(path); message = t('指定された作業用ファイル・ディレクトリを削除している'); break;}
         case 'file': { const path = session.shell.resolve(condition.path); passed = session.shell.isFile(path) && matches(session.shell.files[path], condition.value, condition.match); message = t('保存したファイルの内容が条件に合っている'); break; }
-        case 'used': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && (!condition.args || condition.args.every(arg => stage.args.includes(arg))) && (!condition.flags || [...condition.flags].every(flag => flagsFor(stage).has(flag)))); message = condition.command + t(' を使って今回の操作を実行している'); break;
+        case 'used': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && (!condition.args || condition.args.every(arg => stage.args.includes(arg))) && (!condition.flags || [...condition.flags].every(flag => flagsFor(stage).has(flag)))); message = condition.command + (condition.flags ? ' -' + condition.flags : '') + t(' を使って今回の操作を実行している'); break;
         case 'status': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.command === condition.command && stage.code === condition.code && (!condition.stderrRedirected || stage.stderrRedirected === true)); message = condition.command + t(' の終了コード ') + condition.code + t(' を確認している'); break;
         case 'redirect': passed = stages.some(stage => stageAccepted(stage, lesson) && stage.redirections.some(r => r.op === condition.op && r.target === condition.path && (condition.fd === undefined || r.fd === condition.fd))); message = condition.op + t(' で指定された入力・出力の向きを設定している'); break;
         case 'connector': passed = condition.afterCommand || condition.skipped !== undefined
